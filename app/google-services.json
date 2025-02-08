@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "562749159605",
+    "project_id": "stockit-firebase",
+    "storage_bucket": "stockit-firebase.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:562749159605:android:f6c156d3fe25cec5b2e6fc",
+        "android_client_info": {
+          "package_name": "com.lock.stockit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBb9Upzy1TCZRtOltS6nVIbPPCXDuuDRwU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
