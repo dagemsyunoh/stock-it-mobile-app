@@ -18,18 +18,18 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class LoginActivity extends AppCompatActivity {
+public class LogInActivity extends AppCompatActivity {
     TextInputEditText editTextEmail, editTextPassword;
     Button buttonSignIn;
-    FirebaseAuth mAuth;
+    FirebaseAuth auth = FirebaseAuth.getInstance();
     ProgressBar progressBar;
 
     @Override
     public void onStart() {
         super.onStart();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
+        FirebaseUser currentUser = auth.getCurrentUser();
         if(currentUser != null){
-            sign_in();
+            log_in();
         }
     }
 
@@ -39,10 +39,9 @@ public class LoginActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
-        mAuth = FirebaseAuth.getInstance();
-        editTextEmail = findViewById(R.id.sign_in_email);
-        editTextPassword = findViewById(R.id.sign_in_password);
-        buttonSignIn = findViewById(R.id.sign_in_button);
+        editTextEmail = findViewById(R.id.log_in_email);
+        editTextPassword = findViewById(R.id.log_in_password);
+        buttonSignIn = findViewById(R.id.log_in_button);
         progressBar = findViewById(R.id.progressBar);
 
         editTextEmail.setOnFocusChangeListener((v, hasFocus) -> {
@@ -66,15 +65,15 @@ public class LoginActivity extends AppCompatActivity {
             email = String.valueOf(editTextEmail.getText());
             password = String.valueOf(editTextPassword.getText());
 
-            mAuth.signInWithEmailAndPassword(email, password)
+            auth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, task -> {
                         progressBar.setVisibility(View.GONE);
                         if (task.isSuccessful()) {
-                            Toast.makeText(LoginActivity.this, "Login successful.",
+                            Toast.makeText(LogInActivity.this, "Login successful.",
                                     Toast.LENGTH_SHORT).show();
-                            sign_in();
+                            log_in();
                         } else {
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
+                            Toast.makeText(LogInActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -87,7 +86,7 @@ public class LoginActivity extends AppCompatActivity {
             return insets;
         });
     }
-    private void sign_in () {
+    private void log_in () {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(intent);
         finish();

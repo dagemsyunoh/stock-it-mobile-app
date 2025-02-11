@@ -14,17 +14,38 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 
 public class MainActivity extends AppCompatActivity {
     ViewPager2 viewPager2;
     ViewPagerAdapter viewPagerAdapter;
     BottomNavigationView bottomNavigationView;
+    public static String uid, type;
+    FirebaseAuth auth = FirebaseAuth.getInstance();
+    FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+    FirebaseUser user =auth.getCurrentUser();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        if (user != null) {
+            uid = user.getUid();
+        }
+
+        DocumentReference docRef = firestore.collection("users").document(uid);
+        docRef.get().addOnSuccessListener(doc -> type = doc.getString("type"))
+                .addOnFailureListener(e -> type = "Error")
+                .addOnCompleteListener(task -> {
+                    //change later to hide if not admin
+                    bottomNavigationView.getMenu().findItem(R.id.inventory).setVisible(!type.equals("user"));
+                });
 
         bottomNavigationView = findViewById(R.id.bottomNav);
         viewPager2 = findViewById(R.id.viewPager);

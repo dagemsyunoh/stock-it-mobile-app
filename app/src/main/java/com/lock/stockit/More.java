@@ -15,22 +15,20 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class More extends Fragment {
 
-    FirebaseAuth auth;
+    FirebaseAuth auth = FirebaseAuth.getInstance();
     Button button;
     TextView textView;
-    FirebaseUser user;
+    FirebaseUser user = auth.getCurrentUser();
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_more, container, false);
-        auth = FirebaseAuth.getInstance();
-        button = view.findViewById(R.id.sign_out_button);
+        button = view.findViewById(R.id.log_out_button);
         textView = view.findViewById(R.id.email_user);
-        user = auth.getCurrentUser();
 
         if (user == null) {
-            sign_out();
+            log_out();
         }
         else {
             textView.setText(user.getEmail());
@@ -38,14 +36,14 @@ public class More extends Fragment {
 
         button.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
-            sign_out();
+            log_out();
         });
 
         return view;
 
     }
-    private void sign_out () {
-        Intent i = new Intent(getActivity(), LoginActivity.class);
+    private void log_out() {
+        Intent i = new Intent(getActivity(), LogInActivity.class);
         startActivity(i);
         requireActivity().finish();
     }
