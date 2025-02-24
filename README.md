@@ -23,3 +23,4 @@ DONE: <br>
 - user registration
 - inactive page
 - loader(login checker)
+- main menu
