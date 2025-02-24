@@ -16,7 +16,7 @@
         android:id="@+id/load"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Loading..."
+        android:text="@string/loading"
         android:textSize="40sp" />
 
 </LinearLayout>
