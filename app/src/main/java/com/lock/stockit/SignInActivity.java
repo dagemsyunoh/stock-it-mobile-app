@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -18,9 +19,10 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class LogInActivity extends AppCompatActivity {
+public class SignInActivity extends AppCompatActivity {
     TextInputEditText editTextEmail, editTextPassword;
     Button buttonSignIn;
+    TextView signUp;
     FirebaseAuth auth = FirebaseAuth.getInstance();
     ProgressBar progressBar;
 
@@ -29,7 +31,7 @@ public class LogInActivity extends AppCompatActivity {
         super.onStart();
         FirebaseUser currentUser = auth.getCurrentUser();
         if(currentUser != null){
-            log_in();
+            loader();
         }
     }
 
@@ -37,11 +39,12 @@ public class LogInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_signin);
 
-        editTextEmail = findViewById(R.id.log_in_email);
-        editTextPassword = findViewById(R.id.log_in_password);
-        buttonSignIn = findViewById(R.id.log_in_button);
+        editTextEmail = findViewById(R.id.sign_in_email);
+        editTextPassword = findViewById(R.id.sign_in_password);
+        buttonSignIn = findViewById(R.id.sign_in_button);
+        signUp = findViewById(R.id.sign_up);
         progressBar = findViewById(R.id.progressBar);
 
         editTextEmail.setOnFocusChangeListener((v, hasFocus) -> {
@@ -69,15 +72,20 @@ public class LogInActivity extends AppCompatActivity {
                     .addOnCompleteListener(this, task -> {
                         progressBar.setVisibility(View.GONE);
                         if (task.isSuccessful()) {
-                            Toast.makeText(LogInActivity.this, "Login successful.",
+                            Toast.makeText(SignInActivity.this, "Login successful.",
                                     Toast.LENGTH_SHORT).show();
-                            log_in();
+                            loader();
                         } else {
-                            Toast.makeText(LogInActivity.this, "Authentication failed.",
+                            Toast.makeText(SignInActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         }
                     });
 
+        });
+        signUp.setOnClickListener(v -> {
+            Intent i = new Intent(getApplicationContext(), SignUpActivity.class);
+            startActivity(i);
+            finish();
         });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -86,9 +94,9 @@ public class LogInActivity extends AppCompatActivity {
             return insets;
         });
     }
-    private void log_in () {
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(intent);
+    private void loader() {
+        Intent i = new Intent(getApplicationContext(), LoaderActivity.class);
+        startActivity(i);
         finish();
     }
 }

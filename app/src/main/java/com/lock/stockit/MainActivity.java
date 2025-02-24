@@ -24,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
     ViewPager2 viewPager2;
     ViewPagerAdapter viewPagerAdapter;
     BottomNavigationView bottomNavigationView;
-    public static String uid, type;
     FirebaseAuth auth = FirebaseAuth.getInstance();
     FirebaseFirestore firestore = FirebaseFirestore.getInstance();
     FirebaseUser user =auth.getCurrentUser();
@@ -36,15 +35,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         if (user != null) {
-            uid = user.getUid();
+            LoaderActivity.uid = user.getUid();
         }
 
-        DocumentReference docRef = firestore.collection("users").document(uid);
-        docRef.get().addOnSuccessListener(doc -> type = doc.getString("type"))
-                .addOnFailureListener(e -> type = "Error")
+        DocumentReference docRef = firestore.collection("users").document(LoaderActivity.uid);
+        docRef.get().addOnSuccessListener(doc -> LoaderActivity.admin = Boolean.TRUE.equals(doc.getBoolean("admin")))
+                .addOnFailureListener(e -> LoaderActivity.admin = false)
                 .addOnCompleteListener(task -> {
                     //change later to hide if not admin
-                    bottomNavigationView.getMenu().findItem(R.id.inventory).setVisible(!type.equals("user"));
+                    bottomNavigationView.getMenu().findItem(R.id.inventory).setVisible(LoaderActivity.admin);
                 });
 
         bottomNavigationView = findViewById(R.id.bottomNav);

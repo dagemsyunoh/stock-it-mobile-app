@@ -14,7 +14,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class More extends Fragment {
-
+    LoaderActivity loaderActivity = new LoaderActivity();
     FirebaseAuth auth = FirebaseAuth.getInstance();
     Button button;
     TextView textView;
@@ -24,26 +24,26 @@ public class More extends Fragment {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_more, container, false);
-        button = view.findViewById(R.id.log_out_button);
+        button = view.findViewById(R.id.sign_out_button);
         textView = view.findViewById(R.id.email_user);
 
         if (user == null) {
-            log_out();
+            loader();
         }
         else {
             textView.setText(user.getEmail());
         }
 
         button.setOnClickListener(v -> {
-            FirebaseAuth.getInstance().signOut();
-            log_out();
+            auth.signOut();
+            loader();
         });
 
         return view;
 
     }
-    private void log_out() {
-        Intent i = new Intent(getActivity(), LogInActivity.class);
+    private void loader() {
+        Intent i = new Intent(getActivity(), LoaderActivity.class);
         startActivity(i);
         requireActivity().finish();
     }
