@@ -32,9 +32,7 @@ public class InactiveActivity extends AppCompatActivity {
             loader();
         }
 
-        reload_button.setOnClickListener(v -> {
-            loader();
-        });
+        reload_button.setOnClickListener(v -> loader());
         sign_out_button.setOnClickListener(v -> {
             auth.signOut();
             loader();

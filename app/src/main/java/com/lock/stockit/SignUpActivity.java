@@ -18,8 +18,11 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 public class SignUpActivity extends AppCompatActivity {
@@ -30,7 +33,8 @@ public class SignUpActivity extends AppCompatActivity {
     FirebaseAuth auth = FirebaseAuth.getInstance();
     FirebaseFirestore firestore = FirebaseFirestore.getInstance();
     ProgressBar progressBar;
-    boolean flag;
+    ArrayList<String> emails = new ArrayList<>();
+    boolean flagExists;
 
     @Override
     public void onStart() {
@@ -54,22 +58,16 @@ public class SignUpActivity extends AppCompatActivity {
         signIn = findViewById(R.id.sign_in);
         progressBar = findViewById(R.id.progressBar);
 
-        editTextEmail.setOnFocusChangeListener((v, hasFocus) -> {
-            String email;
-            email = String.valueOf(editTextEmail.getText());
-            if (TextUtils.isEmpty(email)){
-                editTextEmail.setError("Email is required.");
+        firestore.collection("users").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                QuerySnapshot querySnapshot = task.getResult();
+                if (querySnapshot != null) {
+                    for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+                        emails.add(document.getString("email"));
+                    }
+                }
             }
         });
-
-        editTextPassword.setOnFocusChangeListener((v, hasFocus) -> {
-            String password;
-            password = String.valueOf(editTextPassword.getText());
-            if (TextUtils.isEmpty(password)){
-                editTextPassword.setError("Password is required.");
-            }
-        });
-
 
         buttonSignUp.setOnClickListener(v -> {
             progressBar.setVisibility(View.VISIBLE);
@@ -125,16 +123,13 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private boolean emailChecker(String email) {
-        flag = false;
-        firestore.collection("users")
-                .whereEqualTo("email", email).get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        if (task.getResult().isEmpty()) {
-                            flag = true;
-                        }
-                    }
-                });
+        flagExists = false;
+        for (String e : emails) {
+            if (e.equals(email)) {
+                flagExists = true;
+                break;
+            }
+        }
         if (TextUtils.isEmpty(email)){
             Toast.makeText(SignUpActivity.this, "Email is required.", Toast.LENGTH_SHORT).show();
             editTextEmail.setError("Email is required.");
@@ -145,11 +140,11 @@ public class SignUpActivity extends AppCompatActivity {
             editTextEmail.setError("Invalid email.");
             return false;
         }
-        if (!flag) {
+        if (flagExists) {
             Toast.makeText(SignUpActivity.this, "Email already exists.", Toast.LENGTH_SHORT).show();
             editTextEmail.setError("Email already exists.");
         }
-        return flag;
+        return !flagExists;
     }
 
     private boolean passwordChecker(String password,String confirmPassword) {
