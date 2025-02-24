@@ -16,3 +16,10 @@ TO-DO: <br>
 4. More Fragment
 - edit personal email/password (user)
 - user management (admin)
+
+DONE:
+-user database
+-email and password validation
+-user registration
+-inactive page
+-loader(login checker)
