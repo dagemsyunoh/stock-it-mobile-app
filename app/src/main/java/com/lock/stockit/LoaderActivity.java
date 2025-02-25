@@ -37,31 +37,27 @@ public class LoaderActivity extends AppCompatActivity {
             uid = user.getUid();
             DocumentReference docRef = firestore.collection("users").document(uid);
             if (SignUpActivity.create) {
-                data_create(uid, user.getEmail(), docRef);
+                data_create(user.getEmail(), docRef);
                 SignUpActivity.create = false;
             }
 
-            new Handler().postDelayed(() -> {
-                docRef.get().addOnSuccessListener(doc -> {
-                            if (!doc.exists()) {
-                                sign_out();
-                            }
-                            else {
-                                admin = Boolean.TRUE.equals(doc.getBoolean("admin"));
-                                activated = Boolean.TRUE.equals(doc.getBoolean("activated"));
-                            }
-                        })
-                        .addOnFailureListener(e -> {
-                            Log.wtf("TAG", "Error Code " + e);
-                        })
-                        .addOnCompleteListener(task -> {
-                            if (activated) {
-                                sign_in();
-                            } else {
-                                sign_inactive();
-                            }
-                        });
-            }, 1000);
+            new Handler().postDelayed(() -> docRef.get().addOnSuccessListener(doc -> {
+                        if (!doc.exists()) {
+                            sign_out();
+                        }
+                        else {
+                            admin = Boolean.TRUE.equals(doc.getBoolean("admin"));
+                            activated = Boolean.TRUE.equals(doc.getBoolean("activated"));
+                        }
+                    })
+                    .addOnFailureListener(e -> Log.wtf("TAG", "Error Code " + e))
+                    .addOnCompleteListener(task -> {
+                        if (activated) {
+                            sign_in();
+                        } else {
+                            sign_inactive();
+                        }
+                    }), 1000);
         } catch (Exception e) {
             sign_out();
         }
@@ -74,7 +70,7 @@ public class LoaderActivity extends AppCompatActivity {
             return insets;
         });
     }
-    private void data_create(String uid, String email, DocumentReference docRef) {
+    private void data_create(String email, DocumentReference docRef) {
         Map<String, Object> data = new HashMap<>();
         data.put("activated", false);
         data.put("admin", false);

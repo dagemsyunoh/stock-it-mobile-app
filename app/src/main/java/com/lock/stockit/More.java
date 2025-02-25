@@ -14,7 +14,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class More extends Fragment {
-    LoaderActivity loaderActivity = new LoaderActivity();
     FirebaseAuth auth = FirebaseAuth.getInstance();
     Button button;
     TextView textView;
