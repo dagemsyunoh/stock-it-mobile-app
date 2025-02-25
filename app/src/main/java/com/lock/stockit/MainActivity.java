@@ -1,6 +1,7 @@
 package com.lock.stockit;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -25,8 +26,16 @@ public class MainActivity extends AppCompatActivity {
     ViewPagerAdapter viewPagerAdapter;
     BottomNavigationView bottomNavigationView;
     FirebaseAuth auth = FirebaseAuth.getInstance();
-    FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-    FirebaseUser user =auth.getCurrentUser();
+    DocumentReference docRef = FirebaseFirestore.getInstance().collection("users").document(LoaderActivity.uid);
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        FirebaseUser currentUser = auth.getCurrentUser();
+        if(currentUser != null){
+            loader();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,11 +43,6 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        if (user != null) {
-            LoaderActivity.uid = user.getUid();
-        }
-
-        DocumentReference docRef = firestore.collection("users").document(LoaderActivity.uid);
         docRef.get().addOnSuccessListener(doc -> LoaderActivity.admin = Boolean.TRUE.equals(doc.getBoolean("admin")))
                 .addOnFailureListener(e -> LoaderActivity.admin = false)
                 .addOnCompleteListener(task -> {
@@ -46,8 +50,8 @@ public class MainActivity extends AppCompatActivity {
                     bottomNavigationView.getMenu().findItem(R.id.inventory).setVisible(LoaderActivity.admin);
                 });
 
-        bottomNavigationView = findViewById(R.id.bottomNav);
-        viewPager2 = findViewById(R.id.viewPager);
+        bottomNavigationView = findViewById(R.id.bottom_nav);
+        viewPager2 = findViewById(R.id.view_pager);
         viewPagerAdapter = new ViewPagerAdapter(this);
         viewPager2.setAdapter(viewPagerAdapter);
         bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
@@ -99,5 +103,10 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+    private void loader() {
+        Intent i = new Intent(getApplicationContext(), LoaderActivity.class);
+        startActivity(i);
+        finish();
     }
 }

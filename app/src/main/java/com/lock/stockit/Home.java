@@ -12,13 +12,13 @@ import androidx.fragment.app.Fragment;
 public class Home extends Fragment {
     String type;
     TextView textView;
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n") //remove later
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_home, container, false);
-        textView = view.findViewById(R.id.homeText);
+        textView = view.findViewById(R.id.home_text);
         if (LoaderActivity.admin) {
             type = "Admin";
         }
