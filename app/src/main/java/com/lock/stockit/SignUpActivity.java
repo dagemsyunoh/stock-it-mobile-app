@@ -86,11 +86,10 @@ public class SignUpActivity extends AppCompatActivity {
                                 create = true;
                                 loader();
                             } else {
-                                Toast.makeText(SignUpActivity.this, "Authentication failed.",
+                                Toast.makeText(SignUpActivity.this, "Account creation failed. Please try again.",
                                         Toast.LENGTH_SHORT).show();
                             }
-                        }).addOnFailureListener(e -> Toast.makeText(SignUpActivity.this, "Password does not meet requirements.",
-                                Toast.LENGTH_SHORT).show());
+                        });
             }
             progressBar.setVisibility(View.GONE);
         });
