@@ -16,6 +16,8 @@ TO-DO: <br>
 4. More Fragment
 - edit personal email/password (user)
 - user management (admin)
+- settings
+- log out
 
 DONE: <br>
 - user database
