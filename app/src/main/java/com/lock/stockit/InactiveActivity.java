@@ -2,7 +2,11 @@ package com.lock.stockit;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,9 +19,14 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class InactiveActivity extends AppCompatActivity {
 
+    private final Handler handler = new Handler();
+    TextView inactiveText, reload;
     FirebaseAuth auth = FirebaseAuth.getInstance();
-    Button reload_button, sign_out_button;
     FirebaseUser user = auth.getCurrentUser();
+    Button buttonSignOut, buttonResend;
+    int i = 30; //temporary for testing, change back to 30 upon deployment
+    private Runnable runnable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,15 +34,43 @@ public class InactiveActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_inactive);
 
-        reload_button = findViewById(R.id.reload_button);
-        sign_out_button = findViewById(R.id.sign_out_button);
+        inactiveText = findViewById(R.id.inactive_text);
+        reload = findViewById(R.id.reload);
+        buttonSignOut = findViewById(R.id.sign_out_button);
+        buttonResend = findViewById(R.id.resend_button);
 
         if (user == null) {
             loader();
         }
 
-        reload_button.setOnClickListener(v -> loader());
-        sign_out_button.setOnClickListener(v -> {
+        if (!LoaderActivity.verified) {
+            buttonResend.setVisibility(View.VISIBLE);
+            inactiveText.setText(R.string.account_verify);
+            reload.setText(R.string.reloadV);
+            resendDelay();
+        }
+        else if (!LoaderActivity.activated){
+            buttonResend.setVisibility(View.GONE);
+            inactiveText.setText(R.string.account_inactive);
+            reload.setText(R.string.reloadA);
+        }
+        buttonResend.setOnClickListener(v -> {
+            i = 5; //to restart delay loop
+            if (auth.getCurrentUser() != null && !LoaderActivity.verified){
+                auth.getCurrentUser().sendEmailVerification().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(InactiveActivity.this, "Verification email sent.", Toast.LENGTH_SHORT).show();
+                    }
+                    else {
+                        Toast.makeText(InactiveActivity.this, "Failed to send verification email.", Toast.LENGTH_SHORT).show();
+                        i = 3; //to restart delay loop early, do not change to 30
+                    }
+                });
+            }
+        });
+
+        reload.setOnClickListener(v -> loader());
+        buttonSignOut.setOnClickListener(v -> {
             auth.signOut();
             loader();
         });
@@ -44,6 +81,24 @@ public class InactiveActivity extends AppCompatActivity {
             return insets;
         });
     }
+
+    private void resendDelay() {
+        //delay loop will pause when i is 0, enabling resend button. Loop will continue if i value is changed.
+        runnable = () -> {
+            if (i == 0) {
+                handler.removeCallbacks(runnable);
+                buttonResend.setEnabled(true);
+                buttonResend.setText(R.string.resend);
+            } else {
+                buttonResend.setEnabled(false);
+                buttonResend.setText(String.valueOf(i));
+                i--;
+            }
+            handler.postDelayed(runnable, 1000);
+        };
+        handler.postDelayed(runnable, 1000);
+    }
+
     private void loader() {
         Intent i = new Intent(getApplicationContext(), LoaderActivity.class);
         startActivity(i);

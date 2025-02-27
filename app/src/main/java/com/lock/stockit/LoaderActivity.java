@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -22,9 +23,9 @@ import java.util.Map;
 public class LoaderActivity extends AppCompatActivity {
 
     public static String uid;
-    public static boolean admin, activated;
+    public static boolean admin, activated, verified;
     FirebaseAuth auth = FirebaseAuth.getInstance();
-    FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+    CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
     FirebaseUser user = auth.getCurrentUser();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +36,7 @@ public class LoaderActivity extends AppCompatActivity {
         }
         try {
             uid = user.getUid();
-            DocumentReference docRef = firestore.collection("users").document(uid);
+            DocumentReference docRef = colRef.document(uid);
             if (SignUpActivity.create) {
                 data_create(user.getEmail(), docRef);
                 SignUpActivity.create = false;
@@ -48,11 +49,16 @@ public class LoaderActivity extends AppCompatActivity {
                         else {
                             admin = Boolean.TRUE.equals(doc.getBoolean("admin"));
                             activated = Boolean.TRUE.equals(doc.getBoolean("activated"));
+                            verified = Boolean.TRUE.equals(user.isEmailVerified());
+
+                            Log.wtf("TAG", "Admin: " + admin);
+                            Log.wtf("TAG", "Activated: " + activated);
+                            Log.wtf("TAG", "Verified: " + verified);
                         }
                     })
                     .addOnFailureListener(e -> Log.wtf("TAG", "Error Code " + e))
                     .addOnCompleteListener(task -> {
-                        if (activated) {
+                        if (activated && verified) {
                             sign_in();
                         } else {
                             sign_inactive();

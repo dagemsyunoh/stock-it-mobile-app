@@ -76,7 +76,7 @@ public class SignInActivity extends AppCompatActivity {
                                     Toast.LENGTH_SHORT).show();
                             loader();
                         } else {
-                            Toast.makeText(SignInActivity.this, "Authentication failed.",
+                            Toast.makeText(SignInActivity.this, "Incorrect email or password. Please try again.",
                                     Toast.LENGTH_SHORT).show();
                         }
                     });
