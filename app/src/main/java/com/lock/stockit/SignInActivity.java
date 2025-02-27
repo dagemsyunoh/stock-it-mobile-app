@@ -45,7 +45,7 @@ public class SignInActivity extends AppCompatActivity {
         editTextPassword = findViewById(R.id.sign_in_password);
         buttonSignIn = findViewById(R.id.sign_in_button);
         signUp = findViewById(R.id.sign_up);
-        progressBar = findViewById(R.id.progressBar);
+        progressBar = findViewById(R.id.progress_bar);
 
         editTextEmail.setOnFocusChangeListener((v, hasFocus) -> {
             String email;

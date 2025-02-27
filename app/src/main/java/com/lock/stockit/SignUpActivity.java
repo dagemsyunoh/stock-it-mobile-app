@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 public class SignUpActivity extends AppCompatActivity {
-    static Boolean create = false;
     TextInputEditText editTextEmail, editTextPassword, editTextConfirmPassword;
     Button buttonSignUp;
     TextView signIn;
@@ -34,7 +33,8 @@ public class SignUpActivity extends AppCompatActivity {
     FirebaseFirestore firestore = FirebaseFirestore.getInstance();
     ProgressBar progressBar;
     ArrayList<String> emails = new ArrayList<>();
-    boolean flagExists;
+    static Boolean create = false;
+    boolean emailExists;
 
     @Override
     public void onStart() {
@@ -56,18 +56,10 @@ public class SignUpActivity extends AppCompatActivity {
         editTextConfirmPassword = findViewById(R.id.sign_up_confirm_password);
         buttonSignUp = findViewById(R.id.sign_up_button);
         signIn = findViewById(R.id.sign_in);
-        progressBar = findViewById(R.id.progressBar);
+        progressBar = findViewById(R.id.progress_bar);
 
-        firestore.collection("users").get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                QuerySnapshot querySnapshot = task.getResult();
-                if (querySnapshot != null) {
-                    for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                        emails.add(document.getString("email"));
-                    }
-                }
-            }
-        });
+        //get all emails from database to use when checking if email already exists
+        fetchEmail();
 
         buttonSignUp.setOnClickListener(v -> {
             progressBar.setVisibility(View.VISIBLE);
@@ -106,6 +98,20 @@ public class SignUpActivity extends AppCompatActivity {
             return insets;
         });
     }
+
+    private void fetchEmail() {
+        firestore.collection("users").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                QuerySnapshot querySnapshot = task.getResult();
+                if (querySnapshot != null) {
+                    for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+                        emails.add(document.getString("email"));
+                    }
+                }
+            }
+        });
+    }
+
     private Boolean checker(String email, String password, String confirmPassword) {
         boolean emailValid = emailChecker(email);
         if (!emailValid) {
@@ -122,10 +128,10 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private boolean emailChecker(String email) {
-        flagExists = false;
+        emailExists = false; //returns true if email exists in database
         for (String e : emails) {
             if (e.equals(email)) {
-                flagExists = true;
+                emailExists = true;
                 break;
             }
         }
@@ -139,11 +145,11 @@ public class SignUpActivity extends AppCompatActivity {
             editTextEmail.setError("Invalid email.");
             return false;
         }
-        if (flagExists) {
+        if (emailExists) {
             Toast.makeText(SignUpActivity.this, "Email already exists.", Toast.LENGTH_SHORT).show();
             editTextEmail.setError("Email already exists.");
         }
-        return !flagExists;
+        return !emailExists;
     }
 
     private boolean passwordChecker(String password,String confirmPassword) {
