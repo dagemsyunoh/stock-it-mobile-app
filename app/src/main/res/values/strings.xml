@@ -11,8 +11,15 @@
     <string name="confirm_password">Confirm Password</string>
     <string name="sign_out">Sign Out</string>
     <string name="account_inactive">Account is inactive. \nPlease contact admin to activate account.</string>
-    <string name="reload">Already Activated? \nClick to Reload</string>
+    <string name="reloadV">Already Verified? \nClick to Reload</string>
+    <string name="reloadA">Already Activated? \nClick to Reload</string>
     <string name="create_account">Create Account</string>
     <string name="sign_account">Sign In Existing Account</string>
-    <string name="loading">Loading...</string>
+    <string name="loading">Loading…</string>
+    <string name="account_verify">Verification email has been sent. \nPlease check your email and try again. \n\nEmail not received? \nClick resend to try again.</string>
+    <string name="resend">Resend</string>
+    <string name="manage_users">Manage Users</string>
+    <string name="change_email">Change Email</string>
+    <string name="change_password">Change Password</string>
+    <string name="back">Back</string>
 </resources>
