@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         FirebaseUser currentUser = auth.getCurrentUser();
-        if(currentUser != null){
+        if(currentUser == null){
             loader();
         }
     }

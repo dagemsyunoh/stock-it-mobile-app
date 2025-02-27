@@ -76,7 +76,7 @@ public class SignUpActivity extends AppCompatActivity {
                                 Toast.makeText(SignUpActivity.this, "Account successfully created.",
                                         Toast.LENGTH_SHORT).show();
                                 create = true;
-                                loader();
+                                verifyEmail();
                             } else {
                                 Toast.makeText(SignUpActivity.this, "Account creation failed. Please try again.",
                                         Toast.LENGTH_SHORT).show();
@@ -199,6 +199,20 @@ public class SignUpActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    private void verifyEmail() {
+        if (auth.getCurrentUser() != null){
+            auth.getCurrentUser().sendEmailVerification().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(SignUpActivity.this, "Verification email sent.", Toast.LENGTH_SHORT).show();
+                    loader();
+                }
+                else {
+                    Toast.makeText(SignUpActivity.this, "Failed to send verification email.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     private void loader() {
