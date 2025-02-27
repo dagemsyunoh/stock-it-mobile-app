@@ -50,10 +50,6 @@ public class LoaderActivity extends AppCompatActivity {
                             admin = Boolean.TRUE.equals(doc.getBoolean("admin"));
                             activated = Boolean.TRUE.equals(doc.getBoolean("activated"));
                             verified = Boolean.TRUE.equals(user.isEmailVerified());
-
-                            Log.wtf("TAG", "Admin: " + admin);
-                            Log.wtf("TAG", "Activated: " + activated);
-                            Log.wtf("TAG", "Verified: " + verified);
                         }
                     })
                     .addOnFailureListener(e -> Log.wtf("TAG", "Error Code " + e))

@@ -15,11 +15,10 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class More extends Fragment {
     FirebaseAuth auth = FirebaseAuth.getInstance();
-    public static String change;
     Button buttonManage, buttonChangeEmail, buttonChangePassword, buttonSignOUt;
-    FirebaseUser user = auth.getCurrentUser();
     TextView emailUser;
-
+    public static String change;
+    FirebaseUser user = auth.getCurrentUser();
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

@@ -1,7 +1,6 @@
 package com.lock.stockit;
 
 import android.os.Bundle;
-import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,9 +8,11 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+
 public class ChangeActivity extends AppCompatActivity {
 
-    Button buttonBack;
+    ExtendedFloatingActionButton buttonBack;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
