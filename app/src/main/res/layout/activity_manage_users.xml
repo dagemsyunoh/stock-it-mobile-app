@@ -5,19 +5,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ManageUsersActivity">
+
     <ListView
         android:id="@+id/users"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:listitem="@layout/user_item">
-    </ListView>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:dividerHeight="10dp"
+        android:scrollbars="vertical"
+        tools:listitem="@layout/user_item" />
 
-    <Button
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/back_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="10dp"
         android:drawableLeft="@drawable/ic_back"
-        android:drawableTint="@color/white"
-        android:text="@string/back" />
-
+        android:text="@string/back"
+        tools:ignore="RtlHardcoded" />
 </RelativeLayout>

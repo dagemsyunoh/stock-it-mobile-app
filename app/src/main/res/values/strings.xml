@@ -22,4 +22,6 @@
     <string name="change_email">Change Email</string>
     <string name="change_password">Change Password</string>
     <string name="back">Back</string>
+    <string name="admin">Admin:</string>
+    <string name="activated">Activated:</string>
 </resources>
