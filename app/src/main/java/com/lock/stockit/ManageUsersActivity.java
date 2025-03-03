@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -26,7 +27,7 @@ public class ManageUsersActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     private UserAdapter adapter;
     private List<UserData> usersList;
-
+    AppCompatImageButton buttonRemove;
     ExtendedFloatingActionButton buttonBack;
     CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
     @Override
@@ -38,6 +39,8 @@ public class ManageUsersActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.user_view);
         buttonBack = findViewById(R.id.back_button);
+        buttonRemove = findViewById(R.id.remove_button);
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         usersList = new ArrayList<>();
