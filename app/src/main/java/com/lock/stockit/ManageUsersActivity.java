@@ -45,7 +45,7 @@ public class ManageUsersActivity extends AppCompatActivity {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        new UserSwipeHelper(this, recyclerView, 200) {
+        new UserSwipeHelper(this, recyclerView, 250) {
 
             @Override
             public void instantiateUserButton(RecyclerView.ViewHolder viewHolder, List<UserSwipeHelper.UserButton> buffer) {

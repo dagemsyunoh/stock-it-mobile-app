@@ -19,6 +19,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.lock.stockit.R;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -123,9 +125,7 @@ public abstract class UserSwipeHelper extends ItemTouchHelper.SimpleCallback {
     }
 
     @Override
-    public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-        return false;
-    }
+    public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) { return false; }
 
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
@@ -145,19 +145,13 @@ public abstract class UserSwipeHelper extends ItemTouchHelper.SimpleCallback {
     }
 
     @Override
-    public float getMoveThreshold(@NonNull RecyclerView.ViewHolder viewHolder) {
-        return swipeThreshold;
-    }
+    public float getMoveThreshold(@NonNull RecyclerView.ViewHolder viewHolder) { return swipeThreshold; }
 
     @Override
-    public float getSwipeEscapeVelocity(float defaultValue) {
-        return 0.1f * defaultValue;
-    }
+    public float getSwipeEscapeVelocity(float defaultValue) { return 0.1f * defaultValue; }
 
     @Override
-    public float getSwipeVelocityThreshold(float defaultValue) {
-        return 5.0f * defaultValue;
-    }
+    public float getSwipeVelocityThreshold(float defaultValue) { return 5.0f * defaultValue; }
 
     @Override
     public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
@@ -179,11 +173,15 @@ public abstract class UserSwipeHelper extends ItemTouchHelper.SimpleCallback {
                     buffer = buttonBuffer.get(pos);
                 }
                 translationX = dX * Objects.requireNonNull(buffer).size() * buttonWidth / itemView.getWidth();
+
+                // Move the layout to the right
+                itemView.findViewById(R.id.content).setTranslationX(-translationX);
                 drawButton(c, itemView, buffer, pos, translationX);
             }
         }
         super.onChildDraw(c, recyclerView, viewHolder, translationX, dY, actionState, isCurrentlyActive);
     }
+
 
     private void drawButton(Canvas c, View itemView, List<UserButton> buffer, int pos, float translationX) {
         float right = itemView.getRight();
@@ -245,9 +243,18 @@ public abstract class UserSwipeHelper extends ItemTouchHelper.SimpleCallback {
             } else {
 
                 @SuppressLint("UseCompatLoadingForDrawables") Drawable d = context.getDrawable(imageResId);
+                if (d == null) return;
                 Bitmap bitmap = drawableToBitmap(d);
-                c.drawBitmap(bitmap, (rectF.left + rectF.right) / 2, (rectF.top + rectF.bottom) / 2, p);
 
+                // Calculate the center position for the bitmap
+                x = rectF.left + rectF.width() / 2f; // Center of the button
+                y = rectF.top + rectF.height() / 2f; // Center of the button
+
+                // Adjust the position to account for the bitmap's size
+                x -= bitmap.getWidth() / 2f; // Move left by half the bitmap's width
+                y -= bitmap.getHeight() / 2f; // Move up by half the bitmap's height
+
+                c.drawBitmap(bitmap, x, y, p);
             }
             clickRegion = rectF;
             this.pos = pos;
