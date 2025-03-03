@@ -9,6 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -17,31 +18,28 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class InactiveActivity extends AppCompatActivity {
+public class InactiveActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
 
     private final Handler handler = new Handler();
     TextView inactiveText, reload;
     FirebaseAuth auth = FirebaseAuth.getInstance();
     FirebaseUser user = auth.getCurrentUser();
     Button buttonSignOut, buttonResend;
-    int i = 30; //temporary for testing, change back to 30 upon deployment
+    int i = 5; //temporary for testing, change back to 30 upon deployment
     private Runnable runnable;
+    boolean clicked;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_inactive);
 
+        clicked = false;
         inactiveText = findViewById(R.id.inactive_text);
         reload = findViewById(R.id.reload);
         buttonSignOut = findViewById(R.id.sign_out_button);
         buttonResend = findViewById(R.id.resend_button);
-
-        if (user == null) {
-            loader();
-        }
 
         if (!LoaderActivity.verified) {
             buttonResend.setVisibility(View.VISIBLE);
@@ -56,8 +54,8 @@ public class InactiveActivity extends AppCompatActivity {
         }
         buttonResend.setOnClickListener(v -> {
             i = 5; //to restart delay loop
-            if (auth.getCurrentUser() != null && !LoaderActivity.verified){
-                auth.getCurrentUser().sendEmailVerification().addOnCompleteListener(task -> {
+            if (user != null && !LoaderActivity.verified){
+                user.sendEmailVerification().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         Toast.makeText(InactiveActivity.this, "Verification email sent.", Toast.LENGTH_SHORT).show();
                     }
@@ -69,11 +67,12 @@ public class InactiveActivity extends AppCompatActivity {
             }
         });
 
-        reload.setOnClickListener(v -> loader());
-        buttonSignOut.setOnClickListener(v -> {
-            auth.signOut();
-            loader();
+        reload.setOnClickListener(v -> {
+            clicked = true;
+            //to inform AuthStateListener to recheck auth state
+            auth.addAuthStateListener(this);
         });
+        buttonSignOut.setOnClickListener(v -> auth.signOut());
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -99,10 +98,23 @@ public class InactiveActivity extends AppCompatActivity {
         handler.postDelayed(runnable, 1000);
     }
 
-    private void loader() {
-        Intent i = new Intent(getApplicationContext(), LoaderActivity.class);
-        startActivity(i);
-        finish();
+    @Override
+    protected void onStart() {
+        super.onStart();
+        auth.addAuthStateListener(this);
+    }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        auth.removeAuthStateListener(this);
+    }
+    @Override
+    public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+        if (firebaseAuth.getCurrentUser() == null || clicked) {
+            Intent i = new Intent(getApplicationContext(), LoaderActivity.class);
+            startActivity(i);
+            finish();
+        }
     }
 }

@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -17,23 +18,13 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
-public class SignInActivity extends AppCompatActivity {
+public class SignInActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
     TextInputEditText editTextEmail, editTextPassword;
     Button buttonSignIn;
     TextView signUp;
     FirebaseAuth auth = FirebaseAuth.getInstance();
     ProgressBar progressBar;
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        FirebaseUser currentUser = auth.getCurrentUser();
-        if(currentUser != null){
-            loader();
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,15 +63,11 @@ public class SignInActivity extends AppCompatActivity {
                     .addOnCompleteListener(this, task -> {
                         progressBar.setVisibility(View.GONE);
                         if (task.isSuccessful()) {
-                            Toast.makeText(SignInActivity.this, "Login successful.",
-                                    Toast.LENGTH_SHORT).show();
-                            loader();
+                            Toast.makeText(SignInActivity.this, "Sign in successful.", Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(SignInActivity.this, "Incorrect email or password. Please try again.",
-                                    Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SignInActivity.this, "Incorrect email or password. Please try again.", Toast.LENGTH_SHORT).show();
                         }
                     });
-
         });
         signUp.setOnClickListener(v -> {
             Intent i = new Intent(getApplicationContext(), SignUpActivity.class);
@@ -94,9 +81,24 @@ public class SignInActivity extends AppCompatActivity {
             return insets;
         });
     }
-    private void loader() {
-        Intent i = new Intent(getApplicationContext(), LoaderActivity.class);
-        startActivity(i);
-        finish();
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        auth.addAuthStateListener(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        auth.removeAuthStateListener(this);
+    }
+    @Override
+    public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+        if (firebaseAuth.getCurrentUser() != null) {
+            Intent i = new Intent(getApplicationContext(), LoaderActivity.class);
+            startActivity(i);
+            finish();
+        }
     }
 }

@@ -30,19 +30,6 @@ public class More extends Fragment {
         buttonSignOUt = view.findViewById(R.id.sign_out_button);
         emailUser = view.findViewById(R.id.email_user);
 
-        if (user == null) {
-            loader();
-        }
-        else {
-            emailUser.setText(user.getEmail());
-        }
-        if (LoaderActivity.admin) {
-            buttonManage.setVisibility(View.VISIBLE);
-        }
-        else {
-            buttonManage.setVisibility(View.GONE);
-        }
-
         buttonManage.setOnClickListener(v -> {
             Intent i = new Intent(getActivity(), ManageUsersActivity.class);
             startActivity(i);
@@ -58,17 +45,22 @@ public class More extends Fragment {
             Intent i = new Intent(getActivity(), ChangeActivity.class);
             startActivity(i);
         });
-        buttonSignOUt.setOnClickListener(v -> {
-            auth.signOut();
-            loader();
-        });
+        buttonSignOUt.setOnClickListener(v -> auth.signOut());
 
         return view;
-
     }
-    private void loader() {
-        Intent i = new Intent(getActivity(), LoaderActivity.class);
-        startActivity(i);
-        requireActivity().finish();
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        String welcome = "Welcome, " + user.getEmail();
+        emailUser.setText(welcome);
+        if (LoaderActivity.admin) {
+            buttonManage.setVisibility(View.VISIBLE);
+        }
+        else {
+            buttonManage.setVisibility(View.GONE);
+        }
     }
 }

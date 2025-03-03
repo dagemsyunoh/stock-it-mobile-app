@@ -24,4 +24,7 @@
     <string name="back">Back</string>
     <string name="admin">Admin:</string>
     <string name="activated">Activated:</string>
+    <string name="new_email">New Email</string>
+    <string name="new_password">New Password</string>
+    <string name="confirm_new_password">Confirm New Password</string>
 </resources>

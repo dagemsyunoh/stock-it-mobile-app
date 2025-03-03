@@ -14,17 +14,32 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        switch (position) {
-            case 1: return new Receipt();
-            case 2: return new Inventory();
-            case 3: return new More();
-            case 0:
-            default: return new Home();
+        if (LoaderActivity.admin) {
+            switch (position) {
+                case 1: return new Receipt();
+                case 2: return new Inventory();
+                case 3: return new More();
+                case 0:
+                default: return new Home();
+            }
+        }
+        else {
+            switch (position) {
+                case 1: return new Receipt();
+                case 2: return new More();
+                case 0:
+                default: return new Home();
+            }
         }
     }
 
     @Override
     public int getItemCount() {
-        return 4;
+        if (LoaderActivity.admin) {
+            return 4;
+        }
+        else {
+            return 3;
+        }
     }
 }

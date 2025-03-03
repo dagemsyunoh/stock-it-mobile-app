@@ -20,12 +20,12 @@ public class Home extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         textView = view.findViewById(R.id.home_text);
         if (LoaderActivity.admin) {
-            type = "Admin";
+            type = "an Admin";
         }
         else {
-            type = "User";
+            type = "a User";
         }
-        textView.setText("You are an " + type);
+        textView.setText("You are " + type);
 
         return view;
     }
