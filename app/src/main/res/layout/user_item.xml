@@ -4,13 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="10dp"
-    app:cardCornerRadius="20dp"
     app:cardElevation="8dp">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="10dp">
+    <LinearLayout
+        android:id="@+id/content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_margin="10dp"
+        android:orientation="vertical">
+
         <TextView
             android:id="@+id/email"
             android:layout_width="wrap_content"
@@ -18,22 +21,22 @@
             android:layout_margin="5dp"
             android:text="@string/email"
             android:textSize="20sp" />
+
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/admin_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/email"
             android:layout_margin="5dp"
             android:text="@string/admin"
             android:textSize="20sp" />
+
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/activated_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/admin_switch"
             android:layout_margin="5dp"
             android:text="@string/activated"
             android:textSize="20sp" />
-    </RelativeLayout>
+    </LinearLayout>
 
 </androidx.cardview.widget.CardView>

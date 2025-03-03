@@ -18,6 +18,7 @@ import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.lock.stockit.Adapter.ViewPagerAdapter;
 
 
 public class MainActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {

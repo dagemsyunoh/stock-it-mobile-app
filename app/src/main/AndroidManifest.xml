@@ -17,11 +17,23 @@
         <activity
             android:name=".ChangeActivity"
             android:exported="false" />
-        <activity
+        <!--activity
             android:name=".ManageUsersActivity"
             android:exported="false" />
         <activity
             android:name=".LoaderActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-->
+        <activity
+            android:name=".LoaderActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ManageUsersActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

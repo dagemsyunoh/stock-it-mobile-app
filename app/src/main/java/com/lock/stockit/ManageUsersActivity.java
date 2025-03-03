@@ -1,7 +1,9 @@
 package com.lock.stockit;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,6 +17,9 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.lock.stockit.Adapter.UserAdapter;
+import com.lock.stockit.Helper.UserSwipeHelper;
+import com.lock.stockit.Model.UserData;
 import com.lock.stockit.databinding.ActivityManageUsersBinding;
 
 import java.util.ArrayList;
@@ -26,7 +31,6 @@ public class ManageUsersActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     private UserAdapter adapter;
     private List<UserData> usersList;
-
     ExtendedFloatingActionButton buttonBack;
     CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
     @Override
@@ -38,7 +42,21 @@ public class ManageUsersActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.user_view);
         buttonBack = findViewById(R.id.back_button);
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        new UserSwipeHelper(this, recyclerView, 250) {
+
+            @Override
+            public void instantiateUserButton(RecyclerView.ViewHolder viewHolder, List<UserSwipeHelper.UserButton> buffer) {
+                buffer.add(new UserButton(ManageUsersActivity.this,
+                        "",
+                        R.drawable.ic_delete,
+                        0,
+                        Color.parseColor("#FF3C30"),
+                        pos -> Toast.makeText(ManageUsersActivity.this, "Remove Click", Toast.LENGTH_SHORT).show()));
+            }
+        };
 
         usersList = new ArrayList<>();
         adapter = new UserAdapter(usersList, this);

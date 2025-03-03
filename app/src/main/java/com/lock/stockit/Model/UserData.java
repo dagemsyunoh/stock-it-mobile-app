@@ -1,4 +1,4 @@
-package com.lock.stockit;
+package com.lock.stockit.Model;
 
 public class UserData {
     String email;
@@ -23,15 +23,7 @@ public class UserData {
         return admin;
     }
 
-    public void setAdmin(boolean admin) {
-        this.admin = admin;
-    }
-
     public boolean isActivated() {
         return activated;
-    }
-
-    public void setActivated(boolean activated) {
-        this.activated = activated;
     }
 }
