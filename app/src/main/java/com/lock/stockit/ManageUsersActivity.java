@@ -1,5 +1,6 @@
 package com.lock.stockit;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -7,20 +8,25 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.lock.stockit.databinding.ActivityManageUsersBinding;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ManageUsersActivity extends AppCompatActivity {
 
     ActivityManageUsersBinding binding;
-    UserListAdapter adapter;
-    ArrayList<UserData> dataArrayList = new ArrayList<>();
-    UserData userData;
+    RecyclerView recyclerView;
+    private UserAdapter adapter;
+    private List<UserData> usersList;
+
     ExtendedFloatingActionButton buttonBack;
     CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
     @Override
@@ -30,26 +36,16 @@ public class ManageUsersActivity extends AppCompatActivity {
         binding = ActivityManageUsersBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        recyclerView = findViewById(R.id.user_view);
         buttonBack = findViewById(R.id.back_button);
-        dataArrayList.clear();
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        colRef.get().addOnSuccessListener(queryDocumentSnapshots -> {
-            if (!queryDocumentSnapshots.isEmpty()) {
-                for (int i = 0; i < queryDocumentSnapshots.size(); i++) {
-                    String email = queryDocumentSnapshots.getDocuments().get(i).getString("email");
-                    boolean admin = Boolean.TRUE.equals(queryDocumentSnapshots.getDocuments().get(i).getBoolean("admin"));
-                    boolean activated = Boolean.TRUE.equals(queryDocumentSnapshots.getDocuments().get(i).getBoolean("activated"));
-                    userData = new UserData(email, admin, activated);
-                    dataArrayList.add(userData);
-                    adapter.notifyDataSetChanged();
-                }
-            }
-        });
-
-        adapter = new UserListAdapter(this, dataArrayList);
-        binding.users.setAdapter(adapter);
+        usersList = new ArrayList<>();
+        adapter = new UserAdapter(usersList, this);
+        recyclerView.setAdapter(adapter);
 
         buttonBack.setOnClickListener(v -> finish());
+
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -57,4 +53,29 @@ public class ManageUsersActivity extends AppCompatActivity {
             return insets;
         });
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        fetchData();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void fetchData() {
+        colRef.addSnapshotListener((value, error) -> {
+            if (error != null || value == null) {
+                return;
+            }
+            usersList.clear();
+
+            for (DocumentSnapshot documentSnapshot : value.getDocuments()) {
+                String email = documentSnapshot.getString("email");
+                boolean admin = Boolean.TRUE.equals(documentSnapshot.getBoolean("admin"));
+                boolean activated = Boolean.TRUE.equals(documentSnapshot.getBoolean("activated"));
+                usersList.add(new UserData(email, admin, activated));
+            }
+            adapter.notifyDataSetChanged();
+        });
+    }
+
 }
