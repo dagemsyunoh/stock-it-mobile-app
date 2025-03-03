@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="10dp"
-    app:cardCornerRadius="20dp"
     app:cardElevation="8dp">
 
     <RelativeLayout
@@ -41,14 +40,14 @@
                 android:text="@string/activated"
                 android:textSize="20sp" />
         </LinearLayout>
-        <androidx.appcompat.widget.AppCompatImageButton
+        <!--androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/remove_button"
             android:layout_width="150dp"
             android:layout_height="150dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:src="@drawable/ic_delete"
-            android:visibility="gone" />
+            android:visibility="gone" /-->
     </RelativeLayout>
 
 </androidx.cardview.widget.CardView>

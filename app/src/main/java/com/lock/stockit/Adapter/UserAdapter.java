@@ -1,4 +1,4 @@
-package com.lock.stockit;
+package com.lock.stockit.Adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,6 +9,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.lock.stockit.Model.UserData;
+import com.lock.stockit.R;
 
 import java.util.List;
 

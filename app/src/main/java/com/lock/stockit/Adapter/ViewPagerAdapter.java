@@ -1,9 +1,15 @@
-package com.lock.stockit;
+package com.lock.stockit.Adapter;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
+
+import com.lock.stockit.Home;
+import com.lock.stockit.Inventory;
+import com.lock.stockit.LoaderActivity;
+import com.lock.stockit.More;
+import com.lock.stockit.Receipt;
 
 public class ViewPagerAdapter extends FragmentStateAdapter {
 
