@@ -91,13 +91,6 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
             adapter.notifyDataSetChanged();
         });
     }
-//    private void setItems() {
-//        usersList = new ArrayList<UserModel>();
-//        usersList.add(new UserModel("A", true, true));
-//        usersList.add(new UserModel("B", true, true));
-//        usersList.add(new UserModel("C", true, true));
-//        usersList.add(new UserModel("D", true, true));
-//    }
 
     @Override
     public void onClickLeft(UserModel item, int position) {
