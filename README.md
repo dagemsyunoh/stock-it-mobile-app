@@ -14,15 +14,16 @@ TO-DO: <br>
 - inventory interface
 - functions
 4. More Fragment
-- edit personal email/password (user)
 - user management (admin)
 - settings
-- log out
 
 DONE: <br>
 - user database
 - email and password validation
+- user login
 - user registration
 - inactive page
 - loader(login checker)
 - main menu
+- log out function
+- edit personal email/password (user)
