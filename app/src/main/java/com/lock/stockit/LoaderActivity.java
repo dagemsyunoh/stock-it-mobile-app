@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -48,6 +49,43 @@ public class LoaderActivity extends AppCompatActivity implements FirebaseAuth.Au
         docRef.set(data);
     }
 
+    private void delayLoad(DocumentReference docRef) {
+        new Handler().postDelayed(() -> getData(docRef), 1000);
+    }
+
+    private void getData(DocumentReference docRef) {
+        docRef.get().addOnSuccessListener(this::findDoc)
+                .addOnFailureListener(e -> Log.wtf("TAG", "Error Code " + e))
+                .addOnCompleteListener(task -> checkUserStatus());
+    }
+
+    private void findDoc(DocumentSnapshot doc) {
+        if (!doc.exists()) auth.signOut();
+        else {
+            admin = Boolean.TRUE.equals(doc.getBoolean("admin"));
+            activated = Boolean.TRUE.equals(doc.getBoolean("activated"));
+            verified = Boolean.TRUE.equals(user.isEmailVerified());
+        }
+    }
+
+    private void checkUserStatus() {
+        Intent i;
+        if (activated && verified) {
+            i = new Intent(getApplicationContext(), MainActivity.class);
+        } else {
+            i = new Intent(getApplicationContext(), InactiveActivity.class);
+        }
+        startActivity(i);
+        finish();
+    }
+
+    private void newUser(DocumentReference docRef) {
+        if (SignUpActivity.create) {
+            data_create(user.getEmail(), docRef);
+            SignUpActivity.create = false;
+        }
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -59,6 +97,7 @@ public class LoaderActivity extends AppCompatActivity implements FirebaseAuth.Au
         super.onStop();
         auth.removeAuthStateListener(this);
     }
+
     @Override
     public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
         if (firebaseAuth.getCurrentUser() == null) {
@@ -66,41 +105,14 @@ public class LoaderActivity extends AppCompatActivity implements FirebaseAuth.Au
             Intent i = new Intent(getApplicationContext(), SignInActivity.class);
             startActivity(i);
             finish();
+            return;
         }
-        else {
-            uid = user.getUid();
-            DocumentReference docRef = colRef.document(uid);
-            if (SignUpActivity.create) {
-                data_create(user.getEmail(), docRef);
-                SignUpActivity.create = false;
-            }
-            docRef.update("email", user.getEmail());
+        uid = user.getUid();
+        DocumentReference docRef = colRef.document(uid);
+        newUser(docRef);
+        docRef.update("email", user.getEmail());
 
-            new Handler().postDelayed(() -> docRef.get().addOnSuccessListener(doc -> {
-                        if (!doc.exists()) {
-                            auth.signOut();
-                        }
-                        else {
-                            admin = Boolean.TRUE.equals(doc.getBoolean("admin"));
-                            activated = Boolean.TRUE.equals(doc.getBoolean("activated"));
-                            verified = Boolean.TRUE.equals(user.isEmailVerified());
-                        }
-                    })
-                    .addOnFailureListener(e -> Log.wtf("TAG", "Error Code " + e))
-                    .addOnCompleteListener(task -> {
-                        Log.wtf("TAG", "OnAuthStateChanged:signed_in: " + user.getEmail());
-                        Log.wtf("TAG", "Verified: " + user.isEmailVerified());
-                        Log.wtf("TAG", "Admin: " + admin);
-                        Log.wtf("TAG", "Activated: " + activated);
-                        Intent i;
-                        if (activated && verified) {
-                            i = new Intent(getApplicationContext(), MainActivity.class);
-                        } else {
-                            i = new Intent(getApplicationContext(), InactiveActivity.class);
-                        }
-                        startActivity(i);
-                        finish();
-                    }), 1000);
-        }
+        delayLoad(docRef);
     }
+
 }

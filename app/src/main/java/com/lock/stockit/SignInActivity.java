@@ -41,34 +41,24 @@ public class SignInActivity extends AppCompatActivity implements FirebaseAuth.Au
         editTextEmail.setOnFocusChangeListener((v, hasFocus) -> {
             String email;
             email = String.valueOf(editTextEmail.getText());
-            if (TextUtils.isEmpty(email)){
-                editTextEmail.setError("Email is required.");
-            }
+            if (TextUtils.isEmpty(email)) editTextEmail.setError("Email is required.");
         });
 
         editTextPassword.setOnFocusChangeListener((v, hasFocus) -> {
             String password;
             password = String.valueOf(editTextPassword.getText());
-            if (TextUtils.isEmpty(password)){
-                editTextPassword.setError("Password is required.");
-            }
+            if (TextUtils.isEmpty(password)) editTextPassword.setError("Password is required.");
         });
+
         buttonSignIn.setOnClickListener(v -> {
             progressBar.setVisibility(View.VISIBLE);
             String email, password;
             email = String.valueOf(editTextEmail.getText());
             password = String.valueOf(editTextPassword.getText());
 
-            auth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(this, task -> {
-                        progressBar.setVisibility(View.GONE);
-                        if (task.isSuccessful()) {
-                            Toast.makeText(SignInActivity.this, "Sign in successful.", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(SignInActivity.this, "Incorrect email or password. Please try again.", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+            authUser(email, password);
         });
+
         signUp.setOnClickListener(v -> {
             Intent i = new Intent(getApplicationContext(), SignUpActivity.class);
             startActivity(i);
@@ -80,6 +70,18 @@ public class SignInActivity extends AppCompatActivity implements FirebaseAuth.Au
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    private void authUser(String email, String password) {
+        auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    progressBar.setVisibility(View.GONE);
+                    if (task.isSuccessful()) {
+                        Toast.makeText(SignInActivity.this, "Sign in successful.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(SignInActivity.this, "Incorrect email or password. Please try again.", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     @Override
@@ -95,10 +97,9 @@ public class SignInActivity extends AppCompatActivity implements FirebaseAuth.Au
     }
     @Override
     public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-        if (firebaseAuth.getCurrentUser() != null) {
-            Intent i = new Intent(getApplicationContext(), LoaderActivity.class);
-            startActivity(i);
-            finish();
-        }
+        if (firebaseAuth.getCurrentUser() == null) return;
+        Intent i = new Intent(getApplicationContext(), LoaderActivity.class);
+        startActivity(i);
+        finish();
     }
 }

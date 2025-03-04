@@ -136,10 +136,9 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
     }
     @Override
     public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-        if (firebaseAuth.getCurrentUser() == null) {
-            Intent i = new Intent(getApplicationContext(), LoaderActivity.class);
-            startActivity(i);
-            finish();
-        }
+        if (firebaseAuth.getCurrentUser() != null) return;
+        Intent i = new Intent(getApplicationContext(), LoaderActivity.class);
+        startActivity(i);
+        finish();
     }
 }

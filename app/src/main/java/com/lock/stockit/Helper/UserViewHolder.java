@@ -46,34 +46,33 @@ public class UserViewHolder extends BaseViewHolder{
         if (swipeState != SwipeState.NONE) {
             rightImage.setOnClickListener(view -> getListener().onClickRight(item, position));
         }
-        cardView.setOnClickListener(view -> { //Do not remove this need this click listener to swipe with on touch listener
-            LogDebug("on Click Card");
-        });
+        cardView.setOnClickListener(view -> LogDebug("on Click Card"));
         //endregion
         //region On Touch Swipe
-        if (swipeState != SwipeState.NONE) {
-            cardView.setOnTouchListener((view, event) -> {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        dXLead = view.getX() - event.getRawX();
-                        dXTrail = view.getRight() - event.getRawX();
-                        LogDebug("MotionEvent.ACTION_DOWN");
-                        return false;
-                    case MotionEvent.ACTION_MOVE:
-                        view.getParent().requestDisallowInterceptTouchEvent(true);
-                        getListener().onRetainSwipe(item, position);
-                        onAnimate(view, onSwipeMove(event.getRawX() + dXLead, event.getRawX() + dXTrail,swipeState), 0L);
-                        item.setState(getSwipeState(event.getRawX() + dXLead, event.getRawX() + dXTrail, swipeState));
-                        LogDebug("MotionEvent.ACTION_MOVE");
-                        return false;
-                    case MotionEvent.ACTION_UP:
-                        onAnimate(view, onSwipeUp(item.getState()), 250L);
-                        LogDebug("MotionEvent.ACTION_UP");
-                        return false;
-                    default:
-                        return true;
-                }
-            });
+        if (swipeState == SwipeState.NONE) {
+            return;
         }
+        cardView.setOnTouchListener((view, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    dXLead = view.getX() - event.getRawX();
+                    dXTrail = view.getRight() - event.getRawX();
+                    LogDebug("MotionEvent.ACTION_DOWN");
+                    return false;
+                case MotionEvent.ACTION_MOVE:
+                    view.getParent().requestDisallowInterceptTouchEvent(true);
+                    getListener().onRetainSwipe(item, position);
+                    onAnimate(view, onSwipeMove(event.getRawX() + dXLead, event.getRawX() + dXTrail,swipeState), 0L);
+                    item.setState(getSwipeState(event.getRawX() + dXLead, event.getRawX() + dXTrail, swipeState));
+                    LogDebug("MotionEvent.ACTION_MOVE");
+                    return false;
+                case MotionEvent.ACTION_UP:
+                    onAnimate(view, onSwipeUp(item.getState()), 250L);
+                    LogDebug("MotionEvent.ACTION_UP");
+                    return false;
+                default:
+                    return true;
+            }
+        });
     }
 }

@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -32,14 +33,14 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public class ChangeActivity extends AppCompatActivity {
+public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
 
     FirebaseAuth auth = FirebaseAuth.getInstance();
     FirebaseUser user = auth.getCurrentUser();
     CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
     AuthCredential credential;
     TextView changeText;
-    TextInputLayout passwordLayout, conpasswordLayout;
+    TextInputLayout passwordLayout, confirmPasswordLayout;
     TextInputEditText changeEmail, changePassword, changeConfirmPassword;
     ProgressBar progressBar;
     Button changeButton;
@@ -57,24 +58,23 @@ public class ChangeActivity extends AppCompatActivity {
         changeText = findViewById(R.id.change_text);
         changeEmail = findViewById(R.id.change_email);
         changePassword = findViewById(R.id.change_password);
-        changeConfirmPassword = findViewById(R.id.change_conpassword);
+        changeConfirmPassword = findViewById(R.id.change_confirm_password);
         passwordLayout = findViewById(R.id.password_layout);
-        conpasswordLayout = findViewById(R.id.conpassword_layout);
+        confirmPasswordLayout = findViewById(R.id.confirm_password_layout);
         progressBar = findViewById(R.id.progress_bar);
         buttonBack = findViewById(R.id.back_button);
         changeButton = findViewById(R.id.change_button);
 
-        String text = "Confirm it's you\nChange " + More.change;
+        String text = "Confirm it's you\nChange " + getIntent().getStringExtra("change");
         changeText.setText(text);
 
         changeButton.setOnClickListener(v -> {
             progressBar.setVisibility(View.VISIBLE);
-            if (!authenticated) {
-                reAuth();
-            }
-            else if(More.change.equals("email")) {
-                newEmail();
-            }
+            // Check if user is authenticated
+            if (!authenticated) reAuth();
+            // If user wants to change email
+            else if(getIntent().getStringExtra("change").equals("email")) newEmail();
+            // If user wants to change password
             else {
                 String newPassword, confirmPassword;
                 newPassword = String.valueOf(changePassword.getText());
@@ -105,7 +105,7 @@ public class ChangeActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         authenticated = true;
                         Toast.makeText(ChangeActivity.this, "Re-authentication successful.", Toast.LENGTH_SHORT).show();
-                        changeLayout(More.change);
+                        changeLayout(getIntent().getStringExtra("change"));
                     }
                     else {
                         Toast.makeText(ChangeActivity.this, "Re-authentication failed. Please try again.", Toast.LENGTH_SHORT).show();
@@ -129,73 +129,59 @@ public class ChangeActivity extends AppCompatActivity {
             fetchEmail();
             changeEmail.setVisibility(View.VISIBLE);
             passwordLayout.setVisibility(View.GONE);
-            conpasswordLayout.setVisibility(View.GONE);
+            confirmPasswordLayout.setVisibility(View.GONE);
         }
         else {
             changeEmail.setVisibility(View.GONE);
             changePassword.setVisibility(View.VISIBLE);
-            conpasswordLayout.setVisibility(View.VISIBLE);
+            confirmPasswordLayout.setVisibility(View.VISIBLE);
             changePassword.setHint(R.string.new_password);
             passwordLayout.setPasswordVisibilityToggleEnabled(true);
         }
     }
     private void fetchEmail() {
         colRef.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                QuerySnapshot querySnapshot = task.getResult();
-                if (querySnapshot != null) {
-                    for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                        emails.add(document.getString("email"));
-                    }
-                }
+            if (!task.isSuccessful()) return;
+            QuerySnapshot querySnapshot = task.getResult();
+            if (querySnapshot == null) return;
+            for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+                emails.add(document.getString("email"));
             }
         });
     }
 
     private void newEmail() {
         String email = String.valueOf(changeEmail.getText());
-        if (emailChecker(email)) {
-            user.verifyBeforeUpdateEmail(email).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    verifyEmail();
+        if (!emailChecker(email)) return;
+        user.verifyBeforeUpdateEmail(email).addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Toast.makeText(ChangeActivity.this, "Error. Please try again.", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-                    AlertDialog alertDialog = new AlertDialog.Builder(this)
-                            .setTitle("Email verification required.")
-                            .setMessage("Please verify your new email before signing in again.\n Email will only be changed after verification.")
-                            .setNegativeButton("OK", (dialog, which) -> {
-                                dialog.dismiss();
-                                sign_out();
-                            })
-                            .create();
-                    alertDialog.show();
-                }
-                else {
-                    Toast.makeText(ChangeActivity.this, "Error. Please try again.", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
+            AlertDialog alertDialog = new AlertDialog.Builder(this)
+                    .setTitle("Email verification required.")
+                    .setMessage("Please verify your new email before signing in again.\n Email will only be changed after verification.")
+                    .setNegativeButton("OK", (dialog, which) -> {
+                        auth.signOut();
+                        dialog.dismiss();
+                    })
+                    .create();
+            alertDialog.show();
+        });
         progressBar.setVisibility(View.GONE);
     }
 
-    private void sign_out() {
-        auth.signOut();
-        Intent i = new Intent(getApplicationContext(), LoaderActivity.class);
-        startActivity(i);
-        finish();
-    }
-
     private void newPassword(String oldPassword, String password, String confirmPassword) {
-        if (passwordChecker(oldPassword, password, confirmPassword)) {
-            user.updatePassword(password).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Toast.makeText(ChangeActivity.this, "Password successfully changed.", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-                else {
-                    Toast.makeText(ChangeActivity.this, "Error. Please try again.", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
+        if (!passwordChecker(oldPassword, password, confirmPassword)) return;
+        user.updatePassword(password).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(ChangeActivity.this, "Password successfully changed.", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                Toast.makeText(ChangeActivity.this, "Error. Please try again.", Toast.LENGTH_SHORT).show();
+            }
+        });
         progressBar.setVisibility(View.GONE);
     }
 
@@ -287,18 +273,23 @@ public class ChangeActivity extends AppCompatActivity {
         return true;
     }
 
-    private void verifyEmail() {
-        if (user != null){
-            user.sendEmailVerification().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Toast.makeText(ChangeActivity.this, "Verification email sent.", Toast.LENGTH_SHORT).show();
-                    verifySent = true;
-                }
-                else {
-                    Toast.makeText(ChangeActivity.this, "Failed to send verification email.", Toast.LENGTH_SHORT).show();
-                    verifySent = false;
-                }
-            });
-        }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        auth.addAuthStateListener(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        auth.removeAuthStateListener(this);
+    }
+
+    @Override
+    public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+        if (firebaseAuth.getCurrentUser() != null) return;
+        Intent i = new Intent(getApplicationContext(), LoaderActivity.class);
+        startActivity(i);
+        finish();
     }
 }

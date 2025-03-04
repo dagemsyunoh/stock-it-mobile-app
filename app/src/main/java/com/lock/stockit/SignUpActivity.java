@@ -49,7 +49,6 @@ public class SignUpActivity extends AppCompatActivity implements FirebaseAuth.Au
         signIn = findViewById(R.id.sign_in);
         progressBar = findViewById(R.id.progress_bar);
 
-        //get all emails from database to use when checking if email already exists
         fetchEmail();
 
         buttonSignUp.setOnClickListener(v -> {
@@ -59,19 +58,22 @@ public class SignUpActivity extends AppCompatActivity implements FirebaseAuth.Au
             String confirmPassword = String.valueOf(editTextConfirmPassword.getText());
             Boolean valid = checker(email, password, confirmPassword);
 
-            if (valid) {
-                auth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(task -> {
-                            progressBar.setVisibility(View.GONE);
-                            if (task.isSuccessful()) {
-                                Toast.makeText(SignUpActivity.this, "Account successfully created.", Toast.LENGTH_SHORT).show();
-                                create = true;
-                                verifyEmail();
-                            } else {
-                                Toast.makeText(SignUpActivity.this, "Account creation failed. Please try again.", Toast.LENGTH_SHORT).show();
-                            }
-                        });
+            if (!valid) {
+                progressBar.setVisibility(View.GONE);
+                return;
             }
+            auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(task -> {
+                        progressBar.setVisibility(View.GONE);
+                        if (task.isSuccessful()) {
+                            Toast.makeText(SignUpActivity.this, "Account successfully created.", Toast.LENGTH_SHORT).show();
+                            create = true;
+                            verifyEmail();
+                        }
+                        else {
+                            Toast.makeText(SignUpActivity.this, "Account creation failed. Please try again.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
             progressBar.setVisibility(View.GONE);
         });
 
@@ -90,30 +92,24 @@ public class SignUpActivity extends AppCompatActivity implements FirebaseAuth.Au
 
     private void fetchEmail() {
         firestore.collection("users").get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                QuerySnapshot querySnapshot = task.getResult();
-                if (querySnapshot != null) {
-                    for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                        emails.add(document.getString("email"));
-                    }
-                }
+            if (!task.isSuccessful()) return;
+            QuerySnapshot querySnapshot = task.getResult();
+            if (querySnapshot == null) return;
+            for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+                emails.add(document.getString("email"));
             }
         });
     }
 
     private Boolean checker(String email, String password, String confirmPassword) {
         boolean emailValid = emailChecker(email);
-        if (!emailValid) {
-            return false;
-        }
+        if (!emailValid) return false;
         else if (password.contains(email) || email.contains(password)){
             Toast.makeText(SignUpActivity.this, "Password cannot contain email.", Toast.LENGTH_SHORT).show();
             editTextPassword.setError("Password cannot contain email.");
             return false;
         }
-        else {
-            return passwordChecker(password, confirmPassword);
-        }
+        else return passwordChecker(password, confirmPassword);
     }
 
     private boolean emailChecker(String email) {
@@ -191,16 +187,15 @@ public class SignUpActivity extends AppCompatActivity implements FirebaseAuth.Au
     }
 
     private void verifyEmail() {
-        if (auth.getCurrentUser() != null){
-            auth.getCurrentUser().sendEmailVerification().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Toast.makeText(SignUpActivity.this, "Verification email sent.", Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    Toast.makeText(SignUpActivity.this, "Failed to send verification email.", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
+        if (auth.getCurrentUser() == null) return;
+        auth.getCurrentUser().sendEmailVerification().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(SignUpActivity.this, "Verification email sent.", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                Toast.makeText(SignUpActivity.this, "Failed to send verification email.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -216,10 +211,9 @@ public class SignUpActivity extends AppCompatActivity implements FirebaseAuth.Au
     }
     @Override
     public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-        if (firebaseAuth.getCurrentUser() != null) {
-            Intent i = new Intent(getApplicationContext(), LoaderActivity.class);
-            startActivity(i);
-            finish();
-        }
+        if (firebaseAuth.getCurrentUser() == null) return;
+        Intent i = new Intent(getApplicationContext(), LoaderActivity.class);
+        startActivity(i);
+        finish();
     }
 }

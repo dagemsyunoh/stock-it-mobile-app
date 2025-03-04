@@ -87,9 +87,7 @@ abstract public class BaseViewHolder extends RecyclerView.ViewHolder {
         LogDebug("onSwipeMove($currentLead, $currentTrail, $swipeState)");
         if (swipeState == SwipeState.LEFT || swipeState == SwipeState.RIGHT || swipeState == SwipeState.LEFT_RIGHT) {
             return currentLead;
-        } else {
-            return cardViewLeading;
-        }
+        } else return cardViewLeading;
     }
 
     protected SwipeState getSwipeState(Float currentLead, Float currentTrail, SwipeState swipeState) {

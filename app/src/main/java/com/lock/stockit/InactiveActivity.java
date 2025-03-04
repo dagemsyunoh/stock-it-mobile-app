@@ -46,25 +46,23 @@ public class InactiveActivity extends AppCompatActivity implements FirebaseAuth.
             inactiveText.setText(R.string.account_verify);
             reload.setText(R.string.reloadV);
             resendDelay();
-        }
-        else if (!LoaderActivity.activated){
+        } else if (!LoaderActivity.activated){
             buttonResend.setVisibility(View.GONE);
             inactiveText.setText(R.string.account_inactive);
             reload.setText(R.string.reloadA);
         }
+
         buttonResend.setOnClickListener(v -> {
-            i = 5; //to restart delay loop
-            if (user != null && !LoaderActivity.verified){
-                user.sendEmailVerification().addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Toast.makeText(InactiveActivity.this, "Verification email sent.", Toast.LENGTH_SHORT).show();
-                    }
-                    else {
-                        Toast.makeText(InactiveActivity.this, "Failed to send verification email.", Toast.LENGTH_SHORT).show();
-                        i = 3; //to restart delay loop early, do not change to 30
-                    }
-                });
-            }
+            i = 5; //to restart delay loop, change back to 30 upon deployment
+            if (user == null || LoaderActivity.verified) return;
+            user.sendEmailVerification().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(InactiveActivity.this, "Verification email sent.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(InactiveActivity.this, "Failed to send verification email.", Toast.LENGTH_SHORT).show();
+                    i = 3; //to restart delay loop early, do not change to 30
+                }
+            });
         });
 
         reload.setOnClickListener(v -> {
@@ -111,10 +109,9 @@ public class InactiveActivity extends AppCompatActivity implements FirebaseAuth.
     }
     @Override
     public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-        if (firebaseAuth.getCurrentUser() == null || clicked) {
-            Intent i = new Intent(getApplicationContext(), LoaderActivity.class);
-            startActivity(i);
-            finish();
-        }
+        if (firebaseAuth.getCurrentUser() != null && !clicked) return;
+        Intent i = new Intent(getApplicationContext(), LoaderActivity.class);
+        startActivity(i);
+        finish();
     }
 }

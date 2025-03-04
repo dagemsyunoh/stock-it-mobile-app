@@ -17,7 +17,6 @@ public class More extends Fragment {
     FirebaseAuth auth = FirebaseAuth.getInstance();
     Button buttonManage, buttonChangeEmail, buttonChangePassword, buttonSignOUt;
     TextView emailUser;
-    public static String change;
     FirebaseUser user = auth.getCurrentUser();
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -36,13 +35,13 @@ public class More extends Fragment {
         });
 
         buttonChangeEmail.setOnClickListener(v -> {
-            change = "email";
             Intent i = new Intent(getActivity(), ChangeActivity.class);
+            i.putExtra("change", "email");
             startActivity(i);
         });
         buttonChangePassword.setOnClickListener(v -> {
-            change = "password";
             Intent i = new Intent(getActivity(), ChangeActivity.class);
+            i.putExtra("change", "password");
             startActivity(i);
         });
         buttonSignOUt.setOnClickListener(v -> auth.signOut());
@@ -56,11 +55,7 @@ public class More extends Fragment {
 
         String welcome = "Welcome, " + user.getEmail();
         emailUser.setText(welcome);
-        if (LoaderActivity.admin) {
-            buttonManage.setVisibility(View.VISIBLE);
-        }
-        else {
-            buttonManage.setVisibility(View.GONE);
-        }
+        if (LoaderActivity.admin) buttonManage.setVisibility(View.VISIBLE);
+        else buttonManage.setVisibility(View.GONE);
     }
 }

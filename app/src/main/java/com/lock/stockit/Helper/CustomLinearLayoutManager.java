@@ -38,8 +38,7 @@ public class CustomLinearLayoutManager extends LinearLayoutManager {
                 return super.getHorizontalSnapPreference();
             }
 
-            @Nullable
-            @Override
+            @Nullable @Override
             public PointF computeScrollVectorForPosition(int targetPosition) {
                 return CustomLinearLayoutManager.this.computeScrollVectorForPosition(targetPosition);
             }
