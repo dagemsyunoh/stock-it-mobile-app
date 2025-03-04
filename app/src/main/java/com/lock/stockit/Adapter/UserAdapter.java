@@ -34,8 +34,7 @@ public class UserAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         usersList = new ArrayList<>();
     }
 
-    @NonNull
-    @Override
+    @NonNull @Override
     public BaseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View view = layoutInflater.inflate(R.layout.user_item, parent, false);
@@ -54,13 +53,12 @@ public class UserAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         // Check if swipe is enabled in the current state
         final boolean isEnabled = swipeState == SwipeState.LEFT || swipeState == SwipeState.RIGHT || swipeState == SwipeState.LEFT_RIGHT;
         // If swipe is enabled, reset the swipe state for other cells
-        if (isEnabled) {
-            for (int index = 0; index < getItemCount(); index++) {
-                final boolean isNotSwiped = usersList.get(index).getState() != SwipeState.NONE;
-                if (index != position && isNotSwiped) {
-                    usersList.get(index).setState(SwipeState.NONE);
-                    notifyItemChanged(index);
-                }
+        if (!isEnabled) return;
+        for (int index = 0; index < getItemCount(); index++) {
+            final boolean isNotSwiped = usersList.get(index).getState() != SwipeState.NONE;
+            if (index != position && isNotSwiped) {
+                usersList.get(index).setState(SwipeState.NONE);
+                notifyItemChanged(index);
             }
         }
     }
@@ -75,9 +73,7 @@ public class UserAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     @SuppressLint("NotifyDataSetChanged")
     private void fetchData() {
         colRef.addSnapshotListener((value, error) -> {
-            if (error != null || value == null) {
-                return;
-            }
+            if (error != null || value == null) return;
             this.usersList.clear();
 
             for (DocumentSnapshot documentSnapshot : value.getDocuments()) {
