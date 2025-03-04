@@ -50,6 +50,21 @@ public class UserAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     @Override
     public int getItemCount() { return usersList.size(); }
 
+    public void retainSwipe(UserModel model, int position) {
+        // Check if swipe is enabled in the current state
+        final boolean isEnabled = swipeState == SwipeState.LEFT || swipeState == SwipeState.RIGHT || swipeState == SwipeState.LEFT_RIGHT;
+        // If swipe is enabled, reset the swipe state for other cells
+        if (isEnabled) {
+            for (int index = 0; index < getItemCount(); index++) {
+                final boolean isNotSwiped = usersList.get(index).getState() != SwipeState.NONE;
+                if (index != position && isNotSwiped) {
+                    usersList.get(index).setState(SwipeState.NONE);
+                    notifyItemChanged(index);
+                }
+            }
+        }
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     public void setUsers(ArrayList<UserModel> users) {
         usersList.clear();

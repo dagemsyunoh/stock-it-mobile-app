@@ -50,7 +50,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="@dimen/trailing_rubber" />
+        app:layout_constraintGuide_percent="0.7518248" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/constraint_guideline_vertical_trailing"
@@ -87,18 +87,6 @@
         app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing"
         app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"
         app:layout_constraintTop_toTopOf="@id/constraint_guideline_horizontal_top" />
-
-    <ImageView
-        android:id="@+id/button_left"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:contentDescription="@string/inventory"
-        android:elevation="@dimen/card_elevation"
-        app:layout_constraintBottom_toBottomOf="@id/constraint_guideline_horizontal_bottom"
-        app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_leading_rubber"
-        app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"
-        app:layout_constraintTop_toTopOf="@id/constraint_guideline_horizontal_top"
-        app:srcCompat="@drawable/ic_inventory" />
 
     <ImageView
         android:id="@+id/button_right"

@@ -17,7 +17,7 @@ public class UserViewHolder extends BaseViewHolder{
 
     private final TextView email;
     private final SwitchCompat admin, activated;
-    private final ImageView leftImage, rightImage;
+    private final ImageView rightImage;
     private final CardView cardView;
 
     public UserViewHolder(View itemView, UserListeners customListeners) {
@@ -26,7 +26,6 @@ public class UserViewHolder extends BaseViewHolder{
         admin = itemView.findViewById(R.id.admin_switch);
         activated = itemView.findViewById(R.id.activated_switch);
         cardView = itemView.findViewById(R.id.card_view);
-        leftImage = itemView.findViewById(R.id.button_left);
         rightImage = itemView.findViewById(R.id.button_right);
     }
     @Override
@@ -45,7 +44,6 @@ public class UserViewHolder extends BaseViewHolder{
     private void setSwipeEventListener(final UserModel item, final int position, final SwipeState swipeState) {
         //region On Click
         if (swipeState != SwipeState.NONE) {
-            leftImage.setOnClickListener(view -> getListener().onClickLeft(item, position));
             rightImage.setOnClickListener(view -> getListener().onClickRight(item, position));
         }
         cardView.setOnClickListener(view -> { //Do not remove this need this click listener to swipe with on touch listener
@@ -63,6 +61,7 @@ public class UserViewHolder extends BaseViewHolder{
                         return false;
                     case MotionEvent.ACTION_MOVE:
                         view.getParent().requestDisallowInterceptTouchEvent(true);
+                        getListener().onRetainSwipe(item, position);
                         onAnimate(view, onSwipeMove(event.getRawX() + dXLead, event.getRawX() + dXTrail,swipeState), 0L);
                         item.setState(getSwipeState(event.getRawX() + dXLead, event.getRawX() + dXTrail, swipeState));
                         LogDebug("MotionEvent.ACTION_MOVE");
@@ -76,6 +75,5 @@ public class UserViewHolder extends BaseViewHolder{
                 }
             });
         }
-        //endregion
     }
 }
