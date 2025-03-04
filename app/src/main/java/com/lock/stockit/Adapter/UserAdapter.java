@@ -1,60 +1,92 @@
 package com.lock.stockit.Adapter;
 
-import android.content.Context;
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.lock.stockit.Model.UserData;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.lock.stockit.Helper.BaseViewHolder;
+import com.lock.stockit.Helper.SwipeState;
+import com.lock.stockit.Helper.UserListeners;
+import com.lock.stockit.Helper.UserViewHolder;
+import com.lock.stockit.Model.UserModel;
 import com.lock.stockit.R;
 
-import java.util.List;
+import java.util.ArrayList;
 
-public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
+public class UserAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
-    private final Context context;
-    List<UserData> usersList;
+    private final UserListeners userListeners;
+    private final SwipeState swipeState;
+    private final ArrayList<UserModel> usersList;
+    CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
 
-    public UserAdapter(List<UserData> usersList, Context context) {
-        this.usersList = usersList;
-        this.context = context;
+    public UserAdapter(UserListeners userListeners, SwipeState swipeState) {
+        super();
+        this.userListeners = userListeners;
+        this.swipeState = swipeState;
+        usersList = new ArrayList<>();
     }
 
     @NonNull
     @Override
-    public UserAdapter.UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.user_item, parent, false);
-        return new UserViewHolder(view);
+    public BaseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+        View view = layoutInflater.inflate(R.layout.user_item, parent, false);
+        return new UserViewHolder(view, userListeners);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull UserAdapter.UserViewHolder holder, int position) {
-        UserData userData = usersList.get(position);
-        holder.email.setText(userData.getEmail());
-        holder.adminSwitch.setChecked(userData.isAdmin());
-        holder.activatedSwitch.setChecked(userData.isActivated());
+    public void onBindViewHolder(@NonNull BaseViewHolder holder, int position) {
+        holder.bindDataToViewHolder(usersList.get(position), position, swipeState);
     }
 
     @Override
-    public int getItemCount() {
-        return usersList.size();
-    }
+    public int getItemCount() { return usersList.size(); }
 
-    public static class UserViewHolder extends RecyclerView.ViewHolder {
-        TextView email;
-        SwitchCompat adminSwitch;
-        SwitchCompat activatedSwitch;
-
-        public UserViewHolder(@NonNull View itemView) {
-            super(itemView);
-            email = itemView.findViewById(R.id.email);
-            adminSwitch = itemView.findViewById(R.id.admin_switch);
-            activatedSwitch = itemView.findViewById(R.id.activated_switch);
+    public void retainSwipe(UserModel model, int position) {
+        // Check if swipe is enabled in the current state
+        final boolean isEnabled = swipeState == SwipeState.LEFT || swipeState == SwipeState.RIGHT || swipeState == SwipeState.LEFT_RIGHT;
+        // If swipe is enabled, reset the swipe state for other cells
+        if (isEnabled) {
+            for (int index = 0; index < getItemCount(); index++) {
+                final boolean isNotSwiped = usersList.get(index).getState() != SwipeState.NONE;
+                if (index != position && isNotSwiped) {
+                    usersList.get(index).setState(SwipeState.NONE);
+                    notifyItemChanged(index);
+                }
+            }
         }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void setUsers(ArrayList<UserModel> users) {
+        usersList.clear();
+        usersList.addAll(users);
+        notifyDataSetChanged();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void fetchData() {
+        colRef.addSnapshotListener((value, error) -> {
+            if (error != null || value == null) {
+                return;
+            }
+            this.usersList.clear();
+
+            for (DocumentSnapshot documentSnapshot : value.getDocuments()) {
+                String email = documentSnapshot.getString("email");
+                boolean admin = Boolean.TRUE.equals(documentSnapshot.getBoolean("admin"));
+                boolean activated = Boolean.TRUE.equals(documentSnapshot.getBoolean("activated"));
+                usersList.add(new UserModel(email, admin, activated));
+            }
+            notifyDataSetChanged();
+        });
     }
 }
