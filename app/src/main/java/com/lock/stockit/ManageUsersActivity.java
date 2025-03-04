@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,7 +28,6 @@ import java.util.ArrayList;
 
 public class ManageUsersActivity extends AppCompatActivity implements UserListeners {
 
-//    ActivityManageUsersBinding binding;
     RecyclerView recyclerView;
     private ArrayList<UserModel> usersList;
     private UserAdapter adapter;
@@ -43,17 +43,14 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_manage_users);
-//        binding = ActivityManageUsersBinding.inflate(getLayoutInflater());
-//        setContentView(binding.getRoot());
 
         buttonBack = findViewById(R.id.back_button);
         recyclerView = findViewById(R.id.user_view);
         usersList = new ArrayList<>();
-        setRecyclerView();
         fetchData();
 //        setItems();
 
-        buttonBack.setOnClickListener(v -> finish());
+        buttonBack.setOnClickListener(v -> fetchData());
 
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -64,7 +61,7 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
     }
 
     private void setRecyclerView() {
-        adapter = new UserAdapter(this, SwipeState.LEFT_RIGHT);
+        adapter = new UserAdapter(this, SwipeState.LEFT);
         recyclerView.setLayoutManager(new CustomLinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(adapter);
     }
@@ -72,7 +69,6 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
     @Override
     protected void onStart() {
         super.onStart();
-        adapter.setUsers(usersList);
         fetchData();
     }
 
@@ -90,38 +86,17 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
                 boolean activated = Boolean.TRUE.equals(documentSnapshot.getBoolean("activated"));
                 usersList.add(new UserModel(email, admin, activated));
             }
+            setRecyclerView();
+            adapter.setUsers(usersList);
             adapter.notifyDataSetChanged();
         });
     }
 //    private void setItems() {
 //        usersList = new ArrayList<UserModel>();
-//        usersList.clear();
 //        usersList.add(new UserModel("A", true, true));
 //        usersList.add(new UserModel("B", true, true));
 //        usersList.add(new UserModel("C", true, true));
 //        usersList.add(new UserModel("D", true, true));
-//        usersList.add(new UserModel("E", true, true));
-//        usersList.add(new UserModel("F", true, true));
-//        usersList.add(new UserModel("G", true, true));
-//        usersList.add(new UserModel("H", true, true));
-//        usersList.add(new UserModel("I", true, true));
-//        usersList.add(new UserModel("J", true, true));
-//        usersList.add(new UserModel("K", true, true));
-//        usersList.add(new UserModel("L", true, true));
-//        usersList.add(new UserModel("M", true, true));
-//        usersList.add(new UserModel("N", true, true));
-//        usersList.add(new UserModel("O", true, true));
-//        usersList.add(new UserModel("P", true, true));
-//        usersList.add(new UserModel("Q", true, true));
-//        usersList.add(new UserModel("R", true, true));
-//        usersList.add(new UserModel("S", true, true));
-//        usersList.add(new UserModel("T", true, true));
-//        usersList.add(new UserModel("U", true, true));
-//        usersList.add(new UserModel("V", true, true));
-//        usersList.add(new UserModel("W", true, true));
-//        usersList.add(new UserModel("X", true, true));
-//        usersList.add(new UserModel("Y", true, true));
-//        usersList.add(new UserModel("Z", true, true));
 //    }
 
     @Override
@@ -131,6 +106,6 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
 
     @Override
     public void onClickRight(UserModel item, int position) {
-
+        Toast.makeText(this, "Delete", Toast.LENGTH_SHORT).show();
     }
 }

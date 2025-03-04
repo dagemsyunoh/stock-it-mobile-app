@@ -2,7 +2,7 @@
 <resources>
     <!-- CardView Radius -->
     <dimen name="card_radius_macro">10dp</dimen>
-    <dimen name="card_radius">8dp</dimen>
+    <dimen name="card_radius">16dp</dimen>
     <dimen name="card_radius_minimum">5dp</dimen>
     <dimen name="card_radius_micro">3dp</dimen>
     <!-- endregion -->
