@@ -35,4 +35,5 @@
     <string name="add_item">Add Item</string>
     <string name="unit_price">Unit Price</string>
     <string name="total_price">Total Price</string>
+    <string name="edit">Edit</string>
 </resources>
