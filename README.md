@@ -11,10 +11,8 @@ TO-DO: <br>
 - edit/delete items
 - print
 3. Inventory Fragment (admin only)
-- inventory interface
-- functions
+- inventory search function
 4. More Fragment
-- user management (admin)
 - settings
 
 DONE: <br>
@@ -27,3 +25,6 @@ DONE: <br>
 - main menu
 - log out function
 - edit personal email/password (user)
+- user management (admin)
+- inventory interface
+- stock edit functions
