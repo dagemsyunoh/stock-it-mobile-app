@@ -28,7 +28,6 @@
             android:layout_gravity="center_horizontal"
             android:iconifiedByDefault="false"
             android:inputType="text"
-            android:queryBackground="@id/stock_view"
             android:queryHint="@string/search_item" />
 
         <androidx.recyclerview.widget.RecyclerView

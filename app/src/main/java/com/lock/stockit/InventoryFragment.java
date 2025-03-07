@@ -45,7 +45,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
         stockList = new ArrayList<>();
 
         addButton.setOnClickListener(v -> {
-            //
+            //code for add item
         });
 
         return view;
