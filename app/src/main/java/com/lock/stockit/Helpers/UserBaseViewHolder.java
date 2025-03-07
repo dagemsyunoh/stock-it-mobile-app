@@ -1,4 +1,4 @@
-package com.lock.stockit.Helper;
+package com.lock.stockit.Helpers;
 
 import android.content.Context;
 import android.graphics.Insets;
@@ -14,9 +14,9 @@ import android.view.WindowMetrics;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.lock.stockit.Model.UserModel;
+import com.lock.stockit.Models.UserModel;
 
-abstract public class BaseViewHolder extends RecyclerView.ViewHolder {
+abstract public class UserBaseViewHolder extends RecyclerView.ViewHolder {
 
 
     /** Main */
@@ -30,7 +30,7 @@ abstract public class BaseViewHolder extends RecyclerView.ViewHolder {
     private final int width;
     protected Float dXLead = (float) 0;
     protected Float dXTrail = (float) 0;
-    public BaseViewHolder(View itemView, UserListeners userListeners) {
+    public UserBaseViewHolder(View itemView, UserListeners userListeners) {
         super(itemView);
         this.userListeners = userListeners;
         windowManager = (WindowManager) itemView.getContext().getSystemService(Context.WINDOW_SERVICE);

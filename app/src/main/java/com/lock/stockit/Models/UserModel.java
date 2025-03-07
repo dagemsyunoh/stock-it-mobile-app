@@ -1,6 +1,6 @@
-package com.lock.stockit.Model;
+package com.lock.stockit.Models;
 
-import com.lock.stockit.Helper.SwipeState;
+import com.lock.stockit.Helpers.SwipeState;
 
 public class UserModel {
     private String email;

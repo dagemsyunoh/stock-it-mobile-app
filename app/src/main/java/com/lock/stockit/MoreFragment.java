@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class More extends Fragment {
+public class MoreFragment extends Fragment {
     FirebaseAuth auth = FirebaseAuth.getInstance();
     Button buttonManage, buttonChangeEmail, buttonChangePassword, buttonSignOUt;
     TextView emailUser;

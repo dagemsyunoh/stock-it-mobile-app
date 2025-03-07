@@ -26,11 +26,11 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.lock.stockit.Adapter.UserAdapter;
-import com.lock.stockit.Helper.CustomLinearLayoutManager;
-import com.lock.stockit.Helper.SwipeState;
-import com.lock.stockit.Helper.UserListeners;
-import com.lock.stockit.Model.UserModel;
+import com.lock.stockit.Adapters.UserAdapter;
+import com.lock.stockit.Helpers.CustomLinearLayoutManager;
+import com.lock.stockit.Helpers.SwipeState;
+import com.lock.stockit.Helpers.UserListeners;
+import com.lock.stockit.Models.UserModel;
 
 import java.util.ArrayList;
 

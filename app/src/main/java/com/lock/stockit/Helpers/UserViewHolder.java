@@ -1,4 +1,4 @@
-package com.lock.stockit.Helper;
+package com.lock.stockit.Helpers;
 
 import android.annotation.SuppressLint;
 import android.view.MotionEvent;
@@ -12,10 +12,10 @@ import androidx.cardview.widget.CardView;
 
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.lock.stockit.Model.UserModel;
+import com.lock.stockit.Models.UserModel;
 import com.lock.stockit.R;
 
-public class UserViewHolder extends BaseViewHolder{
+public class UserViewHolder extends UserBaseViewHolder {
 
 
     private final TextView email;
@@ -55,7 +55,7 @@ public class UserViewHolder extends BaseViewHolder{
 
         activated.setOnClickListener(view -> confirmChange("activated", activated));
 
-        cardView.setOnClickListener(view -> { }); // Do not remove, it is required for the swipe to work
+        cardView.setOnClickListener(view -> {}); // Do not remove, it is required for the swipe to work
         //endregion
         //region On Touch Swipe
         if (swipeState == SwipeState.NONE) return;
@@ -99,7 +99,10 @@ public class UserViewHolder extends BaseViewHolder{
                     updateData(field, switchClicked);
                     dialog.dismiss();
                 })
-                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    switchClicked.setChecked(!switchClicked.isChecked());
+                    dialog.dismiss();
+                })
                 .create();
         alertDialog.show();
     }

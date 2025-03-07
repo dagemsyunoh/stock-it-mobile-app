@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
-public class Home extends Fragment {
+public class HomeFragment extends Fragment {
     String type;
     TextView textView;
     @SuppressLint("SetTextI18n") //remove later

@@ -1,4 +1,4 @@
-package com.lock.stockit.Helper;
+package com.lock.stockit.Helpers;
 
 import android.content.Context;
 import android.graphics.PointF;
