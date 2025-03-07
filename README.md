@@ -12,6 +12,7 @@ TO-DO: <br>
 - print
 3. Inventory Fragment (admin only)
 - inventory search function
+- inventory add item
 4. More Fragment
 - settings
 
