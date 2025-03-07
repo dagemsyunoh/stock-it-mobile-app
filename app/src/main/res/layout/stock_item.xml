@@ -160,6 +160,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
                 android:layout_below="@+id/size_text"
+                android:layout_marginHorizontal="5dp"
                 android:layout_marginTop="-10dp"
                 android:gravity="center"
                 android:text="@string/stocks"
@@ -181,6 +182,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
                 android:layout_below="@+id/qty_text"
+                android:layout_marginHorizontal="5dp"
                 android:gravity="center"
                 android:text="@string/price"
                 android:textSize="15sp" />
