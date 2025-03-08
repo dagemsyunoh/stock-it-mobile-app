@@ -35,4 +35,10 @@
     <string name="unit_price">Unit Price</string>
     <string name="total_price">Total Price</string>
     <string name="edit">Edit</string>
+    <string name="zero">0</string>
+    <string name="item_name">Item Name</string>
+    <string name="item_size">Item Size</string>
+    <string name="add_item_to_inventory">ADD ITEM TO INVENTORY</string>
+    <string name="plus_one">+1</string>
+    <string name="minus_one">-1</string>
 </resources>

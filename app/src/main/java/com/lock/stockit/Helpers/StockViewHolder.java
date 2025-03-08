@@ -76,11 +76,7 @@ public class StockViewHolder extends StockBaseViewHolder {
         //region On Click
         if (swipeState != SwipeState.NONE) {
             leftImage.setOnClickListener(view -> {
-                editQty.setVisibility(View.VISIBLE);
-                editPrice.setVisibility(View.VISIBLE);
-                itemQty.setVisibility(View.GONE);
-                itemPrice.setVisibility(View.GONE);
-                saveButton.setVisibility(View.VISIBLE);
+                changeLayout(item, position);
                 getListener().onClickLeft(item, position);
             });
             rightImage.setOnClickListener(view -> getListener().onClickRight(item, position));
@@ -120,6 +116,15 @@ public class StockViewHolder extends StockBaseViewHolder {
             }
         });
         //endregion
+    }
+
+    private void changeLayout(StockModel item, int position) {
+        editQty.setVisibility(View.VISIBLE);
+        editPrice.setVisibility(View.VISIBLE);
+        itemQty.setVisibility(View.GONE);
+        itemPrice.setVisibility(View.GONE);
+        saveButton.setVisibility(View.VISIBLE);
+        getListener().onClickLeft(item, position);
     }
 
     private void updateData(TextInputEditText qty, TextInputEditText price) {

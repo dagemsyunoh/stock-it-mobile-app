@@ -1,18 +1,23 @@
 package com.lock.stockit;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -27,7 +32,9 @@ import java.util.ArrayList;
 public class InventoryFragment extends Fragment implements StockListeners {
 
     RecyclerView recyclerView;
-    FloatingActionButton addButton;
+    FloatingActionButton addButton, addItem;
+    TextInputEditText itemName, itemSize, itemQty, itemPrice;
+    AppCompatImageButton plusOne, minusOne;
     CollectionReference colRef = FirebaseFirestore.getInstance().collection("stocks");
     private ArrayList<StockModel> stockList;
     private StockAdapter adapter;
@@ -44,9 +51,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
         addButton = view.findViewById(R.id.add_stock);
         stockList = new ArrayList<>();
 
-        addButton.setOnClickListener(v -> {
-            //code for add item
-        });
+        addButton.setOnClickListener(v -> popUp());
 
         return view;
     }
@@ -61,6 +66,18 @@ public class InventoryFragment extends Fragment implements StockListeners {
         recyclerView.setLayoutManager(new CustomLinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(adapter);
     }
+
+    @Override
+    public void onClickLeft(StockModel item, int position) { }
+
+    @Override
+    public void onClickRight(StockModel item, int position) { }
+
+    @Override
+    public void onRetainSwipe(StockModel item, int position) {
+        adapter.retainSwipe(item, position);
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     private void fetchData() {
         colRef.addSnapshotListener((value, error) -> {
@@ -80,17 +97,18 @@ public class InventoryFragment extends Fragment implements StockListeners {
         });
     }
 
-    @Override
-    public void onClickLeft(StockModel item, int position) {
-    }
-
-    @Override
-    public void onClickRight(StockModel item, int position) {
-
-    }
-
-    @Override
-    public void onRetainSwipe(StockModel item, int position) {
-        adapter.retainSwipe(item, position);
+    private void popUp() {
+        Dialog addPopUp = new Dialog(getActivity());
+        itemName = addPopUp.findViewById(R.id.add_name);
+        itemSize = addPopUp.findViewById(R.id.add_size);
+        itemQty = addPopUp.findViewById(R.id.add_qty);
+        itemPrice = addPopUp.findViewById(R.id.add_price);
+        plusOne = addPopUp.findViewById(R.id.plus_one);
+        minusOne = addPopUp.findViewById(R.id.minus_one);
+        addItem = addPopUp.findViewById(R.id.add_item);
+        addPopUp.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        addPopUp.setContentView(R.layout.stock_add);
+        addPopUp.setTitle("Add Item to Inventory");
+        addPopUp.show();
     }
 }

@@ -177,7 +177,7 @@
                     android:layout_height="match_parent"
                     android:layout_marginStart="7dp"
                     android:gravity="center"
-                    android:text="@string/price_default"
+                    android:text="@string/zero"
                     android:textSize="15sp" />
 
                 <LinearLayout
@@ -204,7 +204,7 @@
                             android:layout_height="match_parent"
                             android:gravity="center"
                             android:inputType="numberDecimal"
-                            android:text="@string/price_default"
+                            android:text="@string/zero"
                             android:textSize="15sp" />
 
                     </com.google.android.material.textfield.TextInputLayout>
