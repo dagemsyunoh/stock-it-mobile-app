@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
@@ -25,9 +26,11 @@ import com.lock.stockit.Adapters.StockAdapter;
 import com.lock.stockit.Helpers.CustomLinearLayoutManager;
 import com.lock.stockit.Helpers.StockListeners;
 import com.lock.stockit.Helpers.SwipeState;
+import com.lock.stockit.Helpers.ValueMover;
 import com.lock.stockit.Models.StockModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class InventoryFragment extends Fragment implements StockListeners {
 
@@ -38,6 +41,8 @@ public class InventoryFragment extends Fragment implements StockListeners {
     CollectionReference colRef = FirebaseFirestore.getInstance().collection("stocks");
     private ArrayList<StockModel> stockList;
     private StockAdapter adapter;
+    private final ArrayList<String> names = new ArrayList<>();
+    private final ArrayList<String> sizes = new ArrayList<>();
 
     public static Intent newIntent(Context context) {
         return new Intent(context, InventoryFragment.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -89,6 +94,8 @@ public class InventoryFragment extends Fragment implements StockListeners {
                 String size = documentSnapshot.getString("item size");
                 int qty = documentSnapshot.getDouble("qty").intValue();
                 double price = documentSnapshot.getDouble("price");
+                names.add(name);
+                sizes.add(size);
                 stockList.add(new StockModel(name, size, qty, price));
             }
             setRecyclerView();
@@ -99,16 +106,80 @@ public class InventoryFragment extends Fragment implements StockListeners {
 
     private void popUp() {
         Dialog addPopUp = new Dialog(getActivity());
-        itemName = addPopUp.findViewById(R.id.add_name);
-        itemSize = addPopUp.findViewById(R.id.add_size);
-        itemQty = addPopUp.findViewById(R.id.add_qty);
-        itemPrice = addPopUp.findViewById(R.id.add_price);
-        plusOne = addPopUp.findViewById(R.id.plus_one);
-        minusOne = addPopUp.findViewById(R.id.minus_one);
-        addItem = addPopUp.findViewById(R.id.add_item);
         addPopUp.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         addPopUp.setContentView(R.layout.stock_add);
         addPopUp.setTitle("Add Item to Inventory");
         addPopUp.show();
+        itemName = addPopUp.findViewById(R.id.add_name);
+        itemSize = addPopUp.findViewById(R.id.add_size);
+        itemQty = addPopUp.findViewById(R.id.add_qty);
+        itemPrice = addPopUp.findViewById(R.id.add_price);
+
+        plusOne = addPopUp.findViewById(R.id.add_plus_one);
+        minusOne = addPopUp.findViewById(R.id.add_minus_one);
+        addItem = addPopUp.findViewById(R.id.add_item);
+
+        plusOne.setOnClickListener(view -> ValueMover.onPlusOne(itemQty));
+
+        minusOne.setOnClickListener(view -> ValueMover.onMinusOne(itemQty));
+
+        addItem.setOnClickListener(view -> {
+            HashMap<String, Object> data = new HashMap<>();
+            data.put("item name", itemName.getText().toString());
+            data.put("item size", itemSize.getText().toString());
+            data.put("qty", Double.parseDouble(itemQty.getText().toString()));
+            data.put("price", Double.parseDouble(itemPrice.getText().toString()));
+
+            if (isInvalid(data)) {
+                Toast.makeText(getActivity(), "Invalid input", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (exists(data)) {
+                Toast.makeText(getActivity(), "Item already exists", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            colRef.add(data).addOnSuccessListener(documentReference -> {
+                Toast.makeText(getActivity(), "Item added", Toast.LENGTH_SHORT).show();
+                addPopUp.dismiss();
+            }).addOnFailureListener(e -> Toast.makeText(getActivity(), "Error adding item", Toast.LENGTH_SHORT).show());
+        });
+
+    }
+
+    private boolean isInvalid(HashMap<String, Object> data) {
+        // check if name and size are not empty
+        if (data.get("item name").toString().isEmpty() || data.get("item size").toString().isEmpty()) {
+            return true;
+        }
+        // check if qty and price are greater than 0
+        return Double.parseDouble(data.get("qty").toString()) <= 0 && Double.parseDouble(data.get("price").toString()) <= 0;
+    }
+
+    private boolean exists(HashMap<String, Object> data) {
+        boolean nameExists = false;
+        boolean sizeExists = false;
+        ArrayList<Boolean> nameFlag = new ArrayList<>();
+        // check if name exists
+        for (String n : names) {
+            if (n.equals(data.get("item name").toString())) {
+                nameExists = true;
+                nameFlag.add(true);
+            } else {
+                nameFlag.add(false);
+            }
+        }
+        // check if size exists
+        for (int i = 0; i < sizes.size(); i++) {
+            if (nameFlag.get(i)) {
+                if (sizes.get(i).equals(data.get("item size").toString())) {
+                    sizeExists = true;
+                    break;
+                }
+            }
+            sizeExists = false;
+        }
+        // return true if both name and size exist to prevent duplication
+        return nameExists && sizeExists;
     }
 }

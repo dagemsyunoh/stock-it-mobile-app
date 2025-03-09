@@ -82,15 +82,10 @@ public class StockViewHolder extends StockBaseViewHolder {
             rightImage.setOnClickListener(view -> getListener().onClickRight(item, position));
         }
         saveButton.setOnClickListener(view -> updateData(inputQty, inputPrice));
-        plusOne.setOnClickListener(view -> {
-            int qty = Integer.parseInt(inputQty.getText().toString());
-            inputQty.setText(String.valueOf(qty + 1));
-                });
 
-        minusOne.setOnClickListener(view -> {
-            int qty = Integer.parseInt(inputQty.getText().toString());
-            if (qty > 0) inputQty.setText(String.valueOf(qty - 1));
-                });
+        plusOne.setOnClickListener(view -> ValueMover.onPlusOne(inputQty));
+
+        minusOne.setOnClickListener(view -> ValueMover.onMinusOne(inputQty));
 
         cardView.setOnClickListener(view -> {}); // Do not remove, it is required for the swipe to work
         //endregion
