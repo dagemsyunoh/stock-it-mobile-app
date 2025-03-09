@@ -44,34 +44,30 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int id = item.getItemId();
-                if (LoaderActivity.admin) {
-                    switch (id) {
-                        case R.id.home:
-                            viewPager2.setCurrentItem(0);
-                            break;
-                        case R.id.receipt:
-                            viewPager2.setCurrentItem(1);
-                            break;
-                        case R.id.inventory:
-                            viewPager2.setCurrentItem(2);
-                            break;
-                        case R.id.more:
-                            viewPager2.setCurrentItem(3);
-                            break;
-                    }
+                if (LoaderActivity.admin) switch (id) {
+                    case R.id.home:
+                        viewPager2.setCurrentItem(0);
+                        break;
+                    case R.id.receipt:
+                        viewPager2.setCurrentItem(1);
+                        break;
+                    case R.id.inventory:
+                        viewPager2.setCurrentItem(2);
+                        break;
+                    case R.id.more:
+                        viewPager2.setCurrentItem(3);
+                        break;
                 }
-                else {
-                    switch (id) {
-                        case R.id.home:
-                            viewPager2.setCurrentItem(0);
-                            break;
-                        case R.id.receipt:
-                            viewPager2.setCurrentItem(1);
-                            break;
-                        case R.id.more:
-                            viewPager2.setCurrentItem(2);
-                            break;
-                    }
+                else switch (id) {
+                    case R.id.home:
+                        viewPager2.setCurrentItem(0);
+                        break;
+                    case R.id.receipt:
+                        viewPager2.setCurrentItem(1);
+                        break;
+                    case R.id.more:
+                        viewPager2.setCurrentItem(2);
+                        break;
                 }
                 return false;
             }
@@ -80,34 +76,30 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
         viewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
-                if (LoaderActivity.admin) {
-                    switch (position) {
-                        case 0:
-                            bottomNavigationView.getMenu().findItem(R.id.home).setChecked(true);
-                            break;
-                        case 1:
-                            bottomNavigationView.getMenu().findItem(R.id.receipt).setChecked(true);
-                            break;
-                        case 2:
-                            bottomNavigationView.getMenu().findItem(R.id.inventory).setChecked(true);
-                            break;
-                        case 3:
-                            bottomNavigationView.getMenu().findItem(R.id.more).setChecked(true);
-                            break;
-                    }
+                if (LoaderActivity.admin) switch (position) {
+                    case 0:
+                        bottomNavigationView.getMenu().findItem(R.id.home).setChecked(true);
+                        break;
+                    case 1:
+                        bottomNavigationView.getMenu().findItem(R.id.receipt).setChecked(true);
+                        break;
+                    case 2:
+                        bottomNavigationView.getMenu().findItem(R.id.inventory).setChecked(true);
+                        break;
+                    case 3:
+                        bottomNavigationView.getMenu().findItem(R.id.more).setChecked(true);
+                        break;
                 }
-                else {
-                    switch (position) {
-                        case 0:
-                            bottomNavigationView.getMenu().findItem(R.id.home).setChecked(true);
-                            break;
-                        case 1:
-                            bottomNavigationView.getMenu().findItem(R.id.receipt).setChecked(true);
-                            break;
-                        case 2:
-                            bottomNavigationView.getMenu().findItem(R.id.more).setChecked(true);
-                            break;
-                    }
+                else switch (position) {
+                    case 0:
+                        bottomNavigationView.getMenu().findItem(R.id.home).setChecked(true);
+                        break;
+                    case 1:
+                        bottomNavigationView.getMenu().findItem(R.id.receipt).setChecked(true);
+                        break;
+                    case 2:
+                        bottomNavigationView.getMenu().findItem(R.id.more).setChecked(true);
+                        break;
                 }
                 super.onPageSelected(position);
             }

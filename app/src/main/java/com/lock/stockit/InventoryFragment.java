@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.AppCompatImageButton;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,9 +25,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.lock.stockit.Adapters.StockAdapter;
 import com.lock.stockit.Helpers.CustomLinearLayoutManager;
+import com.lock.stockit.Helpers.QtyMover;
 import com.lock.stockit.Helpers.StockListeners;
 import com.lock.stockit.Helpers.SwipeState;
-import com.lock.stockit.Helpers.ValueMover;
 import com.lock.stockit.Models.StockModel;
 
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
     FloatingActionButton addButton, addItem;
     TextInputEditText itemName, itemSize, itemQty, itemPrice;
     AppCompatImageButton plusOne, minusOne;
+    SearchView searchView;
     CollectionReference colRef = FirebaseFirestore.getInstance().collection("stocks");
     private ArrayList<StockModel> stockList;
     private StockAdapter adapter;
@@ -54,7 +56,9 @@ public class InventoryFragment extends Fragment implements StockListeners {
     View view = inflater.inflate(R.layout.fragment_inventory, container, false);
         recyclerView = view.findViewById(R.id.stock_view);
         addButton = view.findViewById(R.id.add_stock);
+        searchView = view.findViewById(R.id.stock_search);
         stockList = new ArrayList<>();
+
 
         addButton.setOnClickListener(v -> popUp());
 
@@ -76,7 +80,9 @@ public class InventoryFragment extends Fragment implements StockListeners {
     public void onClickLeft(StockModel item, int position) { }
 
     @Override
-    public void onClickRight(StockModel item, int position) { }
+    public void onClickRight(StockModel item, int position) {
+        deleteItem(position);
+    }
 
     @Override
     public void onRetainSwipe(StockModel item, int position) {
@@ -104,6 +110,19 @@ public class InventoryFragment extends Fragment implements StockListeners {
         });
     }
 
+    private void deleteItem(int pos) {
+        String name = stockList.get(pos).getItemName();
+        String size = stockList.get(pos).getItemSize();
+        colRef.addSnapshotListener((value, error) -> {
+            if (error != null || value == null) return;
+            for (DocumentSnapshot documentSnapshot : value.getDocuments())
+                if (documentSnapshot.getString("item name").equals(name) && documentSnapshot.getString("item size").equals(size)) {
+                    documentSnapshot.getReference().delete();
+                    Toast.makeText(getActivity(), "Item Deleted", Toast.LENGTH_SHORT).show();
+                }
+        });
+    }
+
     private void popUp() {
         Dialog addPopUp = new Dialog(getActivity());
         addPopUp.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -119,9 +138,9 @@ public class InventoryFragment extends Fragment implements StockListeners {
         minusOne = addPopUp.findViewById(R.id.add_minus_one);
         addItem = addPopUp.findViewById(R.id.add_item);
 
-        plusOne.setOnClickListener(view -> ValueMover.onPlusOne(itemQty));
+        plusOne.setOnClickListener(view -> QtyMover.onPlusOne(itemQty));
 
-        minusOne.setOnClickListener(view -> ValueMover.onMinusOne(itemQty));
+        minusOne.setOnClickListener(view -> QtyMover.onMinusOne(itemQty));
 
         addItem.setOnClickListener(view -> {
             HashMap<String, Object> data = new HashMap<>();
@@ -149,9 +168,8 @@ public class InventoryFragment extends Fragment implements StockListeners {
 
     private boolean isInvalid(HashMap<String, Object> data) {
         // check if name and size are not empty
-        if (data.get("item name").toString().isEmpty() || data.get("item size").toString().isEmpty()) {
+        if (data.get("item name").toString().isEmpty() || data.get("item size").toString().isEmpty())
             return true;
-        }
         // check if qty and price are greater than 0
         return Double.parseDouble(data.get("qty").toString()) <= 0 && Double.parseDouble(data.get("price").toString()) <= 0;
     }
@@ -161,21 +179,16 @@ public class InventoryFragment extends Fragment implements StockListeners {
         boolean sizeExists = false;
         ArrayList<Boolean> nameFlag = new ArrayList<>();
         // check if name exists
-        for (String n : names) {
+        for (String n : names)
             if (n.equals(data.get("item name").toString())) {
                 nameExists = true;
                 nameFlag.add(true);
-            } else {
-                nameFlag.add(false);
-            }
-        }
+            } else nameFlag.add(false);
         // check if size exists
         for (int i = 0; i < sizes.size(); i++) {
-            if (nameFlag.get(i)) {
-                if (sizes.get(i).equals(data.get("item size").toString())) {
-                    sizeExists = true;
-                    break;
-                }
+            if (nameFlag.get(i)) if (sizes.get(i).equals(data.get("item size").toString())) {
+                sizeExists = true;
+                break;
             }
             sizeExists = false;
         }

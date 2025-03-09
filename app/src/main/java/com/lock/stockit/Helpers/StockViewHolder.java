@@ -78,33 +78,40 @@ public class StockViewHolder extends StockBaseViewHolder {
             leftImage.setOnClickListener(view -> {
                 changeLayout(item, position);
                 getListener().onClickLeft(item, position);
+                onAnimate(cardView, onSwipeUp(swipeState), 250L);
             });
             rightImage.setOnClickListener(view -> getListener().onClickRight(item, position));
         }
         saveButton.setOnClickListener(view -> updateData(inputQty, inputPrice));
 
-        plusOne.setOnClickListener(view -> ValueMover.onPlusOne(inputQty));
+        plusOne.setOnClickListener(view -> QtyMover.onPlusOne(inputQty));
 
-        minusOne.setOnClickListener(view -> ValueMover.onMinusOne(inputQty));
+        minusOne.setOnClickListener(view -> QtyMover.onMinusOne(inputQty));
 
-        cardView.setOnClickListener(view -> {}); // Do not remove, it is required for the swipe to work
+        cardView.setOnClickListener(view -> { }); // Do not remove, it is required for the swipe to work
         //endregion
         //region On Touch Swipe
         if (swipeState == SwipeState.NONE) return;
         cardView.setOnTouchListener((view, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                    view.getParent().requestDisallowInterceptTouchEvent(false);
                     dXLead = view.getX() - event.getRawX();
                     dXTrail = view.getRight() - event.getRawX();
+
                     return false;
                 case MotionEvent.ACTION_MOVE:
                     view.getParent().requestDisallowInterceptTouchEvent(true);
                     getListener().onRetainSwipe(item, position);
-                    onAnimate(view, onSwipeMove(event.getRawX() + dXLead, event.getRawX() + dXTrail,swipeState), 0L);
+                    onAnimate(view, onSwipeMove(event.getRawX() + dXLead, event.getRawX() + dXTrail,swipeState), 250L);
                     item.setState(getSwipeState(event.getRawX() + dXLead, event.getRawX() + dXTrail, swipeState));
                     return false;
                 case MotionEvent.ACTION_UP:
+                    view.getParent().requestDisallowInterceptTouchEvent(false);
                     onAnimate(view, onSwipeUp(item.getState()), 250L);
+                    return false;
+                case MotionEvent.ACTION_CANCEL:
+                    view.getParent().requestDisallowInterceptTouchEvent(false); // to
                     return false;
                 default:
                     return true;
@@ -131,12 +138,15 @@ public class StockViewHolder extends StockBaseViewHolder {
                     .update("qty", Double.parseDouble(inputQty.getText().toString()),
                             "price", Double.parseDouble(price.getText().toString()));
         });
+        returnLayout();
+        Toast.makeText(itemView.getContext(), "Updated", Toast.LENGTH_SHORT).show();
+    }
+
+    private void returnLayout() {
         editQty.setVisibility(View.GONE);
         editPrice.setVisibility(View.GONE);
         itemQty.setVisibility(View.VISIBLE);
         itemPrice.setVisibility(View.VISIBLE);
-
         saveButton.setVisibility(View.GONE);
-        Toast.makeText(itemView.getContext(), "Updated", Toast.LENGTH_SHORT).show();
     }
 }

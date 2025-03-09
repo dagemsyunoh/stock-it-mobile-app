@@ -108,8 +108,7 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
                     if (task.isSuccessful()) {
                         Toast.makeText(ManageUsersActivity.this, "Re-authentication successful.", Toast.LENGTH_SHORT).show();
                         deleteUser(pos);
-                    }
-                    else {
+                    } else {
                         Toast.makeText(ManageUsersActivity.this, "Re-authentication failed. Please try again.", Toast.LENGTH_SHORT).show();
                         alertPassword(pos, true);
                     }
@@ -144,12 +143,12 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
     private void deleteUser(int pos) {
         String email = usersList.get(pos).getEmail();
         colRef.addSnapshotListener((value, error) -> {
-           for (DocumentSnapshot documentSnapshot : value.getDocuments()) {
-               if (documentSnapshot.getString("email").equals(email)) {
-//                   documentSnapshot.getReference().delete(); // temporarily disabled to prevent data deletion
-                   Toast.makeText(ManageUsersActivity.this, "User Deleted", Toast.LENGTH_SHORT).show();
-               }
-           }
+            if (error != null || value == null) return;
+            for (DocumentSnapshot documentSnapshot : value.getDocuments())
+                if (documentSnapshot.getString("email").equals(email)) {
+                    documentSnapshot.getReference().delete();
+                    Toast.makeText(ManageUsersActivity.this, "User Deleted", Toast.LENGTH_SHORT).show();
+                }
         });
     }
 

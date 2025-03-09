@@ -106,10 +106,8 @@ public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.Au
                         authenticated = true;
                         Toast.makeText(ChangeActivity.this, "Re-authentication successful.", Toast.LENGTH_SHORT).show();
                         changeLayout(getIntent().getStringExtra("change"));
-                    }
-                    else {
+                    } else
                         Toast.makeText(ChangeActivity.this, "Re-authentication failed. Please try again.", Toast.LENGTH_SHORT).show();
-                    }
                 });
     }
 
@@ -130,8 +128,7 @@ public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.Au
             changeEmail.setVisibility(View.VISIBLE);
             passwordLayout.setVisibility(View.GONE);
             confirmPasswordLayout.setVisibility(View.GONE);
-        }
-        else {
+        } else {
             changeEmail.setVisibility(View.GONE);
             changePassword.setVisibility(View.VISIBLE);
             confirmPasswordLayout.setVisibility(View.VISIBLE);
@@ -144,9 +141,8 @@ public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.Au
             if (!task.isSuccessful()) return;
             QuerySnapshot querySnapshot = task.getResult();
             if (querySnapshot == null) return;
-            for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+            for (DocumentSnapshot document : querySnapshot.getDocuments())
                 emails.add(document.getString("email"));
-            }
         });
     }
 
@@ -178,37 +174,32 @@ public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.Au
             if (task.isSuccessful()) {
                 Toast.makeText(ChangeActivity.this, "Password successfully changed.", Toast.LENGTH_SHORT).show();
                 finish();
-            } else {
+            } else
                 Toast.makeText(ChangeActivity.this, "Error. Please try again.", Toast.LENGTH_SHORT).show();
-            }
         });
         progressBar.setVisibility(View.GONE);
     }
 
     private boolean emailChecker(String email) {
         emailExists = false; //returns true if email exists in database
-        for (String e : emails) {
+        for (String e : emails)
             if (e.equals(email)) {
                 emailExists = true;
                 break;
             }
-        }
-        if (TextUtils.isEmpty(email)){
+        if (TextUtils.isEmpty(email)) {
             Toast.makeText(ChangeActivity.this, "Email is required.", Toast.LENGTH_SHORT).show();
             changeEmail.setError("Email is required.");
             return false;
-        }
-        if (!email.contains("@") || !email.contains(".") || email.contains(" ")){
+        } if (!email.contains("@") || !email.contains(".") || email.contains(" ")) {
             Toast.makeText(ChangeActivity.this, "Invalid email.", Toast.LENGTH_SHORT).show();
             changeEmail.setError("Invalid email.");
             return false;
-        }
-        if (Objects.equals(user.getEmail(), email)){
+        } if (Objects.equals(user.getEmail(), email)) {
             Toast.makeText(ChangeActivity.this, "New email cannot be the same as the old email.", Toast.LENGTH_SHORT).show();
             changeEmail.setError("New email cannot be the same as the old email.");
             return false;
-        }
-        if (emailExists) {
+        } if (emailExists) {
             Toast.makeText(ChangeActivity.this, "Email already exists.", Toast.LENGTH_SHORT).show();
             changeEmail.setError("Email already exists.");
         }
@@ -223,47 +214,39 @@ public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.Au
         changePassword.setText("");
         changeConfirmPassword.setText("");
 
-        if (TextUtils.isEmpty(newPassword) || TextUtils.isEmpty(confirmPassword)){
+        if (TextUtils.isEmpty(newPassword) || TextUtils.isEmpty(confirmPassword)) {
             Toast.makeText(ChangeActivity.this, "Password is required.", Toast.LENGTH_SHORT).show();
             changePassword.setError("Password is required.");
             return false;
-        }
-        if (newPassword.length() < 8){
+        } if (newPassword.length() < 8) {
             Toast.makeText(ChangeActivity.this, "Password must be at least 8 characters.", Toast.LENGTH_SHORT).show();
             changePassword.setError("Password must be at least 8 characters.");
             return false;
-        }
-        if (!specialChar.matcher(newPassword).find()){
+        } if (!specialChar.matcher(newPassword).find()) {
             Toast.makeText(ChangeActivity.this, "Password must contain a special character.", Toast.LENGTH_SHORT).show();
             changePassword.setError("Password must contain a special character.");
             return false;
-        }
-        if (!upperCase.matcher(newPassword).find()){
+        } if (!upperCase.matcher(newPassword).find()) {
             Toast.makeText(ChangeActivity.this, "Password must contain an uppercase letter.", Toast.LENGTH_SHORT).show();
             changePassword.setError("Password must contain an uppercase letter.");
             return false;
-        }
-        if (!lowerCase.matcher(newPassword).find()){
+        } if (!lowerCase.matcher(newPassword).find()) {
             Toast.makeText(ChangeActivity.this, "Password must contain a lowercase letter.", Toast.LENGTH_SHORT).show();
             changePassword.setError("Password must contain a lowercase letter.");
             return false;
-        }
-        if (!digitCase.matcher(newPassword).find()){
+        } if (!digitCase.matcher(newPassword).find()) {
             Toast.makeText(ChangeActivity.this, "Password must contain a digit.", Toast.LENGTH_SHORT).show();
             changePassword.setError("Password must contain a digit.");
             return false;
-        }
-        if (newPassword.contains(" ") || confirmPassword.contains(" ")){
+        } if (newPassword.contains(" ") || confirmPassword.contains(" ")) {
             Toast.makeText(ChangeActivity.this, "Password cannot contain spaces.", Toast.LENGTH_SHORT).show();
             changePassword.setError("Password cannot contain spaces.");
             return false;
-        }
-        if (!newPassword.equals(confirmPassword)){
+        } if (!newPassword.equals(confirmPassword)) {
             Toast.makeText(ChangeActivity.this, "Passwords do not match.", Toast.LENGTH_SHORT).show();
             changeConfirmPassword.setError("Passwords do not match.");
             return false;
-        }
-        if (newPassword.equals(oldPassword)) {
+        } if (newPassword.equals(oldPassword)) {
             Toast.makeText(ChangeActivity.this, "New password cannot be the same as the old password.", Toast.LENGTH_SHORT).show();
             changePassword.setError("New password cannot be the same as the old password.");
             changePassword.setText("");

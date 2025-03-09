@@ -2,7 +2,7 @@ package com.lock.stockit.Helpers;
 
 import com.google.android.material.textfield.TextInputEditText;
 
-public class ValueMover {
+public class QtyMover {
     public static void onPlusOne(TextInputEditText inputQty) {
         int qty = Integer.parseInt(inputQty.getText().toString());
         inputQty.setText(String.valueOf(qty + 1));

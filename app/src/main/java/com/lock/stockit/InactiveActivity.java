@@ -56,9 +56,9 @@ public class InactiveActivity extends AppCompatActivity implements FirebaseAuth.
             i = 5; //to restart delay loop, change back to 30 upon deployment
             if (user == null || LoaderActivity.verified) return;
             user.sendEmailVerification().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
+                if (task.isSuccessful())
                     Toast.makeText(InactiveActivity.this, "Verification email sent.", Toast.LENGTH_SHORT).show();
-                } else {
+                else {
                     Toast.makeText(InactiveActivity.this, "Failed to send verification email.", Toast.LENGTH_SHORT).show();
                     i = 3; //to restart delay loop early, do not change to 30
                 }

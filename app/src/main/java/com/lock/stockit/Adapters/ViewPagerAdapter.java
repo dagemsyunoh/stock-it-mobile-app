@@ -19,21 +19,25 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
 
     @NonNull @Override
     public Fragment createFragment(int position) {
-        if (LoaderActivity.admin) {
-            switch (position) {
-                case 1: return new ReceiptFragment();
-                case 2: return new InventoryFragment();
-                case 3: return new MoreFragment();
-                case 0:
-                default: return new HomeFragment();
-            }
-        } else {
-            switch (position) {
-                case 1: return new ReceiptFragment();
-                case 2: return new MoreFragment();
-                case 0:
-                default: return new HomeFragment();
-            }
+        if (LoaderActivity.admin) switch (position) {
+            case 1:
+                return new ReceiptFragment();
+            case 2:
+                return new InventoryFragment();
+            case 3:
+                return new MoreFragment();
+            case 0:
+            default:
+                return new HomeFragment();
+        }
+        else switch (position) {
+            case 1:
+                return new ReceiptFragment();
+            case 2:
+                return new MoreFragment();
+            case 0:
+            default:
+                return new HomeFragment();
         }
     }
 

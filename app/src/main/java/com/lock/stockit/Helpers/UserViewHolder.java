@@ -47,9 +47,8 @@ public class UserViewHolder extends UserBaseViewHolder {
     @SuppressLint("ClickableViewAccessibility")
     private void setSwipeEventListener(final UserModel item, final int position, final SwipeState swipeState) {
         //region On Click
-        if (swipeState != SwipeState.NONE) {
+        if (swipeState != SwipeState.NONE)
             rightImage.setOnClickListener(view -> getListener().onClickRight(item, position));
-        }
 
         admin.setOnClickListener(view -> confirmChange("admin", admin));
 

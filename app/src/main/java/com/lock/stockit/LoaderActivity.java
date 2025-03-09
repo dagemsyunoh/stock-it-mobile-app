@@ -70,11 +70,8 @@ public class LoaderActivity extends AppCompatActivity implements FirebaseAuth.Au
 
     private void checkUserStatus() {
         Intent i;
-        if (activated && verified) {
-            i = new Intent(getApplicationContext(), MainActivity.class);
-        } else {
-            i = new Intent(getApplicationContext(), InactiveActivity.class);
-        }
+        if (activated && verified) i = new Intent(getApplicationContext(), MainActivity.class);
+        else i = new Intent(getApplicationContext(), InactiveActivity.class);
         startActivity(i);
         finish();
     }

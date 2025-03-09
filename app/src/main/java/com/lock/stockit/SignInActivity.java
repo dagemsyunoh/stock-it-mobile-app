@@ -55,7 +55,6 @@ public class SignInActivity extends AppCompatActivity implements FirebaseAuth.Au
             String email, password;
             email = String.valueOf(editTextEmail.getText());
             password = String.valueOf(editTextPassword.getText());
-
             authUser(email, password);
         });
 
@@ -76,11 +75,10 @@ public class SignInActivity extends AppCompatActivity implements FirebaseAuth.Au
         auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     progressBar.setVisibility(View.GONE);
-                    if (task.isSuccessful()) {
+                    if (task.isSuccessful())
                         Toast.makeText(SignInActivity.this, "Sign in successful.", Toast.LENGTH_SHORT).show();
-                    } else {
+                    else
                         Toast.makeText(SignInActivity.this, "Incorrect email or password. Please try again.", Toast.LENGTH_SHORT).show();
-                    }
                 });
     }
 

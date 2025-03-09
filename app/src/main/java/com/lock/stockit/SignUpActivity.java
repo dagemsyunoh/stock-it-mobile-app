@@ -69,10 +69,8 @@ public class SignUpActivity extends AppCompatActivity implements FirebaseAuth.Au
                             Toast.makeText(SignUpActivity.this, "Account successfully created.", Toast.LENGTH_SHORT).show();
                             create = true;
                             verifyEmail();
-                        }
-                        else {
+                        } else
                             Toast.makeText(SignUpActivity.this, "Account creation failed. Please try again.", Toast.LENGTH_SHORT).show();
-                        }
                     });
             progressBar.setVisibility(View.GONE);
         });
@@ -143,42 +141,35 @@ public class SignUpActivity extends AppCompatActivity implements FirebaseAuth.Au
         Pattern lowerCase = Pattern.compile("[a-z ]");
         Pattern digitCase = Pattern.compile("[0-9 ]");
 
-        if (TextUtils.isEmpty(password) || TextUtils.isEmpty(confirmPassword)){
+        if (TextUtils.isEmpty(password) || TextUtils.isEmpty(confirmPassword)) {
             Toast.makeText(SignUpActivity.this, "Password is required.", Toast.LENGTH_SHORT).show();
             editTextPassword.setError("Password is required.");
             return false;
-        }
-        if (password.length() < 8){
+        } if (password.length() < 8) {
             Toast.makeText(SignUpActivity.this, "Password must be at least 8 characters.", Toast.LENGTH_SHORT).show();
             editTextPassword.setError("Password must be at least 8 characters.");
             return false;
-        }
-        if (!specialChar.matcher(password).find()){
+        } if (!specialChar.matcher(password).find()) {
             Toast.makeText(SignUpActivity.this, "Password must contain a special character.", Toast.LENGTH_SHORT).show();
             editTextPassword.setError("Password must contain a special character.");
             return false;
-        }
-        if (!upperCase.matcher(password).find()){
+        } if (!upperCase.matcher(password).find()) {
             Toast.makeText(SignUpActivity.this, "Password must contain an uppercase letter.", Toast.LENGTH_SHORT).show();
             editTextPassword.setError("Password must contain an uppercase letter.");
             return false;
-        }
-        if (!lowerCase.matcher(password).find()){
+        } if (!lowerCase.matcher(password).find()) {
             Toast.makeText(SignUpActivity.this, "Password must contain a lowercase letter.", Toast.LENGTH_SHORT).show();
             editTextPassword.setError("Password must contain a lowercase letter.");
             return false;
-        }
-        if (!digitCase.matcher(password).find()){
+        } if (!digitCase.matcher(password).find()) {
             Toast.makeText(SignUpActivity.this, "Password must contain a digit.", Toast.LENGTH_SHORT).show();
             editTextPassword.setError("Password must contain a digit.");
             return false;
-        }
-        if (password.contains(" ") || confirmPassword.contains(" ")){
+        } if (password.contains(" ") || confirmPassword.contains(" ")) {
             Toast.makeText(SignUpActivity.this, "Password cannot contain spaces.", Toast.LENGTH_SHORT).show();
             editTextPassword.setError("Password cannot contain spaces.");
             return false;
-        }
-        if (!password.equals(confirmPassword)){
+        } if (!password.equals(confirmPassword)) {
             Toast.makeText(SignUpActivity.this, "Passwords do not match.", Toast.LENGTH_SHORT).show();
             editTextConfirmPassword.setError("Passwords do not match.");
             return false;
@@ -189,12 +180,10 @@ public class SignUpActivity extends AppCompatActivity implements FirebaseAuth.Au
     private void verifyEmail() {
         if (auth.getCurrentUser() == null) return;
         auth.getCurrentUser().sendEmailVerification().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
+            if (task.isSuccessful())
                 Toast.makeText(SignUpActivity.this, "Verification email sent.", Toast.LENGTH_SHORT).show();
-            }
-            else {
+            else
                 Toast.makeText(SignUpActivity.this, "Failed to send verification email.", Toast.LENGTH_SHORT).show();
-            }
         });
     }
 
