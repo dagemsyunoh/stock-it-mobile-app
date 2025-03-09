@@ -50,7 +50,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.7518248" />
+        app:layout_constraintGuide_percent="@dimen/trailing_rubber" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/constraint_guideline_vertical_trailing"
@@ -78,9 +78,10 @@
     <androidx.cardview.widget.CardView
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_margin="2dp"
+        app:cardBackgroundColor="@color/red"
         app:cardCornerRadius="@dimen/card_radius"
         app:cardElevation="@dimen/card_elevation_minimum"
-        app:cardBackgroundColor="@color/red"
         app:cardMaxElevation="@dimen/card_elevation_minimum"
         app:cardUseCompatPadding="false"
         app:layout_constraintBottom_toBottomOf="@id/constraint_guideline_horizontal_bottom"

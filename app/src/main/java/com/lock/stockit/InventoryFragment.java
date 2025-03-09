@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.AppCompatImageButton;
@@ -40,6 +41,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
     TextInputEditText itemName, itemSize, itemQty, itemPrice;
     AppCompatImageButton plusOne, minusOne;
     SearchView searchView;
+    TextView noResult;
     CollectionReference colRef = FirebaseFirestore.getInstance().collection("stocks");
     private ArrayList<StockModel> stockList;
     private StockAdapter adapter;
@@ -57,23 +59,42 @@ public class InventoryFragment extends Fragment implements StockListeners {
         recyclerView = view.findViewById(R.id.stock_view);
         addButton = view.findViewById(R.id.add_stock);
         searchView = view.findViewById(R.id.stock_search);
+        noResult = view.findViewById(R.id.no_result);
         stockList = new ArrayList<>();
 
+        searchView.clearFocus();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filterStocks(newText);
+                return false;
+            }
+        });
 
         addButton.setOnClickListener(v -> popUp());
 
         return view;
     }
 
+    private void filterStocks(String newText) {
+        ArrayList<StockModel> filteredList = new ArrayList<>();
+        for (StockModel item : stockList)
+            if (item.getItemName().toLowerCase().contains(newText.toLowerCase()) || item.getItemSize().toLowerCase().contains(newText.toLowerCase()))
+                filteredList.add(item);
+        if (filteredList.isEmpty()) noResult.setVisibility(View.VISIBLE);
+        else noResult.setVisibility(View.GONE);
+        adapter.setStocks(filteredList);
+    }
+
     @Override
     public void onStart() {
         super.onStart();
         fetchData();
-    }
-    private void setRecyclerView() {
-        adapter = new StockAdapter(this, SwipeState.LEFT_RIGHT);
-        recyclerView.setLayoutManager(new CustomLinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
-        recyclerView.setAdapter(adapter);
     }
 
     @Override
@@ -87,6 +108,12 @@ public class InventoryFragment extends Fragment implements StockListeners {
     @Override
     public void onRetainSwipe(StockModel item, int position) {
         adapter.retainSwipe(item, position);
+    }
+
+    private void setRecyclerView() {
+        adapter = new StockAdapter(this, SwipeState.LEFT_RIGHT);
+        recyclerView.setLayoutManager(new CustomLinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+        recyclerView.setAdapter(adapter);
     }
 
     @SuppressLint("NotifyDataSetChanged")
