@@ -65,4 +65,11 @@ public class StockAdapter extends RecyclerView.Adapter<StockBaseViewHolder> {
         stocksList.addAll(stocks);
         notifyDataSetChanged();
     }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void setFilteredStocks(ArrayList<StockModel> filteredStocks) {
+        stocksList.clear();
+        stocksList.addAll(filteredStocks);
+        notifyDataSetChanged();
+    }
 }

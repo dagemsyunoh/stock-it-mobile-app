@@ -135,6 +135,7 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
                     dialog.dismiss();
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .setCancelable(false)
                 .create();
         alertDialog.setView(passwordInput);
         alertDialog.show();

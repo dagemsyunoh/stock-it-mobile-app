@@ -135,7 +135,7 @@ public class StockViewHolder extends StockBaseViewHolder {
                 .get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) return;
             colRef.document(task.getResult().getDocuments().get(0).getId())
-                    .update("qty", Double.parseDouble(inputQty.getText().toString()),
+                    .update("qty", Double.parseDouble(qty.getText().toString()),
                             "price", Double.parseDouble(price.getText().toString()));
         });
         returnLayout();

@@ -102,6 +102,7 @@ public class UserViewHolder extends UserBaseViewHolder {
                     switchClicked.setChecked(!switchClicked.isChecked());
                     dialog.dismiss();
                 })
+                .setCancelable(false)
                 .create();
         alertDialog.show();
     }

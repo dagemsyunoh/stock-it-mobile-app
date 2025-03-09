@@ -45,9 +45,6 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int id = item.getItemId();
                 if (LoaderActivity.admin) switch (id) {
-                    case R.id.home:
-                        viewPager2.setCurrentItem(0);
-                        break;
                     case R.id.receipt:
                         viewPager2.setCurrentItem(1);
                         break;
@@ -57,16 +54,21 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
                     case R.id.more:
                         viewPager2.setCurrentItem(3);
                         break;
-                }
-                else switch (id) {
                     case R.id.home:
+                    default:
                         viewPager2.setCurrentItem(0);
                         break;
+                }
+                else switch (id) {
                     case R.id.receipt:
                         viewPager2.setCurrentItem(1);
                         break;
                     case R.id.more:
                         viewPager2.setCurrentItem(2);
+                        break;
+                    case R.id.home:
+                    default:
+                        viewPager2.setCurrentItem(0);
                         break;
                 }
                 return false;
@@ -77,9 +79,6 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
             @Override
             public void onPageSelected(int position) {
                 if (LoaderActivity.admin) switch (position) {
-                    case 0:
-                        bottomNavigationView.getMenu().findItem(R.id.home).setChecked(true);
-                        break;
                     case 1:
                         bottomNavigationView.getMenu().findItem(R.id.receipt).setChecked(true);
                         break;
@@ -89,16 +88,21 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
                     case 3:
                         bottomNavigationView.getMenu().findItem(R.id.more).setChecked(true);
                         break;
-                }
-                else switch (position) {
                     case 0:
+                    default:
                         bottomNavigationView.getMenu().findItem(R.id.home).setChecked(true);
                         break;
+                }
+                else switch (position) {
                     case 1:
                         bottomNavigationView.getMenu().findItem(R.id.receipt).setChecked(true);
                         break;
                     case 2:
                         bottomNavigationView.getMenu().findItem(R.id.more).setChecked(true);
+                        break;
+                    case 0:
+                    default:
+                        bottomNavigationView.getMenu().findItem(R.id.home).setChecked(true);
                         break;
                 }
                 super.onPageSelected(position);
