@@ -10,10 +10,7 @@ TO-DO: <br>
 - add items
 - edit/delete items
 - print
-3. Inventory Fragment (admin only)
-- inventory search function
-- inventory add item
-4. More Fragment
+3. More Fragment
 - settings
 
 DONE: <br>
@@ -29,3 +26,5 @@ DONE: <br>
 - user management (admin)
 - inventory interface
 - stock edit functions
+- inventory search function
+- inventory add item
