@@ -18,6 +18,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.lock.stockit.Models.StockModel;
 import com.lock.stockit.R;
 
+import java.util.Locale;
+
 public class StockViewHolder extends StockBaseViewHolder {
 
 
@@ -50,13 +52,19 @@ public class StockViewHolder extends StockBaseViewHolder {
         leftImage = itemView.findViewById(R.id.button_left);
         rightImage = itemView.findViewById(R.id.button_right);
     }
+
     @Override
     public void bindDataToViewHolder(StockModel item, int position, SwipeState swipeState) {
         //region Input Data
+        String unit;
+        if (item.getItemName().contains("Lumber")) unit = " pcs";
+        else unit = " kg";
+        String qtyText = item.getItemQuantity() + unit;
+        String priceText = "₱" + String.format(Locale.getDefault(), "%.2f", item.getItemPrice());
         itemName.setText(item.getItemName());
         itemSize.setText(item.getItemSize());
-        itemQty.setText(String.valueOf(item.getItemQuantity()));
-        itemPrice.setText(String.valueOf(item.getItemPrice()));
+        itemQty.setText(qtyText);
+        itemPrice.setText(priceText);
 
         inputQty.setText(String.valueOf(item.getItemQuantity()));
         inputPrice.setText(String.valueOf(item.getItemPrice()));

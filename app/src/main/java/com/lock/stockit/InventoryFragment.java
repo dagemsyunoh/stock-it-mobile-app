@@ -163,6 +163,25 @@ public class InventoryFragment extends Fragment implements StockListeners {
         minusOne = addPopUp.findViewById(R.id.add_minus_one);
         addItem = addPopUp.findViewById(R.id.add_item);
 
+        // Auto-capitalize first letter of each word of item name
+        itemName.setOnFocusChangeListener((view, b) -> {
+            String input = String.valueOf(itemName.getText());
+            if (input.isEmpty()) return;
+            String[] words = input.split("\\s");
+            StringBuilder output = new StringBuilder();
+            for (String word : words)
+                output.append(Character.toUpperCase(word.charAt(0)))
+                        .append(word.substring(1).toLowerCase())
+                        .append(" ");
+            itemName.setText(output.toString().trim());
+        });
+        // auto-change item size to lowercase without spaces
+        itemSize.setOnFocusChangeListener((view, b) -> {
+            String input = String.valueOf(itemSize.getText());
+            String output = input.replaceAll("\\s+", "").toLowerCase();
+            itemSize.setText(output);
+        });
+
         plusOne.setOnClickListener(view -> QtyMover.onPlusOne(itemQty));
 
         minusOne.setOnClickListener(view -> QtyMover.onMinusOne(itemQty));
@@ -177,8 +196,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
             if (isInvalid(data)) {
                 Toast.makeText(getActivity(), "Invalid input", Toast.LENGTH_SHORT).show();
                 return;
-            }
-            if (exists(data)) {
+            } if (exists(data)) {
                 Toast.makeText(getActivity(), "Item already exists. Please edit the existing item instead", Toast.LENGTH_SHORT).show();
                 addPopUp.dismiss();
                 return;
