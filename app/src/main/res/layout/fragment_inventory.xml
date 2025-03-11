@@ -30,6 +30,7 @@
             app:iconifiedByDefault="false"
             android:inputType="text"
             app:queryHint="@string/search_item" />
+
         <TextView
             android:id="@+id/no_result"
             android:layout_width="match_parent"
@@ -38,6 +39,7 @@
             android:text="@string/no_results_found"
             android:textSize="20sp"
             android:visibility="gone" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/stock_view"
             android:layout_width="match_parent"
@@ -62,4 +64,5 @@
             android:src="@drawable/ic_add" />
 
     </RelativeLayout>
+
 </FrameLayout>

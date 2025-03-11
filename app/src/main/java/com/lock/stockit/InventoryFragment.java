@@ -94,26 +94,6 @@ public class InventoryFragment extends Fragment implements StockListeners {
         super.onStart();
         fetchData();
     }
-
-    @Override
-    public void onClickLeft(StockModel item, int position) { }
-
-    @Override
-    public void onClickRight(StockModel item, int position) {
-        deleteItem(position);
-    }
-
-    @Override
-    public void onRetainSwipe(StockModel item, int position) {
-        adapter.retainSwipe(item, position);
-    }
-
-    private void setRecyclerView() {
-        adapter = new StockAdapter(this, SwipeState.LEFT_RIGHT);
-        recyclerView.setLayoutManager(new CustomLinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
-        recyclerView.setAdapter(adapter);
-    }
-
     @SuppressLint("NotifyDataSetChanged")
     private void fetchData() {
         colRef.addSnapshotListener((value, error) -> {
@@ -133,6 +113,12 @@ public class InventoryFragment extends Fragment implements StockListeners {
             adapter.setStocks(stockList);
             adapter.notifyDataSetChanged();
         });
+    }
+
+    private void setRecyclerView() {
+        adapter = new StockAdapter(this, SwipeState.LEFT_RIGHT);
+        recyclerView.setLayoutManager(new CustomLinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+        recyclerView.setAdapter(adapter);
     }
 
     private void deleteItem(int pos) {
@@ -239,4 +225,18 @@ public class InventoryFragment extends Fragment implements StockListeners {
         // return true if both name and size exist to prevent duplication
         return nameExists && sizeExists;
     }
+
+    @Override
+    public void onClickLeft(StockModel item, int position) { }
+
+    @Override
+    public void onClickRight(StockModel item, int position) {
+        deleteItem(position);
+    }
+
+    @Override
+    public void onRetainSwipe(StockModel item, int position) {
+        adapter.retainSwipe(item, position);
+    }
+
 }

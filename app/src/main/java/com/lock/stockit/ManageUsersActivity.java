@@ -73,12 +73,6 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
         fetchData();
     }
 
-    private void setRecyclerView() {
-        adapter = new UserAdapter(this, SwipeState.LEFT);
-        recyclerView.setLayoutManager(new CustomLinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        recyclerView.setAdapter(adapter);
-    }
-
     @SuppressLint("NotifyDataSetChanged")
     private void fetchData() {
         colRef.addSnapshotListener((value, error) -> {
@@ -95,6 +89,12 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
             adapter.setUsers(usersList);
             adapter.notifyDataSetChanged();
         });
+    }
+
+    private void setRecyclerView() {
+        adapter = new UserAdapter(this, SwipeState.LEFT);
+        recyclerView.setLayoutManager(new CustomLinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        recyclerView.setAdapter(adapter);
     }
 
     private void reAuth(EditText passwordInput, int pos) {
