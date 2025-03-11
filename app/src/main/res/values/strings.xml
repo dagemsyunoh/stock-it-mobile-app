@@ -42,4 +42,6 @@
     <string name="plus_one">+1</string>
     <string name="minus_one">-1</string>
     <string name="no_results_found">No Results Found</string>
+    <string name="add_item_to_receipt">ADD ITEM TO RECEIPT</string>
+    <string name="click_to_add">Click the add button to add items.</string>
 </resources>
