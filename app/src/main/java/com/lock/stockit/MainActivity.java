@@ -22,11 +22,11 @@ import com.lock.stockit.Adapters.ViewPagerAdapter;
 
 
 public class MainActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
-    ViewPager2 viewPager2;
-    ViewPagerAdapter viewPagerAdapter;
-    BottomNavigationView bottomNavigationView;
-    FirebaseAuth auth = FirebaseAuth.getInstance();
-    DocumentReference docRef = FirebaseFirestore.getInstance().collection("users").document(LoaderActivity.uid);
+    private final FirebaseAuth auth = FirebaseAuth.getInstance();
+    private final DocumentReference docRef = FirebaseFirestore.getInstance().collection("users").document(LoaderActivity.uid);
+    protected ViewPager2 viewPager2;
+    protected ViewPagerAdapter viewPagerAdapter;
+    protected BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

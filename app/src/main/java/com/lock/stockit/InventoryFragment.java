@@ -13,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -36,13 +35,12 @@ import java.util.HashMap;
 
 public class InventoryFragment extends Fragment implements StockListeners {
 
-    RecyclerView recyclerView;
-    FloatingActionButton addButton, addItem;
-    TextInputEditText itemName, itemSize, itemQty, itemPrice;
-    AppCompatImageButton plusOne, minusOne;
-    SearchView searchView;
-    TextView noResult;
-    CollectionReference colRef = FirebaseFirestore.getInstance().collection("stocks");
+    private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("stocks");
+    protected RecyclerView recyclerView;
+    protected FloatingActionButton addButton, addItem, plusOne, minusOne;
+    protected SearchView searchView;
+    private TextInputEditText itemName, itemSize, itemQty, itemPrice;
+    private TextView noResult;
     private ArrayList<StockModel> stockList;
     private StockAdapter adapter;
     private final ArrayList<String> names = new ArrayList<>();
@@ -165,6 +163,25 @@ public class InventoryFragment extends Fragment implements StockListeners {
         minusOne = addPopUp.findViewById(R.id.add_minus_one);
         addItem = addPopUp.findViewById(R.id.add_item);
 
+        // Auto-capitalize first letter of each word of item name
+        itemName.setOnFocusChangeListener((view, b) -> {
+            String input = String.valueOf(itemName.getText());
+            if (input.isEmpty()) return;
+            String[] words = input.split("\\s");
+            StringBuilder output = new StringBuilder();
+            for (String word : words)
+                output.append(Character.toUpperCase(word.charAt(0)))
+                        .append(word.substring(1).toLowerCase())
+                        .append(" ");
+            itemName.setText(output.toString().trim());
+        });
+        // auto-change item size to lowercase without spaces
+        itemSize.setOnFocusChangeListener((view, b) -> {
+            String input = String.valueOf(itemSize.getText());
+            String output = input.replaceAll("\\s+", "").toLowerCase();
+            itemSize.setText(output);
+        });
+
         plusOne.setOnClickListener(view -> QtyMover.onPlusOne(itemQty));
 
         minusOne.setOnClickListener(view -> QtyMover.onMinusOne(itemQty));
@@ -179,9 +196,9 @@ public class InventoryFragment extends Fragment implements StockListeners {
             if (isInvalid(data)) {
                 Toast.makeText(getActivity(), "Invalid input", Toast.LENGTH_SHORT).show();
                 return;
-            }
-            if (exists(data)) {
-                Toast.makeText(getActivity(), "Item already exists", Toast.LENGTH_SHORT).show();
+            } if (exists(data)) {
+                Toast.makeText(getActivity(), "Item already exists. Please edit the existing item instead", Toast.LENGTH_SHORT).show();
+                addPopUp.dismiss();
                 return;
             }
 

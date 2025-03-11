@@ -189,11 +189,14 @@
                     android:orientation="horizontal"
                     android:visibility="gone">
 
-                    <androidx.appcompat.widget.AppCompatImageButton
+                    <com.google.android.material.floatingactionbutton.FloatingActionButton
                         android:id="@+id/plus_one"
-                        android:layout_width="55dp"
-                        android:layout_height="55dp"
-                        android:src="@drawable/ic_add" />
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/plus_one"
+                        android:src="@drawable/ic_add"
+                        app:fabCustomSize="45dp" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="100dp"
@@ -210,11 +213,14 @@
 
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <androidx.appcompat.widget.AppCompatImageButton
+                    <com.google.android.material.floatingactionbutton.FloatingActionButton
                         android:id="@+id/minus_one"
-                        android:layout_width="55dp"
-                        android:layout_height="55dp"
-                        android:src="@drawable/ic_subtract" />
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/minus_one"
+                        android:src="@drawable/ic_subtract"
+                        app:fabCustomSize="45dp" />
 
                 </LinearLayout>
 
@@ -265,14 +271,17 @@
 
             </LinearLayout>
 
-            <androidx.appcompat.widget.AppCompatImageButton
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/save_button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentBottom="true"
+                android:layout_margin="10dp"
+                android:contentDescription="@string/add_item"
                 android:src="@drawable/ic_save"
-                android:visibility="gone" />
+                android:visibility="gone"
+                app:fabCustomSize="48dp" />
         </RelativeLayout>
 
     </androidx.cardview.widget.CardView>

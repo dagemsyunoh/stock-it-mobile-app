@@ -26,15 +26,15 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 public class SignUpActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
-    TextInputEditText editTextEmail, editTextPassword, editTextConfirmPassword;
-    Button buttonSignUp;
-    TextView signIn;
-    FirebaseAuth auth = FirebaseAuth.getInstance();
-    FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-    ProgressBar progressBar;
-    ArrayList<String> emails = new ArrayList<>();
-    static Boolean create = false;
-    boolean emailExists;
+    protected static Boolean create = false;
+    private final FirebaseAuth auth = FirebaseAuth.getInstance();
+    private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+    private final ArrayList<String> emails = new ArrayList<>();
+    protected Button buttonSignUp;
+    protected TextView signIn;
+    protected boolean emailExists;
+    private TextInputEditText editTextEmail, editTextPassword, editTextConfirmPassword;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

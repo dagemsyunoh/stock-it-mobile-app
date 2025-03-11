@@ -8,9 +8,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.cardview.widget.CardView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
@@ -18,20 +18,19 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.lock.stockit.Models.StockModel;
 import com.lock.stockit.R;
 
+import java.util.Locale;
+
 public class StockViewHolder extends StockBaseViewHolder {
 
 
     private final TextView itemName, itemSize, itemQty, itemPrice;
     private final LinearLayout editQty;
     private final TextInputLayout editPrice;
-    AppCompatImageButton plusOne, minusOne;
-    TextInputEditText inputQty;
-    TextInputEditText inputPrice;
-    private final AppCompatImageButton saveButton;
-    private final ImageView leftImage;
-    private final ImageView rightImage;
+    private final TextInputEditText inputQty, inputPrice;
+    private final FloatingActionButton saveButton, plusOne, minusOne;
+    private final ImageView leftImage, rightImage;
     private final CardView cardView;
-    CollectionReference colRef = FirebaseFirestore.getInstance().collection("stocks");
+    private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("stocks");
 
     public StockViewHolder(View itemView, StockListeners customListeners) {
         super(itemView, customListeners);
@@ -53,13 +52,19 @@ public class StockViewHolder extends StockBaseViewHolder {
         leftImage = itemView.findViewById(R.id.button_left);
         rightImage = itemView.findViewById(R.id.button_right);
     }
+
     @Override
     public void bindDataToViewHolder(StockModel item, int position, SwipeState swipeState) {
         //region Input Data
+        String unit;
+        if (item.getItemName().contains("Lumber")) unit = " pcs";
+        else unit = " kg";
+        String qtyText = item.getItemQuantity() + unit;
+        String priceText = "₱" + String.format(Locale.getDefault(), "%.2f", item.getItemPrice());
         itemName.setText(item.getItemName());
         itemSize.setText(item.getItemSize());
-        itemQty.setText(String.valueOf(item.getItemQuantity()));
-        itemPrice.setText(String.valueOf(item.getItemPrice()));
+        itemQty.setText(qtyText);
+        itemPrice.setText(priceText);
 
         inputQty.setText(String.valueOf(item.getItemQuantity()));
         inputPrice.setText(String.valueOf(item.getItemPrice()));

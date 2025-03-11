@@ -21,13 +21,13 @@ import com.google.firebase.auth.FirebaseUser;
 public class InactiveActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
 
     private final Handler handler = new Handler();
-    TextView inactiveText, reload;
-    FirebaseAuth auth = FirebaseAuth.getInstance();
-    FirebaseUser user = auth.getCurrentUser();
-    Button buttonSignOut, buttonResend;
-    int i = 5; //temporary for testing, change back to 30 upon deployment
+    private final FirebaseAuth auth = FirebaseAuth.getInstance();
+    private final FirebaseUser user = auth.getCurrentUser();
+    protected TextView inactiveText, reload;
+    protected Button buttonSignOut, buttonResend;
+    private int i = 5; //temporary for testing, change back to 30 upon deployment
     private Runnable runnable;
-    boolean clicked;
+    private boolean clicked;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

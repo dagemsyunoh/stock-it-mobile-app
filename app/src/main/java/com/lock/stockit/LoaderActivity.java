@@ -24,11 +24,11 @@ import java.util.Map;
 
 public class LoaderActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
 
-    public static String uid;
+    protected static String uid;
     public static boolean admin, activated, verified;
-    FirebaseAuth auth = FirebaseAuth.getInstance();
-    CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
-    FirebaseUser user = auth.getCurrentUser();
+    private final FirebaseAuth auth = FirebaseAuth.getInstance();
+    private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
+    private final FirebaseUser user = auth.getCurrentUser();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

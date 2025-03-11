@@ -10,8 +10,8 @@ import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 
 public class HomeFragment extends Fragment {
-    String type;
-    TextView textView;
+    protected String type;
+    protected TextView textView;
     @SuppressLint("SetTextI18n") //remove later
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

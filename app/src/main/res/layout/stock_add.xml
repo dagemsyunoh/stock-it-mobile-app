@@ -47,6 +47,7 @@
                     android:layout_height="55dp"
                     android:gravity="center"
                     android:hint="@string/item_name"
+                    android:inputType="textCapSentences"
                     android:textSize="15sp" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -83,13 +84,14 @@
                     android:text="@string/stocks"
                     android:textSize="15sp" />
 
-                <androidx.appcompat.widget.AppCompatImageButton
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/add_plus_one"
-                    android:layout_width="55dp"
-                    android:layout_height="55dp"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_gravity="center"
                     android:contentDescription="@string/plus_one"
                     android:src="@drawable/ic_add"
-                    tools:ignore="ImageContrastCheck" />
+                    app:fabCustomSize="45dp" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="100dp"
@@ -105,13 +107,14 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <androidx.appcompat.widget.AppCompatImageButton
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/add_minus_one"
-                    android:layout_width="55dp"
-                    android:layout_height="55dp"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_gravity="center"
                     android:contentDescription="@string/minus_one"
                     android:src="@drawable/ic_subtract"
-                    tools:ignore="ImageContrastCheck" />
+                    app:fabCustomSize="45dp" />
 
 
             </LinearLayout>
@@ -158,8 +161,8 @@
             android:layout_alignParentBottom="true"
             android:layout_margin="10dp"
             android:contentDescription="@string/add_item"
-            android:src="@drawable/ic_add"
-            tools:ignore="ImageContrastCheck" />
+            android:src="@drawable/ic_save"
+            app:fabCustomSize="48dp" />
 
     </RelativeLayout>
 
