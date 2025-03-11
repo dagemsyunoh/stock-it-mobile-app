@@ -36,7 +36,7 @@ import java.util.ArrayList;
 
 public class ManageUsersActivity extends AppCompatActivity implements UserListeners {
 
-    RecyclerView recyclerView;
+    private RecyclerView recyclerView;
     private ArrayList<UserModel> usersList;
     private UserAdapter adapter;
 

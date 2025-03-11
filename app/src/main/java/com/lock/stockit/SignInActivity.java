@@ -20,11 +20,11 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class SignInActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
-    TextInputEditText editTextEmail, editTextPassword;
-    Button buttonSignIn;
-    TextView signUp;
-    FirebaseAuth auth = FirebaseAuth.getInstance();
-    ProgressBar progressBar;
+    private final FirebaseAuth auth = FirebaseAuth.getInstance();
+    protected Button buttonSignIn;
+    protected TextView signUp;
+    private TextInputEditText editTextEmail, editTextPassword;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

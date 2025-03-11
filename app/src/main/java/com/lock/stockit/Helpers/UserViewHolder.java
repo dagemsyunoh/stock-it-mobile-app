@@ -22,7 +22,7 @@ public class UserViewHolder extends UserBaseViewHolder {
     private final SwitchCompat admin, activated;
     private final ImageView rightImage;
     private final CardView cardView;
-    CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
+    private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
 
     public UserViewHolder(View itemView, UserListeners customListeners) {
         super(itemView, customListeners);

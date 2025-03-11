@@ -8,9 +8,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.cardview.widget.CardView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
@@ -24,14 +24,11 @@ public class StockViewHolder extends StockBaseViewHolder {
     private final TextView itemName, itemSize, itemQty, itemPrice;
     private final LinearLayout editQty;
     private final TextInputLayout editPrice;
-    AppCompatImageButton plusOne, minusOne;
-    TextInputEditText inputQty;
-    TextInputEditText inputPrice;
-    private final AppCompatImageButton saveButton;
-    private final ImageView leftImage;
-    private final ImageView rightImage;
+    private final TextInputEditText inputQty, inputPrice;
+    private final FloatingActionButton saveButton, plusOne, minusOne;
+    private final ImageView leftImage, rightImage;
     private final CardView cardView;
-    CollectionReference colRef = FirebaseFirestore.getInstance().collection("stocks");
+    private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("stocks");
 
     public StockViewHolder(View itemView, StockListeners customListeners) {
         super(itemView, customListeners);

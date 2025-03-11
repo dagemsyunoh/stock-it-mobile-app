@@ -13,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -36,13 +35,12 @@ import java.util.HashMap;
 
 public class InventoryFragment extends Fragment implements StockListeners {
 
-    RecyclerView recyclerView;
-    FloatingActionButton addButton, addItem;
-    TextInputEditText itemName, itemSize, itemQty, itemPrice;
-    AppCompatImageButton plusOne, minusOne;
-    SearchView searchView;
-    TextView noResult;
-    CollectionReference colRef = FirebaseFirestore.getInstance().collection("stocks");
+    private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("stocks");
+    protected RecyclerView recyclerView;
+    protected FloatingActionButton addButton, addItem, plusOne, minusOne;
+    protected SearchView searchView;
+    private TextInputEditText itemName, itemSize, itemQty, itemPrice;
+    private TextView noResult;
     private ArrayList<StockModel> stockList;
     private StockAdapter adapter;
     private final ArrayList<String> names = new ArrayList<>();
@@ -181,7 +179,8 @@ public class InventoryFragment extends Fragment implements StockListeners {
                 return;
             }
             if (exists(data)) {
-                Toast.makeText(getActivity(), "Item already exists", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Item already exists. Please edit the existing item instead", Toast.LENGTH_SHORT).show();
+                addPopUp.dismiss();
                 return;
             }
 

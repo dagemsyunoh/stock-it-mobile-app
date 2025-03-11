@@ -14,10 +14,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class MoreFragment extends Fragment {
-    FirebaseAuth auth = FirebaseAuth.getInstance();
-    Button buttonManage, buttonChangeEmail, buttonChangePassword, buttonSignOUt;
-    TextView emailUser;
-    FirebaseUser user = auth.getCurrentUser();
+    private final FirebaseAuth auth = FirebaseAuth.getInstance();
+    private final FirebaseUser user = auth.getCurrentUser();
+    protected Button buttonManage, buttonChangeEmail, buttonChangePassword, buttonSignOUt;
+    private TextView emailUser;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
