@@ -80,13 +80,13 @@ abstract public class UserBaseViewHolder extends RecyclerView.ViewHolder {
     protected SwipeState getSwipeState(Float currentLead, Float currentTrail, SwipeState swipeState) {
         if (swipeState == SwipeState.LEFT && currentLead < cardViewLeading && currentTrail < cardViewTrailEdge)
             return SwipeState.LEFT;
-        else if (swipeState == SwipeState.RIGHT && currentLead > cardViewLeadEdge && currentTrail > cardViewTrailing)
+        if (swipeState == SwipeState.RIGHT && currentLead > cardViewLeadEdge && currentTrail > cardViewTrailing)
             return SwipeState.RIGHT;
-        else if (swipeState == SwipeState.LEFT_RIGHT && currentLead < cardViewLeading && currentTrail < cardViewTrailEdge)
+        if (swipeState == SwipeState.LEFT_RIGHT && currentLead < cardViewLeading && currentTrail < cardViewTrailEdge)
             return SwipeState.LEFT;
-        else if (swipeState == SwipeState.LEFT_RIGHT && currentLead > cardViewLeadEdge && currentTrail > cardViewTrailing)
+        if (swipeState == SwipeState.LEFT_RIGHT && currentLead > cardViewLeadEdge && currentTrail > cardViewTrailing)
             return SwipeState.RIGHT;
-        else return SwipeState.NONE;
+        return SwipeState.NONE;
     }
 
     protected Float onSwipeUp(SwipeState swipeState) {

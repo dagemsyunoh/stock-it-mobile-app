@@ -5,6 +5,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.cardview.widget.CardView;
 
@@ -34,10 +35,8 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
         itemQty = itemView.findViewById(R.id.qty);
         itemUnitPrice = itemView.findViewById(R.id.unit_price_val_text);
         itemTotalPrice = itemView.findViewById(R.id.total_price_val_text);
-
         plusOne = itemView.findViewById(R.id.plus_one);
         minusOne = itemView.findViewById(R.id.minus_one);
-
         cardView = itemView.findViewById(R.id.card_view);
         rightImage = itemView.findViewById(R.id.button_right);
     }
@@ -73,6 +72,10 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
 
         minusOne.setOnClickListener(view -> {
             QtyMover.onMinusOne(itemQty);
+            if (Integer.parseInt(itemQty.getText().toString()) == 1) {
+                Toast.makeText(cardView.getContext(), "Quantity cannot be less than 1. Please delete the item instead.", Toast.LENGTH_SHORT).show();
+                return;
+            }
             itemTotalPrice.setText(String.valueOf(Double.parseDouble(String.valueOf(itemQty.getText())) * item.getItemUnitPrice()));
         });
 
@@ -86,7 +89,6 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
                     view.getParent().requestDisallowInterceptTouchEvent(false);
                     dXLead = view.getX() - event.getRawX();
                     dXTrail = view.getRight() - event.getRawX();
-
                     return false;
                 case MotionEvent.ACTION_MOVE:
                     view.getParent().requestDisallowInterceptTouchEvent(true);
@@ -99,7 +101,7 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
                     onAnimate(view, onSwipeUp(item.getState()), 250L);
                     return false;
                 case MotionEvent.ACTION_CANCEL:
-                    view.getParent().requestDisallowInterceptTouchEvent(false); // to
+                    view.getParent().requestDisallowInterceptTouchEvent(false);
                     return false;
                 default:
                     return true;

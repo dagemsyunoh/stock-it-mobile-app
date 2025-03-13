@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -74,7 +75,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
             }
         });
 
-        addButton.setOnClickListener(v -> popUp());
+        addButton.setOnClickListener(v -> addItemPopUp());
 
         return view;
     }
@@ -134,7 +135,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
         });
     }
 
-    private void popUp() {
+    private void addItemPopUp() {
         Dialog addPopUp = new Dialog(getActivity());
         addPopUp.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         addPopUp.setContentView(R.layout.stock_add);
@@ -145,6 +146,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
         itemQty = addPopUp.findViewById(R.id.add_qty);
         itemPrice = addPopUp.findViewById(R.id.add_price);
 
+        AppCompatImageView back = addPopUp.findViewById(R.id.back);
         plusOne = addPopUp.findViewById(R.id.add_plus_one);
         minusOne = addPopUp.findViewById(R.id.add_minus_one);
         addItem = addPopUp.findViewById(R.id.add_item);
@@ -170,7 +172,11 @@ public class InventoryFragment extends Fragment implements StockListeners {
 
         plusOne.setOnClickListener(view -> QtyMover.onPlusOne(itemQty));
 
-        minusOne.setOnClickListener(view -> QtyMover.onMinusOne(itemQty));
+        minusOne.setOnClickListener(view -> {
+            QtyMover.onMinusOne(itemQty);
+            if (Integer.parseInt(itemQty.getText().toString()) == 1)
+                Toast.makeText(getActivity(), "Quantity cannot be less than 1", Toast.LENGTH_SHORT).show();
+        });
 
         addItem.setOnClickListener(view -> {
             HashMap<String, Object> data = new HashMap<>();
@@ -194,6 +200,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
             }).addOnFailureListener(e -> Toast.makeText(getActivity(), "Error adding item", Toast.LENGTH_SHORT).show());
         });
 
+        back.setOnClickListener(v -> addPopUp.cancel());
     }
 
     private boolean isInvalid(HashMap<String, Object> data) {

@@ -67,11 +67,14 @@ public class UserViewHolder extends UserBaseViewHolder {
                 case MotionEvent.ACTION_MOVE:
                     view.getParent().requestDisallowInterceptTouchEvent(true);
                     getListener().onRetainSwipe(item, position);
-                    onAnimate(view, onSwipeMove(event.getRawX() + dXLead, event.getRawX() + dXTrail,swipeState), 0L);
+                    onAnimate(view, onSwipeMove(event.getRawX() + dXLead, event.getRawX() + dXTrail,swipeState), 250L);
                     item.setState(getSwipeState(event.getRawX() + dXLead, event.getRawX() + dXTrail, swipeState));
                     return false;
                 case MotionEvent.ACTION_UP:
                     onAnimate(view, onSwipeUp(item.getState()), 250L);
+                    return false;
+                case MotionEvent.ACTION_CANCEL:
+                    view.getParent().requestDisallowInterceptTouchEvent(false);
                     return false;
                 default:
                     return true;

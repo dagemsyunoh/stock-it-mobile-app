@@ -2,13 +2,11 @@
 
 TO-DO: <br>
 1. Home Fragment
-- printer conection
+- printer connection
+- print format
 - history log (admin)
 - daily sales (?)
 2. Receipt Fragment
-- searchbox
-- add items
-- edit/delete items
 - print
 3. More Fragment
 - settings
@@ -28,3 +26,5 @@ DONE: <br>
 - stock edit functions
 - inventory search function
 - inventory add item
+- add items
+- edit/delete items

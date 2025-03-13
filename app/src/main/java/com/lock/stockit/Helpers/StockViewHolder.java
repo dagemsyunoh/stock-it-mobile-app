@@ -38,15 +38,12 @@ public class StockViewHolder extends StockBaseViewHolder {
         itemSize = itemView.findViewById(R.id.size_text);
         itemQty = itemView.findViewById(R.id.qty_val_text);
         itemPrice = itemView.findViewById(R.id.price_val_text);
-
         editQty = itemView.findViewById(R.id.qty_edit);
         editPrice = itemView.findViewById(R.id.price_edit);
-
         plusOne = itemView.findViewById(R.id.plus_one);
         minusOne = itemView.findViewById(R.id.minus_one);
         inputQty = itemView.findViewById(R.id.qty);
         inputPrice = itemView.findViewById(R.id.price);
-
         saveButton = itemView.findViewById(R.id.save_button);
         cardView = itemView.findViewById(R.id.card_view);
         leftImage = itemView.findViewById(R.id.button_left);
@@ -65,7 +62,6 @@ public class StockViewHolder extends StockBaseViewHolder {
         itemSize.setText(item.getItemSize());
         itemQty.setText(qtyText);
         itemPrice.setText(priceText);
-
         inputQty.setText(String.valueOf(item.getItemQuantity()));
         inputPrice.setText(String.valueOf(item.getItemPrice()));
         editQty.setVisibility(View.GONE);
@@ -91,7 +87,11 @@ public class StockViewHolder extends StockBaseViewHolder {
 
         plusOne.setOnClickListener(view -> QtyMover.onPlusOne(inputQty));
 
-        minusOne.setOnClickListener(view -> QtyMover.onMinusOne(inputQty));
+        minusOne.setOnClickListener(view -> {
+            QtyMover.onMinusOne(inputQty);
+            if (Integer.parseInt(itemQty.getText().toString()) == 1)
+                Toast.makeText(cardView.getContext(), "Quantity cannot be less than 1. Please delete the item instead.", Toast.LENGTH_SHORT).show();
+        });
 
         cardView.setOnClickListener(view -> { }); // Do not remove, it is required for the swipe to work
         //endregion
@@ -103,7 +103,6 @@ public class StockViewHolder extends StockBaseViewHolder {
                     view.getParent().requestDisallowInterceptTouchEvent(false);
                     dXLead = view.getX() - event.getRawX();
                     dXTrail = view.getRight() - event.getRawX();
-
                     return false;
                 case MotionEvent.ACTION_MOVE:
                     view.getParent().requestDisallowInterceptTouchEvent(true);
@@ -116,7 +115,7 @@ public class StockViewHolder extends StockBaseViewHolder {
                     onAnimate(view, onSwipeUp(item.getState()), 250L);
                     return false;
                 case MotionEvent.ACTION_CANCEL:
-                    view.getParent().requestDisallowInterceptTouchEvent(false); // to
+                    view.getParent().requestDisallowInterceptTouchEvent(false);
                     return false;
                 default:
                     return true;
