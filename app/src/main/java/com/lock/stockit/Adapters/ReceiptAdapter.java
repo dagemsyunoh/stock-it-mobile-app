@@ -65,11 +65,4 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptBaseViewHolder> 
         receiptsList.addAll(receipts);
         notifyDataSetChanged();
     }
-
-    @SuppressLint("NotifyDataSetChanged")
-    public void setFilteredReceipts(ArrayList<ReceiptModel> filteredReceipts) {
-        receiptsList.clear();
-        receiptsList.addAll(filteredReceipts);
-        notifyDataSetChanged();
-    }
 }

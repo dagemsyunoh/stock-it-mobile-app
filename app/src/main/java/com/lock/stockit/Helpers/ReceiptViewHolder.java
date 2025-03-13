@@ -71,11 +71,11 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
         });
 
         minusOne.setOnClickListener(view -> {
-            QtyMover.onMinusOne(itemQty);
             if (Integer.parseInt(itemQty.getText().toString()) == 1) {
                 Toast.makeText(cardView.getContext(), "Quantity cannot be less than 1. Please delete the item instead.", Toast.LENGTH_SHORT).show();
                 return;
             }
+            QtyMover.onMinusOne(itemQty);
             itemTotalPrice.setText(String.valueOf(Double.parseDouble(String.valueOf(itemQty.getText())) * item.getItemUnitPrice()));
         });
 

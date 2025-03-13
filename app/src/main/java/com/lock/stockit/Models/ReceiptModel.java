@@ -1,8 +1,13 @@
 package com.lock.stockit.Models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
+
 import com.lock.stockit.Helpers.SwipeState;
 
-public class ReceiptModel {
+public class ReceiptModel implements Parcelable {
     private String itemName;
     private String itemSize;
     private  int itemQty;
@@ -27,6 +32,27 @@ public class ReceiptModel {
         this.setItemTotalPrice(itemTotalPrice);
         this.setState(state);
     }
+
+    public static final Creator<ReceiptModel> CREATOR = new Creator<>() {
+        @Override
+        public ReceiptModel createFromParcel(Parcel in) {
+            return new ReceiptModel(in);
+        }
+
+        @Override
+        public ReceiptModel[] newArray(int size) {
+            return new ReceiptModel[size];
+        }
+    };
+
+    protected ReceiptModel(Parcel in) {
+        itemName = in.readString();
+        itemSize = in.readString();
+        itemQty = in.readInt();
+        itemUnitPrice = in.readDouble();
+        itemTotalPrice = in.readDouble();
+    }
+
     public String getItemName() {
         return itemName;
     }
@@ -74,4 +100,17 @@ public class ReceiptModel {
         this.state = state;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeString(itemName);
+        dest.writeString(itemSize);
+        dest.writeInt(itemQty);
+        dest.writeDouble(itemUnitPrice);
+        dest.writeDouble(itemTotalPrice);
+    }
 }

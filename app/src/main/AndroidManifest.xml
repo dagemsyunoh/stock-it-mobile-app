@@ -15,6 +15,9 @@
         android:theme="@style/Theme.StockIt"
         tools:targetApi="31">
         <activity
+            android:name=".PrintPreviewActivity"
+            android:exported="false" />
+        <activity
             android:name=".ChangeActivity"
             android:exported="false" />
         <activity

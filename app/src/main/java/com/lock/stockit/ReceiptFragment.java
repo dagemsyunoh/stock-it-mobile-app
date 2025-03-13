@@ -1,5 +1,8 @@
 package com.lock.stockit;
 
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
+
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
@@ -7,15 +10,18 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -49,7 +55,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private final ArrayList<Double> grandTotal = new ArrayList<>();
     private final String[] item = new String[5];
     protected RecyclerView recyclerView;
-    protected FloatingActionButton addButton, saveButton, plusOne, minusOne;
+    protected FloatingActionButton addButton, printButton, saveButton, plusOne, minusOne;
     private NumberPicker itemName, itemSize;
     private TextInputEditText itemQty;
     private TextView title, itemUnitPrice, itemTotalPrice, noItem, grandTotalPrice;
@@ -57,6 +63,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private ArrayList<ReceiptModel> receiptList;
     private ReceiptAdapter adapter;
     private int transactionNo = 1, flag;
+    ActivityResultLauncher<Intent> launcher;
 
     public static Intent newIntent(Context context) {
         return new Intent(context, ReceiptListeners.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -69,16 +76,20 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         title = view.findViewById(R.id.receipt_title);
         recyclerView = view.findViewById(R.id.receipt_view);
         addButton = view.findViewById(R.id.add_button);
+        printButton = view.findViewById(R.id.print_button);
         noItem = view.findViewById(R.id.no_item);
         grandTotalLayout = view.findViewById(R.id.grand_total_layout);
         grandTotalPrice = view.findViewById(R.id.grand_total_val);
         receiptList = new ArrayList<>();
+        initializeLauncher();
 
-        addButton.setOnClickListener(v -> popUp());
+        addButton.setOnClickListener(v -> addItemPopUp());
+
+        printButton.setOnClickListener(v -> printPreview());
 
         return view;
     }
-    
+
     @Override
     public void onStart() {
         super.onStart();
@@ -99,13 +110,13 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     }
 
     private void setRecyclerView() {
-        adapter = new ReceiptAdapter(this, SwipeState.LEFT_RIGHT);
+        adapter = new ReceiptAdapter(this, SwipeState.LEFT);
         recyclerView.setLayoutManager(new CustomLinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(adapter);
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private void popUp() {
+    private void addItemPopUp() {
         Dialog addPopUp = new Dialog(getActivity());
         addPopUp.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         addPopUp.setContentView(R.layout.receipt_add);
@@ -146,11 +157,24 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
 
         minusOne.setOnClickListener(view -> {
             QtyMover.onMinusOne(itemQty);
+            if (Integer.parseInt(itemQty.getText().toString()) == 1) {
+                Toast.makeText(getActivity(), "Quantity cannot be less than 1", Toast.LENGTH_SHORT).show();
+                return;
+            }
             setItem();
         });
 
         saveButton.setOnClickListener(v -> {
+            if (itemQty.getText() == null || itemQty.getText().toString().isEmpty() || Integer.parseInt(itemQty.getText().toString()) == 0) {
+                Toast.makeText(getActivity(), "Please enter quantity", Toast.LENGTH_SHORT).show();
+                return;
+            }
             setItem();
+            for (ReceiptModel receipt : receiptList)
+                if (receipt.getItemName().equals(item[0]) && receipt.getItemSize().equals(item[1])) {
+                    Toast.makeText(getActivity(), "Item already exists", Toast.LENGTH_SHORT).show();
+                    return;
+                }
             receiptList.add(new ReceiptModel(item[0], item[1], Integer.parseInt(item[2]), Double.parseDouble(item[3]), Double.parseDouble(item[4])));
             setLayout(!receiptList.isEmpty());
             getSum();
@@ -163,15 +187,51 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         back.setOnClickListener(v -> addPopUp.cancel());
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    private void initializeLauncher() {
+        launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK) {
+                Toast.makeText(getActivity(), "Print successful", Toast.LENGTH_SHORT).show();
+            }
+            if (result.getResultCode() == RESULT_CANCELED) {
+                receiptList.clear();
+                receiptList.addAll(result.getData().getExtras().getParcelableArrayList("receiptList"));
+                getSum();
+                adapter.setReceipts(receiptList);
+                adapter.notifyDataSetChanged();
+                setLayout(!receiptList.isEmpty());
+                Toast.makeText(getActivity(), "Print cancelled", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void printPreview() {
+        Intent i = new Intent(getActivity(), PrintPreviewActivity.class);
+        i.putExtra("receiptList", receiptList);
+        launcher.launch(i);
+    }
+
     private void setLayout(boolean show) {
+        int mDp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15, getResources().getDisplayMetrics());
         if (show) {
             grandTotalLayout.setVisibility(View.VISIBLE);
             noItem.setVisibility(View.INVISIBLE);
             recyclerView.setVisibility(View.VISIBLE);
+            // print button layout
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) printButton.getLayoutParams();
+            layoutParams.height = RelativeLayout.LayoutParams.WRAP_CONTENT;
+            layoutParams.setMargins(mDp, mDp, mDp, mDp);
+            printButton.setLayoutParams(layoutParams);
+
         } else {
             grandTotalLayout.setVisibility(View.INVISIBLE);
             noItem.setVisibility(View.VISIBLE);
             recyclerView.setVisibility(View.INVISIBLE);
+            // print button layout
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) printButton.getLayoutParams();
+            layoutParams.height = 0;
+            layoutParams.setMargins(mDp, 0, mDp, mDp);
+            printButton.setLayoutParams(layoutParams);
         }
     }
 
@@ -253,7 +313,6 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         if (!item[4].isEmpty()) grandTotal.add(Double.parseDouble(item[4]));
         for (Double total : grandTotal) {
             sum += total;
-            Log.d("TAG", String.valueOf(sum));
         }
         String sumText = "₱" + String.format(Locale.getDefault(), "%.2f", sum);
         grandTotalPrice.setText(sumText);

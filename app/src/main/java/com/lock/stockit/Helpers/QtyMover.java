@@ -9,6 +9,6 @@ public class QtyMover {
     }
     public static void onMinusOne(TextInputEditText inputQty) {
         int qty = Integer.parseInt(inputQty.getText().toString());
-        if (qty > 0) inputQty.setText(String.valueOf(qty - 1));
+        if (qty > 1) inputQty.setText(String.valueOf(qty - 1));
     }
 }
