@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.lock.stockit.Adapters.ReceiptAdapter;
@@ -47,13 +48,14 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
 
     private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("receipts");
     private final CollectionReference colRefStock = FirebaseFirestore.getInstance().collection("stocks");
+    private final DocumentReference docRef = FirebaseFirestore.getInstance().collection("format").document("store info");
     protected RecyclerView recyclerView;
     protected FloatingActionButton addButton, printButton, saveButton, plusOne, minusOne;
     private NumberPicker itemName, itemSize;
     private TextInputEditText itemQty;
     private TextView title, itemUnitPrice, itemTotalPrice, noItem, grandTotalPrice;
     private LinearLayout grandTotalLayout;
-    private ArrayList<ReceiptModel> receiptList;
+    private final ArrayList<ReceiptModel> receiptList = new ArrayList<>();
     private ReceiptAdapter adapter;
     private final ArrayList<String> names = new ArrayList<>();
     private final ArrayList<String> namesUnique = new ArrayList<>();
@@ -63,6 +65,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private final ArrayList<Double> unitPrice = new ArrayList<>();
     private final ArrayList<Double> grandTotal = new ArrayList<>();
     private final String[] item = new String[5];
+    private final ArrayList<String> header = new ArrayList<>();
     private int transactionNo = 1, flag;
     ActivityResultLauncher<Intent> launcher;
     private boolean cancelled, recyclerViewFlag = true;
@@ -81,7 +84,6 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         noItem = view.findViewById(R.id.no_item);
         grandTotalLayout = view.findViewById(R.id.grand_total_layout);
         grandTotalPrice = view.findViewById(R.id.grand_total_val);
-        receiptList = new ArrayList<>();
         initializeLauncher();
         cancelled = false;
 
@@ -97,6 +99,19 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         super.onStart();
         fetchData();
         fetchTransNo();
+        fetchHeader();
+    }
+
+    private void fetchHeader() {
+        docRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                header.clear();
+                header.add(documentSnapshot.getString("name"));
+                header.add(documentSnapshot.getString("address 1"));
+                header.add(documentSnapshot.getString("address 2"));
+                header.add(documentSnapshot.getString("contact"));
+            }
+        });
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -182,7 +197,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
                     return;
                 }
             receiptList.add(new ReceiptModel(item[0], item[1], Integer.parseInt(item[2]), Double.parseDouble(item[3]), Double.parseDouble(item[4])));
-            setLayout(!receiptList.isEmpty());
+            setLayout(true);
             getSum();
             for (int i = 0; i < 5; i++) item[i] = "";
             adapter.setReceipts(receiptList);
@@ -214,6 +229,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private void printPreview() {
         Intent i = new Intent(getActivity(), PrintPreviewActivity.class);
         i.putExtra("receiptList", receiptList);
+        i.putExtra("header", header);
         launcher.launch(i);
     }
 

@@ -11,13 +11,18 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.lock.stockit.Models.ReceiptModel;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class PrintPreviewActivity extends AppCompatActivity {
+    private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("format");
     private TextView printHeader, printBody, printFooter;
     private String header, body, footer;
+    private ArrayList<String> headerArray;
     private ArrayList<ReceiptModel> receiptList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +36,7 @@ public class PrintPreviewActivity extends AppCompatActivity {
         Button cancelButton = findViewById(R.id.cancel_button);
         Button printButton = findViewById(R.id.print_button);
         receiptList = getIntent().getExtras().getParcelableArrayList("receiptList");
+        headerArray = getIntent().getExtras().getStringArrayList("header");
 
         getHeaderBodyFooter();
         setHeaderBodyFooter();
@@ -62,20 +68,31 @@ public class PrintPreviewActivity extends AppCompatActivity {
     }
 
     private void getHeaderBodyFooter() {
-        header = "Header";
+        header = getHeader();
         body = getBody();
-        footer = "Footer";
+        footer = "footer";
+    }
+
+    private String getHeader() {
+        StringBuilder text = new StringBuilder();
+        for (String s : headerArray) text.append(s.toUpperCase()).append("\n");
+        return text.toString();
     }
 
     private String getBody() {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder text = new StringBuilder();
         for (ReceiptModel receipt : receiptList) {
-            builder.append(receipt.getItemName()).append(" ")
-                    .append(receipt.getItemSize()).append(" ")
-                    .append(receipt.getItemQuantity()).append(" ")
-                    .append(receipt.getItemUnitPrice()).append(" ")
-                    .append(receipt.getItemTotalPrice()).append(" \n");
+            String row1 = String.format(Locale.US, "%-22s %10.2f",
+                    receipt.getItemName().toUpperCase(),
+                    receipt.getItemTotalPrice());
+
+            String row2 = String.format(Locale.US, "     %-6s     %4d @ %8.2f",
+                    receipt.getItemSize(),
+                    receipt.getItemQuantity(),
+                    receipt.getItemUnitPrice());
+            text.append(row1).append("\n")
+                    .append(row2).append("\n");
         }
-        return builder.toString();
+        return text.toString();
     }
 }
