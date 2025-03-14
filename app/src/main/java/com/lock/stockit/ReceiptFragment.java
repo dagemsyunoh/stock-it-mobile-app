@@ -44,16 +44,9 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 public class ReceiptFragment extends Fragment implements ReceiptListeners {
+
     private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("receipts");
     private final CollectionReference colRefStock = FirebaseFirestore.getInstance().collection("stocks");
-    private final ArrayList<String> names = new ArrayList<>();
-    private final ArrayList<String> namesUnique = new ArrayList<>();
-    private final ArrayList<String> sizes = new ArrayList<>();
-    private final ArrayList<String> sizesUnique = new ArrayList<>();
-    private final ArrayList<Integer> qty = new ArrayList<>();
-    private final ArrayList<Double> unitPrice = new ArrayList<>();
-    private final ArrayList<Double> grandTotal = new ArrayList<>();
-    private final String[] item = new String[5];
     protected RecyclerView recyclerView;
     protected FloatingActionButton addButton, printButton, saveButton, plusOne, minusOne;
     private NumberPicker itemName, itemSize;
@@ -62,9 +55,17 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private LinearLayout grandTotalLayout;
     private ArrayList<ReceiptModel> receiptList;
     private ReceiptAdapter adapter;
+    private final ArrayList<String> names = new ArrayList<>();
+    private final ArrayList<String> namesUnique = new ArrayList<>();
+    private final ArrayList<String> sizes = new ArrayList<>();
+    private final ArrayList<String> sizesUnique = new ArrayList<>();
+    private final ArrayList<Integer> qty = new ArrayList<>();
+    private final ArrayList<Double> unitPrice = new ArrayList<>();
+    private final ArrayList<Double> grandTotal = new ArrayList<>();
+    private final String[] item = new String[5];
     private int transactionNo = 1, flag;
     ActivityResultLauncher<Intent> launcher;
-
+    private boolean cancelled, recyclerViewFlag = true;
     public static Intent newIntent(Context context) {
         return new Intent(context, ReceiptListeners.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
     }
@@ -82,6 +83,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         grandTotalPrice = view.findViewById(R.id.grand_total_val);
         receiptList = new ArrayList<>();
         initializeLauncher();
+        cancelled = false;
 
         addButton.setOnClickListener(v -> addItemPopUp());
 
@@ -97,14 +99,18 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         fetchTransNo();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void fetchTransNo() {
         colRef.addSnapshotListener((value, error) -> {
             if (error != null || value == null) return;
-            receiptList.clear();
+            if (!cancelled) receiptList.clear();
             for (DocumentSnapshot documentSnapshot : value.getDocuments()) transactionNo++;
             String titleText = "Receipt #" + transactionNo;
             title.setText(titleText);
-            setRecyclerView();
+            while (recyclerViewFlag) {
+                setRecyclerView();
+                recyclerViewFlag = false;
+            }
             setLayout(!receiptList.isEmpty());
         });
     }
@@ -199,7 +205,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
                 getSum();
                 adapter.setReceipts(receiptList);
                 adapter.notifyDataSetChanged();
-                setLayout(!receiptList.isEmpty());
+                cancelled = true;
                 Toast.makeText(getActivity(), "Print cancelled", Toast.LENGTH_SHORT).show();
             }
         });
@@ -251,7 +257,6 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
 
     @SuppressLint("NotifyDataSetChanged")
     private void fetchData() {
-        // to fetch data for number pickers
         colRefStock.addSnapshotListener((value, error) -> {
             if (error != null || value == null) return;
             names.clear();
@@ -330,6 +335,6 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
 
     @Override
     public void onRetainSwipe(ReceiptModel item, int position) {
-
+        adapter.retainSwipe(item, position);
     }
 }

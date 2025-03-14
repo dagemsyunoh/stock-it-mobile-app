@@ -83,6 +83,7 @@ public class StockViewHolder extends StockBaseViewHolder {
             });
             rightImage.setOnClickListener(view -> getListener().onClickRight(item, position));
         }
+
         saveButton.setOnClickListener(view -> updateData(inputQty, inputPrice));
 
         plusOne.setOnClickListener(view -> QtyMover.onPlusOne(inputQty));

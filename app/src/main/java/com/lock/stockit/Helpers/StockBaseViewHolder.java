@@ -17,9 +17,7 @@ import com.lock.stockit.Models.StockModel;
 
 abstract public class StockBaseViewHolder extends RecyclerView.ViewHolder {
 
-    /** Main */
     private final StockListeners stockListeners;
-    /** On Swipe */
     private final WindowManager windowManager;
     private final Float cardViewLeading;
     private final Float cardViewLeadEdge;

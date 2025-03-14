@@ -21,13 +21,13 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptBaseViewHolder> 
 
     private final ReceiptListeners receiptListeners;
     private final SwipeState swipeState;
-    private final ArrayList<ReceiptModel> receiptsList;
+    private final ArrayList<ReceiptModel> receiptList;
 
     public ReceiptAdapter(ReceiptListeners receiptListeners, SwipeState swipeState) {
         super();
         this.receiptListeners = receiptListeners;
         this.swipeState = swipeState;
-        receiptsList = new ArrayList<>();
+        receiptList = new ArrayList<>();
     }
 
     @NonNull @Override
@@ -39,30 +39,30 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptBaseViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull ReceiptBaseViewHolder holder, int position) {
-        holder.bindDataToViewHolder(receiptsList.get(position), position, swipeState);
+        holder.bindDataToViewHolder(receiptList.get(position), position, swipeState);
     }
 
     @Override
-    public int getItemCount() { return receiptsList.size(); }
+    public int getItemCount() { return receiptList.size(); }
 
     public void retainSwipe(ReceiptModel model, int position) {
         // Check if swipe is enabled in the current state
-        final boolean isEnabled = swipeState == SwipeState.LEFT || swipeState == SwipeState.RIGHT || swipeState == SwipeState.LEFT_RIGHT;
+        final boolean isEnabled = (swipeState == SwipeState.LEFT || swipeState == SwipeState.RIGHT || swipeState == SwipeState.LEFT_RIGHT);
         // If swipe is enabled, reset the swipe state for other cells
         if (!isEnabled) return;
         for (int index = 0; index < getItemCount(); index++) {
-            final boolean isNotSwiped = receiptsList.get(index).getState() != SwipeState.NONE;
+            final boolean isNotSwiped = receiptList.get(index).getState() != SwipeState.NONE;
             if (index != position && isNotSwiped) {
-                receiptsList.get(index).setState(SwipeState.NONE);
+                receiptList.get(index).setState(SwipeState.NONE);
                 notifyItemChanged(index);
             }
         }
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void setReceipts(ArrayList<ReceiptModel> receipts) {
-        receiptsList.clear();
-        receiptsList.addAll(receipts);
+    public void setReceipts(ArrayList<ReceiptModel> receipt) {
+        receiptList.clear();
+        receiptList.addAll(receipt);
         notifyDataSetChanged();
     }
 }

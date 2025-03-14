@@ -47,7 +47,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserBaseViewHolder> {
 
     public void retainSwipe(UserModel model, int position) {
         // Check if swipe is enabled in the current state
-        final boolean isEnabled = swipeState == SwipeState.LEFT || swipeState == SwipeState.RIGHT || swipeState == SwipeState.LEFT_RIGHT;
+        final boolean isEnabled = (swipeState == SwipeState.LEFT || swipeState == SwipeState.RIGHT || swipeState == SwipeState.LEFT_RIGHT);
         // If swipe is enabled, reset the swipe state for other cells
         if (!isEnabled) return;
         for (int index = 0; index < getItemCount(); index++) {

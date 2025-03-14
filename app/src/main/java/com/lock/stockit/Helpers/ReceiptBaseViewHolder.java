@@ -17,9 +17,7 @@ import com.lock.stockit.Models.ReceiptModel;
 
 abstract public class ReceiptBaseViewHolder extends RecyclerView.ViewHolder {
 
-    /** Main */
     private final ReceiptListeners receiptListeners;
-    /** On Swipe */
     private final WindowManager windowManager;
     private final Float cardViewLeading;
     private final Float cardViewLeadEdge;

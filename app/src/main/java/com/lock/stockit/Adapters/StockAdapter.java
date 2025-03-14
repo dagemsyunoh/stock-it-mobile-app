@@ -21,13 +21,13 @@ public class StockAdapter extends RecyclerView.Adapter<StockBaseViewHolder> {
 
     private final StockListeners stockListeners;
     private final SwipeState swipeState;
-    private final ArrayList<StockModel> stocksList;
+    private final ArrayList<StockModel> stockList;
 
     public StockAdapter(StockListeners stockListeners, SwipeState swipeState) {
         super();
         this.stockListeners = stockListeners;
         this.swipeState = swipeState;
-        stocksList = new ArrayList<>();
+        stockList = new ArrayList<>();
     }
 
     @NonNull @Override
@@ -39,37 +39,37 @@ public class StockAdapter extends RecyclerView.Adapter<StockBaseViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull StockBaseViewHolder holder, int position) {
-        holder.bindDataToViewHolder(stocksList.get(position), position, swipeState);
+        holder.bindDataToViewHolder(stockList.get(position), position, swipeState);
     }
 
     @Override
-    public int getItemCount() { return stocksList.size(); }
+    public int getItemCount() { return stockList.size(); }
 
     public void retainSwipe(StockModel model, int position) {
         // Check if swipe is enabled in the current state
-        final boolean isEnabled = swipeState == SwipeState.LEFT || swipeState == SwipeState.RIGHT || swipeState == SwipeState.LEFT_RIGHT;
+        final boolean isEnabled = (swipeState == SwipeState.LEFT || swipeState == SwipeState.RIGHT || swipeState == SwipeState.LEFT_RIGHT);
         // If swipe is enabled, reset the swipe state for other cells
         if (!isEnabled) return;
         for (int index = 0; index < getItemCount(); index++) {
-            final boolean isNotSwiped = stocksList.get(index).getState() != SwipeState.NONE;
+            final boolean isNotSwiped = stockList.get(index).getState() != SwipeState.NONE;
             if (index != position && isNotSwiped) {
-                stocksList.get(index).setState(SwipeState.NONE);
+                stockList.get(index).setState(SwipeState.NONE);
                 notifyItemChanged(index);
             }
         }
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void setStocks(ArrayList<StockModel> stocks) {
-        stocksList.clear();
-        stocksList.addAll(stocks);
+    public void setStocks(ArrayList<StockModel> stock) {
+        stockList.clear();
+        stockList.addAll(stock);
         notifyDataSetChanged();
     }
 
     @SuppressLint("NotifyDataSetChanged")
     public void setFilteredStocks(ArrayList<StockModel> filteredStocks) {
-        stocksList.clear();
-        stocksList.addAll(filteredStocks);
+        stockList.clear();
+        stockList.addAll(filteredStocks);
         notifyDataSetChanged();
     }
 }

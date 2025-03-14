@@ -100,7 +100,6 @@ public class InventoryFragment extends Fragment implements StockListeners {
         colRef.addSnapshotListener((value, error) -> {
             if (error != null || value == null) return;
             stockList.clear();
-
             for (DocumentSnapshot documentSnapshot : value.getDocuments()) {
                 String name = documentSnapshot.getString("item name");
                 String size = documentSnapshot.getString("item size");
