@@ -17,10 +17,18 @@
         android:text="@string/add_item_to_receipt"
         android:textSize="20sp"
         android:textStyle="bold" />
+    <TextView
+        android:id="@+id/printer_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/header"
+        android:layout_margin="15dp"
+        android:gravity="center"
+        android:textSize="15sp" />
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/header"
+        android:layout_below="@+id/printer_name"
         android:layout_margin="15dp"
         android:backgroundTint="@color/design_default_color_background">
         <LinearLayout

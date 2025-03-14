@@ -25,34 +25,6 @@ import java.util.Set;
 public class DeviceListActivity extends Activity {
     protected static final String TAG = "TAG";
     private BluetoothAdapter mBluetoothAdapter;
-    private final OnItemClickListener mDeviceClickListener = new OnItemClickListener() {
-        public void onItemClick(AdapterView<?> mAdapterView, View mView, int mPosition, long mLong) {
-
-            try {
-                checkForPermission();
-                mBluetoothAdapter.cancelDiscovery();
-                String mDeviceInfo = ((TextView) mView).getText().toString();
-                String mDeviceAddress = mDeviceInfo.substring(mDeviceInfo.length() - 17);
-                String mDeviceName = mDeviceInfo.substring(0, mDeviceInfo.length() - 17);
-                Log.v(TAG, "Device_Address " + mDeviceAddress);
-
-                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putString("bluetooth_printer", mDeviceAddress); //
-                editor.putString("bluetooth_name", mDeviceName);
-                editor.apply();
-
-                Bundle mBundle = new Bundle();
-                mBundle.putString("DeviceAddress", mDeviceAddress);
-                Intent mBackIntent = new Intent();
-                mBackIntent.putExtras(mBundle);
-                setResult(Activity.RESULT_OK, mBackIntent);
-                finish();
-            } catch (Exception ex) {
-                Log.e(TAG, "Exception Code: ", ex);
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle mSavedInstanceState) {
@@ -115,5 +87,34 @@ public class DeviceListActivity extends Activity {
             mBluetoothAdapter.cancelDiscovery();
         }
     }
+
+    private final OnItemClickListener mDeviceClickListener = new OnItemClickListener() {
+        public void onItemClick(AdapterView<?> mAdapterView, View mView, int mPosition, long mLong) {
+
+            try {
+                checkForPermission();
+                mBluetoothAdapter.cancelDiscovery();
+                String mDeviceInfo = ((TextView) mView).getText().toString();
+                String mDeviceAddress = mDeviceInfo.substring(mDeviceInfo.length() - 17);
+                String mDeviceName = mDeviceInfo.substring(0, mDeviceInfo.length() - 17);
+                Log.v(TAG, "Device_Address " + mDeviceAddress);
+
+                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putString("bluetooth_address", mDeviceAddress); //
+                editor.putString("bluetooth_name", mDeviceName);
+                editor.apply();
+
+                Bundle mBundle = new Bundle();
+                mBundle.putString("DeviceAddress", mDeviceAddress);
+                Intent mBackIntent = new Intent();
+                mBackIntent.putExtras(mBundle);
+                setResult(Activity.RESULT_OK, mBackIntent);
+                finish();
+            } catch (Exception ex) {
+                Log.e(TAG, "Exception Code: ", ex);
+            }
+        }
+    };
 
 }
