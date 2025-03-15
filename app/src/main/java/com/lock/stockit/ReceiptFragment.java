@@ -4,16 +4,19 @@ import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
@@ -30,12 +33,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.lock.stockit.Adapters.ReceiptAdapter;
 import com.lock.stockit.Helpers.CustomLinearLayoutManager;
 import com.lock.stockit.Helpers.QtyMover;
 import com.lock.stockit.Helpers.ReceiptListeners;
+import com.lock.stockit.Helpers.SecurePreferences;
 import com.lock.stockit.Helpers.SwipeState;
 import com.lock.stockit.Helpers.sizeComparator;
 import com.lock.stockit.Models.ReceiptModel;
@@ -47,13 +52,14 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
 
     private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("receipts");
     private final CollectionReference colRefStock = FirebaseFirestore.getInstance().collection("stocks");
+    private final DocumentReference docRef = FirebaseFirestore.getInstance().collection("format").document("store info");
     protected RecyclerView recyclerView;
     protected FloatingActionButton addButton, printButton, saveButton, plusOne, minusOne;
     private NumberPicker itemName, itemSize;
     private TextInputEditText itemQty;
     private TextView title, itemUnitPrice, itemTotalPrice, noItem, grandTotalPrice;
     private LinearLayout grandTotalLayout;
-    private ArrayList<ReceiptModel> receiptList;
+    private final ArrayList<ReceiptModel> receiptList = new ArrayList<>();
     private ReceiptAdapter adapter;
     private final ArrayList<String> names = new ArrayList<>();
     private final ArrayList<String> namesUnique = new ArrayList<>();
@@ -63,9 +69,13 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private final ArrayList<Double> unitPrice = new ArrayList<>();
     private final ArrayList<Double> grandTotal = new ArrayList<>();
     private final String[] item = new String[5];
-    private int transactionNo = 1, flag;
+    private final ArrayList<String> header = new ArrayList<>();
+    private int transactionNo, flag;
     ActivityResultLauncher<Intent> launcher;
     private boolean cancelled, recyclerViewFlag = true;
+    private String invoice;
+    private double cash = 0, sum;
+
     public static Intent newIntent(Context context) {
         return new Intent(context, ReceiptListeners.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
     }
@@ -81,7 +91,6 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         noItem = view.findViewById(R.id.no_item);
         grandTotalLayout = view.findViewById(R.id.grand_total_layout);
         grandTotalPrice = view.findViewById(R.id.grand_total_val);
-        receiptList = new ArrayList<>();
         initializeLauncher();
         cancelled = false;
 
@@ -97,21 +106,41 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         super.onStart();
         fetchData();
         fetchTransNo();
+        fetchHeader();
+    }
+
+    private void fetchHeader() {
+        docRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                header.clear();
+                header.add(documentSnapshot.getString("name"));
+                header.add(documentSnapshot.getString("address 1"));
+                header.add(documentSnapshot.getString("address 2"));
+                header.add(documentSnapshot.getString("contact"));
+                SecurePreferences preferences = new SecurePreferences(getActivity().getApplicationContext(), "store-preferences", "store-key", true);
+                preferences.put("name", header.get(0));
+                preferences.put("address 1", header.get(1));
+                preferences.put("address 2", header.get(2));
+                preferences.put("contact", header.get(3));
+            }
+        });
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private void fetchTransNo() {
-        colRef.addSnapshotListener((value, error) -> {
-            if (error != null || value == null) return;
-            if (!cancelled) receiptList.clear();
-            for (DocumentSnapshot documentSnapshot : value.getDocuments()) transactionNo++;
-            String titleText = "Receipt #" + transactionNo;
-            title.setText(titleText);
-            while (recyclerViewFlag) {
-                setRecyclerView();
-                recyclerViewFlag = false;
+        transactionNo = 1;
+        colRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                if (!cancelled) receiptList.clear();
+                for (DocumentSnapshot documentSnapshot : task.getResult().getDocuments())
+                    transactionNo++;
+                invoice = "INVOICE #" + transactionNo;
+                title.setText(invoice);
+                while (recyclerViewFlag) {
+                    setRecyclerView();
+                    recyclerViewFlag = false;
+                }
             }
-            setLayout(!receiptList.isEmpty());
         });
     }
 
@@ -148,7 +177,10 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
 
         itemName.setOnValueChangedListener((np, oldPos, newPos) -> changeSizeValues(newPos));
 
-        itemSize.setOnValueChangedListener((np, oldPos, newPos) -> setItem());
+        itemSize.setOnValueChangedListener((np, oldPos, newPos) -> {
+            itemQty.setText(String.valueOf(0));
+            setItem();
+        });
 
         itemQty.setOnFocusChangeListener((view, b) -> {
             if (checkStock()) return;
@@ -182,7 +214,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
                     return;
                 }
             receiptList.add(new ReceiptModel(item[0], item[1], Integer.parseInt(item[2]), Double.parseDouble(item[3]), Double.parseDouble(item[4])));
-            setLayout(!receiptList.isEmpty());
+            setLayout(true);
             getSum();
             for (int i = 0; i < 5; i++) item[i] = "";
             adapter.setReceipts(receiptList);
@@ -198,6 +230,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK) {
                 Toast.makeText(getActivity(), "Print successful", Toast.LENGTH_SHORT).show();
+                grandTotal.clear();
             }
             if (result.getResultCode() == RESULT_CANCELED) {
                 receiptList.clear();
@@ -214,7 +247,31 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private void printPreview() {
         Intent i = new Intent(getActivity(), PrintPreviewActivity.class);
         i.putExtra("receiptList", receiptList);
-        launcher.launch(i);
+        i.putExtra("invoice", invoice);
+
+        EditText input = new EditText(getActivity());
+        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Print Receipt");
+        builder.setMessage("Input Cash Amount");
+        builder.setView(input);
+        builder.setCancelable(true);
+        builder.setPositiveButton("Print", (dialog, which) -> {
+            if (input.getText().toString().isEmpty()) {
+                Toast.makeText(getActivity(), "Please enter cash amount", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (Double.parseDouble(input.getText().toString()) < sum) {
+                Toast.makeText(getActivity(), "Cash amount cannot be less than total amount", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            cash = Double.parseDouble(String.format(Locale.getDefault(), "%.2f", Double.parseDouble(input.getText().toString())));
+            i.putExtra("cash", cash);
+            dialog.dismiss();
+            launcher.launch(i);
+                });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        builder.show();
     }
 
     private void setLayout(boolean show) {
@@ -252,6 +309,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         sizesUnique.sort(new sizeComparator());
         String[] sizeDisplay = sizesUnique.toArray(new String[0]);
         setNumberPicker(itemSize, sizeDisplay, sizesUnique);
+        itemQty.setText(String.valueOf(0));
         setItem();
     }
 
@@ -314,11 +372,12 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     }
 
     private void getSum() {
-        Double sum = 0.0;
+        sum = 0.0;
         if (!item[4].isEmpty()) grandTotal.add(Double.parseDouble(item[4]));
         for (Double total : grandTotal) {
             sum += total;
         }
+
         String sumText = "₱" + String.format(Locale.getDefault(), "%.2f", sum);
         grandTotalPrice.setText(sumText);
     }
