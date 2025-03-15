@@ -4,12 +4,17 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -33,20 +38,27 @@ import com.lock.stockit.Helpers.UserListeners;
 import com.lock.stockit.Models.UserModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ManageUsersActivity extends AppCompatActivity implements UserListeners {
 
     private RecyclerView recyclerView;
     private ArrayList<UserModel> usersList;
     private UserAdapter adapter;
-
-    public static Intent newIntent(Context context) {
-        return new Intent(context, ManageUsersActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    }
-    ExtendedFloatingActionButton buttonBack;
-    CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
-    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-    AuthCredential credential;
+    private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
+    private final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    protected ExtendedFloatingActionButton buttonBack;
+    protected AuthCredential credential;
+    private AlertDialog dialog;
+    private final Handler mHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            dialog.dismiss();
+            Toast.makeText(ManageUsersActivity.this, "User deleted.", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,6 +127,11 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
                 });
     }
 
+    /** @noinspection unused*/
+    public static Intent newIntent(Context context) {
+        return new Intent(context, ManageUsersActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    }
+
     private void alertPassword(int position, boolean again) {
         final EditText passwordInput = new EditText(this);
         passwordInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
@@ -130,9 +147,17 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
                 .setIcon(R.drawable.ic_warning)
                 .setTitle("Warning! User Deletion")
                 .setMessage(message)
-                .setPositiveButton("Delete User", (dialog, which) -> {
+                .setPositiveButton("Delete User", (d, which) -> {
                     reAuth(passwordInput, position);
-                    dialog.dismiss();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setCancelable(false);
+                    builder.setView(R.layout.loading_dialog);
+                    dialog = builder.create();
+                    dialog.show();
+                    TextView loadingText = dialog.findViewById(R.id.loading_dialog_text);
+                    String show = "Deleting User " + usersList.get(position).getEmail();
+                    loadingText.setText(show);
+                    d.dismiss();
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .setCancelable(false)
@@ -141,15 +166,25 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
         alertDialog.show();
     }
 
+    public void run() {
+        try {
+
+            mHandler.sendEmptyMessage(0);
+        } catch (Exception e) {
+            Log.e("Error", e.getMessage());
+        }
+    }
+
     private void deleteUser(int pos) {
         String email = usersList.get(pos).getEmail();
-        colRef.addSnapshotListener((value, error) -> {
-            if (error != null || value == null) return;
-            for (DocumentSnapshot documentSnapshot : value.getDocuments())
-                if (documentSnapshot.getString("email").equals(email)) {
-                    documentSnapshot.getReference().delete();
-                    Toast.makeText(ManageUsersActivity.this, "User Deleted", Toast.LENGTH_SHORT).show();
-                }
+        Map<String, Object> data = new HashMap<>();
+        data.put("pending delete", true);
+        colRef.whereEqualTo("email", email).get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) return;
+            String uid = task.getResult().getDocuments().get(0).getId();
+            colRef.document(task.getResult().getDocuments().get(0).getId()).delete();
+            FirebaseFirestore.getInstance().collection("bin").document(email).set(data);
+            dialog.dismiss();
         });
     }
 
@@ -157,7 +192,6 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
     public void onClickRight(UserModel item, int position) {
         alertPassword(position, false);
     }
-
 
     @Override
     public void onRetainSwipe(UserModel item, int position) {

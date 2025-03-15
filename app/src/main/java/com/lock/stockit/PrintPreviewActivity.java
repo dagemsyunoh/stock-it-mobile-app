@@ -59,6 +59,10 @@ public class PrintPreviewActivity extends Activity implements Runnable {
     private BluetoothSocket mBluetoothSocket;
     private AlertDialog dialog;
     private BluetoothDevice mBluetoothDevice;
+    private OutputStream os;
+    private double cash, total;
+    private boolean isConnected = false;
+
     private final Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
@@ -70,63 +74,6 @@ public class PrintPreviewActivity extends Activity implements Runnable {
             return true;
         }
     });
-    private OutputStream os;
-    private double cash, total;
-    private boolean isConnected = false;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_print_preview);
-
-        checkForPermission();
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        String savedPrinterAddress = sharedPreferences.getString("bluetooth_address", null);
-        checkSavedDevice(savedPrinterAddress);
-
-        printerName = findViewById(R.id.printer_name);
-        printHeader = findViewById(R.id.print_header);
-        printBody = findViewById(R.id.print_body);
-        printFooter = findViewById(R.id.print_footer);
-        Button cancelButton = findViewById(R.id.cancel_button);
-        Button printButton = findViewById(R.id.print_button);
-        receiptList = getIntent().getExtras().getParcelableArrayList("receiptList");
-        invoice = getIntent().getExtras().getString("invoice");
-        cash = getIntent().getExtras().getDouble("cash");
-
-        getHeaderBodyFooter();
-        setHeaderBodyFooter();
-
-        cancelButton.setOnClickListener(v -> onBackPressed());
-
-        printButton.setOnClickListener(v -> {
-            Thread t = new Thread() {
-                public void run() {
-                    try {
-                        os = mBluetoothSocket.getOutputStream();
-
-                        printConfig(header, 1, 1);
-                        printConfig(body, 1, 0);
-                        printConfig(getFooter(),  1, 1);
-
-                    } catch (Exception e) {
-                        Log.e("MainActivity", "Exe ", e);
-                    }
-                }
-            };
-            t.start();
-            saveReceipt();
-            Intent i = new Intent(this, ReceiptFragment.class);
-            setResult(RESULT_OK);
-            finish();
-        });
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-    }
 
     private void saveReceipt() {
         ArrayList<String> items = new ArrayList<>();
@@ -329,8 +276,60 @@ public class PrintPreviewActivity extends Activity implements Runnable {
         }
     }
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_print_preview);
 
-    protected void printConfig(String bill, int style, int align) {
+        checkForPermission();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        String savedPrinterAddress = sharedPreferences.getString("bluetooth_address", null);
+        checkSavedDevice(savedPrinterAddress);
+
+        printerName = findViewById(R.id.printer_name);
+        printHeader = findViewById(R.id.print_header);
+        printBody = findViewById(R.id.print_body);
+        printFooter = findViewById(R.id.print_footer);
+        Button cancelButton = findViewById(R.id.cancel_button);
+        Button printButton = findViewById(R.id.print_button);
+        receiptList = getIntent().getExtras().getParcelableArrayList("receiptList");
+        invoice = getIntent().getExtras().getString("invoice");
+        cash = getIntent().getExtras().getDouble("cash");
+
+        getHeaderBodyFooter();
+        setHeaderBodyFooter();
+
+        cancelButton.setOnClickListener(v -> onBackPressed());
+
+        printButton.setOnClickListener(v -> {
+            Thread t = new Thread() {
+                public void run() {
+                    try {
+                        os = mBluetoothSocket.getOutputStream();
+
+                        printConfig(header, 1);
+                        printConfig(body, 0);
+                        printConfig(getFooter(), 1);
+
+                    } catch (Exception e) {
+                        Log.e("MainActivity", "Exe ", e);
+                    }
+                }
+            };
+            t.start();
+            saveReceipt();
+            setResult(RESULT_OK);
+            finish();
+        });
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+    }
+
+    protected void printConfig(String bill, int align) {
         //size 1 = large, size 2 = medium, size 3 = small
         //style 1 = Regular, style 2 = Bold
         //align 0 = left, align 1 = center, align 2 = right
@@ -338,15 +337,8 @@ public class PrintPreviewActivity extends Activity implements Runnable {
         try {
 
             byte[] format = new byte[]{27,33, 0};
-            byte[] change = new byte[]{27,33, 0};
 
             os.write(format);
-
-            //different sizes, same style Regular
-            if(style==2) {
-                change[2] = (byte) (0x8);
-                os.write(change);
-            }
 
             switch (align) {
                 case 0:

@@ -90,7 +90,7 @@ public class StockViewHolder extends StockBaseViewHolder {
 
         minusOne.setOnClickListener(view -> {
             QtyMover.onMinusOne(inputQty);
-            if (Integer.parseInt(itemQty.getText().toString()) == 1)
+            if (Integer.parseInt(inputQty.getText().toString()) == 1)
                 Toast.makeText(cardView.getContext(), "Quantity cannot be less than 1. Please delete the item instead.", Toast.LENGTH_SHORT).show();
         });
 

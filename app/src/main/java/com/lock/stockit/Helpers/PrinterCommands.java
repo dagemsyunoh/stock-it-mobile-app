@@ -1,5 +1,6 @@
 package com.lock.stockit.Helpers;
 
+/** @noinspection unused, unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused , unused */
 public class PrinterCommands {
     public static final byte HT = 0x9;
     public static final byte LF = 0x0A;
@@ -23,8 +24,8 @@ public class PrinterCommands {
     public static final byte[] ESC_ALIGN_CENTER = new byte[]{0x1b, 'a', 0x01};
     public static final byte[] ESC_CANCEL_BOLD = new byte[]{0x1B, 0x45, 0};
     /*********************************************/
-    public static final byte[] ESC_HORIZONTAL_CENTERS = new byte[]{0x1B, 0x44, 20, 28, 00};
-    public static final byte[] ESC_CANCEL_HORIZONTAL_CENTERS = new byte[]{0x1B, 0x44, 00};
+    public static final byte[] ESC_HORIZONTAL_CENTERS = new byte[]{0x1B, 0x44, 20, 28, 0};
+    public static final byte[] ESC_CANCEL_HORIZONTAL_CENTERS = new byte[]{0x1B, 0x44, 0};
     /*********************************************/
 
     public static final byte[] ESC_ENTER = new byte[]{0x1B, 0x4A, 0x40};

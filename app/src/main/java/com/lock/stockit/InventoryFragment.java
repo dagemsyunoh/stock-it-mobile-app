@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +48,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
     private final ArrayList<String> names = new ArrayList<>();
     private final ArrayList<String> sizes = new ArrayList<>();
 
+    /** @noinspection unused*/
     public static Intent newIntent(Context context) {
         return new Intent(context, InventoryFragment.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
     }
@@ -233,7 +235,9 @@ public class InventoryFragment extends Fragment implements StockListeners {
     }
 
     @Override
-    public void onClickLeft(StockModel item, int position) { }
+    public void onClickLeft(StockModel item, int position) {
+        Log.e("TAG", "Position: " + position);
+    }
 
     @Override
     public void onClickRight(StockModel item, int position) {

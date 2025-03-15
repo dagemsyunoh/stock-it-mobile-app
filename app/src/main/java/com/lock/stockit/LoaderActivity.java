@@ -19,9 +19,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class LoaderActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
 
     protected static String uid;
@@ -40,13 +37,6 @@ public class LoaderActivity extends AppCompatActivity implements FirebaseAuth.Au
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-    }
-    private void data_create(String email, DocumentReference docRef) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("activated", false);
-        data.put("admin", false);
-        data.put("email", email);
-        docRef.set(data);
     }
 
     private void delayLoad(DocumentReference docRef) {
@@ -76,12 +66,6 @@ public class LoaderActivity extends AppCompatActivity implements FirebaseAuth.Au
         finish();
     }
 
-    private void newUser(DocumentReference docRef) {
-        if (SignUpActivity.create) {
-            data_create(user.getEmail(), docRef);
-            SignUpActivity.create = false;
-        }
-    }
 
     @Override
     protected void onStart() {
@@ -106,7 +90,6 @@ public class LoaderActivity extends AppCompatActivity implements FirebaseAuth.Au
         }
         uid = user.getUid();
         DocumentReference docRef = colRef.document(uid);
-        newUser(docRef);
         docRef.update("email", user.getEmail());
 
         delayLoad(docRef);

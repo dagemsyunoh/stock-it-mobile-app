@@ -51,10 +51,18 @@ public class SignInActivity extends AppCompatActivity implements FirebaseAuth.Au
         });
 
         buttonSignIn.setOnClickListener(v -> {
-            progressBar.setVisibility(View.VISIBLE);
             String email, password;
             email = String.valueOf(editTextEmail.getText());
             password = String.valueOf(editTextPassword.getText());
+            if (TextUtils.isEmpty(email)) {
+                editTextEmail.setError("Email is required.");
+                return;
+            }
+            if (TextUtils.isEmpty(password)) {
+                editTextPassword.setError("Password is required.");
+                return;
+            }
+            progressBar.setVisibility(View.VISIBLE);
             authUser(email, password);
         });
 
@@ -72,13 +80,18 @@ public class SignInActivity extends AppCompatActivity implements FirebaseAuth.Au
     }
 
     private void authUser(String email, String password) {
+        buttonSignIn.setActivated(false);
+        signUp.setClickable(false);
         auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     progressBar.setVisibility(View.GONE);
-                    if (task.isSuccessful())
+                    if (task.isSuccessful()) {
                         Toast.makeText(SignInActivity.this, "Sign in successful.", Toast.LENGTH_SHORT).show();
-                    else
-                        Toast.makeText(SignInActivity.this, "Incorrect email or password. Please try again.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    Toast.makeText(SignInActivity.this, "Incorrect email or password. Please try again.", Toast.LENGTH_SHORT).show();
+                    buttonSignIn.setActivated(true);
+                    signUp.setClickable(true);
                 });
     }
 

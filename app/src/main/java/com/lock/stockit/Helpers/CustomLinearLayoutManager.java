@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class CustomLinearLayoutManager extends LinearLayoutManager {
 
+    /** @noinspection unused*/
     public CustomLinearLayoutManager(Context context) {
         super(context);
     }
@@ -20,6 +21,7 @@ public class CustomLinearLayoutManager extends LinearLayoutManager {
         super(context, orientation, reverseLayout);
     }
 
+    /** @noinspection unused*/
     public CustomLinearLayoutManager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
@@ -29,10 +31,11 @@ public class CustomLinearLayoutManager extends LinearLayoutManager {
         //super.smoothScrollToPosition(recyclerView, state, position);
         LinearSmoothScroller linearSmoothScroller = new LinearSmoothScroller(recyclerView.getContext()) {
 
-            private static final float MILLISECONDS_PER_INCH = 500f;
+//            private static final float MILLISECONDS_PER_INCH = 500f;
             private static final float DISTANCE_IN_PIXELS = 500f;
             private static final float DURATION = 500f;
 
+            /** @noinspection EmptyMethod*/
             @Override
             protected int getHorizontalSnapPreference() {
                 return super.getHorizontalSnapPreference();
