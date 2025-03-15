@@ -70,7 +70,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private final ArrayList<Double> grandTotal = new ArrayList<>();
     private final String[] item = new String[5];
     private final ArrayList<String> header = new ArrayList<>();
-    private int transactionNo = 1, flag;
+    private int transactionNo, flag;
     ActivityResultLauncher<Intent> launcher;
     private boolean cancelled, recyclerViewFlag = true;
     private String invoice;
@@ -128,17 +128,19 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
 
     @SuppressLint("NotifyDataSetChanged")
     private void fetchTransNo() {
-        colRef.addSnapshotListener((value, error) -> {
-            if (error != null || value == null) return;
-            if (!cancelled) receiptList.clear();
-            for (DocumentSnapshot documentSnapshot : value.getDocuments()) transactionNo++;
-            invoice = "INVOICE #" + transactionNo;
-            title.setText(invoice);
-            while (recyclerViewFlag) {
-                setRecyclerView();
-                recyclerViewFlag = false;
+        transactionNo = 1;
+        colRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                if (!cancelled) receiptList.clear();
+                for (DocumentSnapshot documentSnapshot : task.getResult().getDocuments())
+                    transactionNo++;
+                invoice = "INVOICE #" + transactionNo;
+                title.setText(invoice);
+                while (recyclerViewFlag) {
+                    setRecyclerView();
+                    recyclerViewFlag = false;
+                }
             }
-            setLayout(!receiptList.isEmpty());
         });
     }
 
@@ -175,7 +177,10 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
 
         itemName.setOnValueChangedListener((np, oldPos, newPos) -> changeSizeValues(newPos));
 
-        itemSize.setOnValueChangedListener((np, oldPos, newPos) -> setItem());
+        itemSize.setOnValueChangedListener((np, oldPos, newPos) -> {
+            itemQty.setText(String.valueOf(0));
+            setItem();
+        });
 
         itemQty.setOnFocusChangeListener((view, b) -> {
             if (checkStock()) return;
@@ -225,6 +230,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK) {
                 Toast.makeText(getActivity(), "Print successful", Toast.LENGTH_SHORT).show();
+                grandTotal.clear();
             }
             if (result.getResultCode() == RESULT_CANCELED) {
                 receiptList.clear();
@@ -303,6 +309,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         sizesUnique.sort(new sizeComparator());
         String[] sizeDisplay = sizesUnique.toArray(new String[0]);
         setNumberPicker(itemSize, sizeDisplay, sizesUnique);
+        itemQty.setText(String.valueOf(0));
         setItem();
     }
 

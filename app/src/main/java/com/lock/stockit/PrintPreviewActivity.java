@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,29 +33,32 @@ import com.lock.stockit.Models.ReceiptModel;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 public class PrintPreviewActivity extends Activity implements Runnable {
-    private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("format");
+    private final CollectionReference receiptRef = FirebaseFirestore.getInstance().collection("receipts");
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2,CONNECTION_TIMEOUT = 5000; // 5 seconds
     private final String separator = "-".repeat(32);
     private final ArrayList<String> headerList = new ArrayList<>();
     private ArrayList<ReceiptModel> receiptList;
-    private String header, body, footer, invoice;
+    private final DecimalFormat df = new DecimalFormat("#.00");
     private final UUID applicationUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-    Button mScan, mPrint, mDisc;
-    BluetoothAdapter mBluetoothAdapter;
-    BluetoothDevice mBluetoothDevice;
+    private String header, body, footer, invoice, dateTime;
+    private BluetoothAdapter mBluetoothAdapter;
     private TextView printerName, printHeader, printBody, printFooter;
     private BluetoothSocket mBluetoothSocket;
     private AlertDialog dialog;
+    private BluetoothDevice mBluetoothDevice;
     private final Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
@@ -67,7 +71,7 @@ public class PrintPreviewActivity extends Activity implements Runnable {
         }
     });
     private OutputStream os;
-    private Double cash;
+    private double cash, total;
     private boolean isConnected = false;
 
     @Override
@@ -101,9 +105,9 @@ public class PrintPreviewActivity extends Activity implements Runnable {
                     try {
                         os = mBluetoothSocket.getOutputStream();
 
-                        printConfig(header, 2, 1, 1);
-                        printConfig(body, 2, 1, 0);
-                        printConfig(getFooter(), 2, 1, 1);
+                        printConfig(header, 1, 1);
+                        printConfig(body, 1, 0);
+                        printConfig(getFooter(),  1, 1);
 
                     } catch (Exception e) {
                         Log.e("MainActivity", "Exe ", e);
@@ -111,6 +115,7 @@ public class PrintPreviewActivity extends Activity implements Runnable {
                 }
             };
             t.start();
+            saveReceipt();
             Intent i = new Intent(this, ReceiptFragment.class);
             setResult(RESULT_OK);
             finish();
@@ -121,6 +126,25 @@ public class PrintPreviewActivity extends Activity implements Runnable {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    private void saveReceipt() {
+        ArrayList<String> items = new ArrayList<>();
+        for (ReceiptModel val : receiptList) {
+         items.add(val.getItemName() + " " + val.getItemSize() + ", " + val.getItemQuantity() + " pcs");
+        }
+        Map<String, Object> receiptMap = new HashMap<>();
+        receiptMap.put("invoice no", invoice);
+        receiptMap.put("date-time", dateTime);
+        receiptMap.put("total", total);
+        receiptMap.put("amount rendered cash", cash);
+        receiptMap.put("items", items);
+        receiptMap.put("change", cash - total);
+        try {
+            receiptRef.add(receiptMap);
+        } catch (Exception e) {
+            Log.e("TAG", "Error Code " + e);
+        }
     }
 
     private void checkForPermission() {
@@ -193,14 +217,18 @@ public class PrintPreviewActivity extends Activity implements Runnable {
             case REQUEST_ENABLE_BT:
                 if (mResultCode == Activity.RESULT_OK) {
                     ListPairedDevices();
-                    Intent connectIntent = new Intent(PrintPreviewActivity.this,
-                            DeviceListActivity.class);
-                    startActivityForResult(connectIntent, REQUEST_CONNECT_DEVICE);
+                    launchDeviceList();
                 } else {
                     Toast.makeText(PrintPreviewActivity.this, "Message", Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
+    }
+
+    private void launchDeviceList() {
+        Intent connectIntent = new Intent(PrintPreviewActivity.this,
+                DeviceListActivity.class);
+        startActivityForResult(connectIntent, REQUEST_CONNECT_DEVICE);
     }
 
     private void ListPairedDevices() {
@@ -266,6 +294,7 @@ public class PrintPreviewActivity extends Activity implements Runnable {
                         dialog.dismiss();
                         closeSocket(mBluetoothSocket);
                         Toast.makeText(PrintPreviewActivity.this, "Connection Timeout", Toast.LENGTH_SHORT).show();
+                        launchDeviceList();
                     });
                 }
             } catch (InterruptedException e) {
@@ -301,7 +330,7 @@ public class PrintPreviewActivity extends Activity implements Runnable {
     }
 
 
-    protected void printConfig(String bill, int size, int style, int align) {
+    protected void printConfig(String bill, int style, int align) {
         //size 1 = large, size 2 = medium, size 3 = small
         //style 1 = Regular, style 2 = Bold
         //align 0 = left, align 1 = center, align 2 = right
@@ -314,34 +343,10 @@ public class PrintPreviewActivity extends Activity implements Runnable {
             os.write(format);
 
             //different sizes, same style Regular
-
-            if (size==1 && style==1) {
-                Log.d("TAG", "size==1 && style==1");
-                change[2] = (byte) (0x10); //large
-                os.write(change);
-            } else if(size==2 && style==1) {
-                Log.d("TAG", "size==2 && style==1");
-            } else if(size==3 && style==1) {
-                Log.d("TAG", "size==3 && style==1");
-                change[2] = (byte) (0x3); //small
-                os.write(change);
-            }
-
-            //different sizes, same style Bold
-            if (size==1 && style==2) {
-                Log.d("TAG", "size==1 && style==1");
-                change[2] = (byte) (0x10 | 0x8); //large
-                os.write(change);
-            } else if(size==2 && style==2) {
-                Log.d("TAG", "size==2 && style==1");
+            if(style==2) {
                 change[2] = (byte) (0x8);
                 os.write(change);
-            } else if(size==3 && style==2) {
-                Log.d("TAG", "size==3 && style==1");
-                change[2] = (byte) (0x3 | 0x8); //small
-                os.write(change);
             }
-
 
             switch (align) {
                 case 0:
@@ -366,8 +371,11 @@ public class PrintPreviewActivity extends Activity implements Runnable {
 
     private void setHeaderBodyFooter() {
         printHeader.setText(header);
+        printHeader.setTypeface(Typeface.MONOSPACE);
         printBody.setText(body);
+        printBody.setTypeface(Typeface.MONOSPACE);
         printFooter.setText(footer);
+        printFooter.setTypeface(Typeface.MONOSPACE);
     }
 
     private void getHeaderBodyFooter() {
@@ -395,45 +403,39 @@ public class PrintPreviewActivity extends Activity implements Runnable {
 
     private String getBody() {
         StringBuilder text = new StringBuilder();
-        double total = 0;
+        total = 0;
         for (ReceiptModel receipt : receiptList) {
             total += receipt.getItemTotalPrice();
-            text.append(formatType1(receipt.getItemName(), receipt.getItemTotalPrice())).append("\n");
+            text.append(formatType(receipt.getItemName(), receipt.getItemTotalPrice())).append("\n");
+            text.append(String.format(Locale.US, "  %-6s   %d @ %.2f", receipt.getItemSize(), receipt.getItemQuantity(), receipt.getItemUnitPrice())).append("\n");
         }
         double cashChange = cash - total;
         text.append("\n".repeat(2));
-        text.append(formatType1("TOTAL", total));
+        text.append(formatType("TOTAL", total));
         text.append("\n").append("AMOUNT TENDERED").append("\n");
-        text.append(formatType1("CASH", cash));
+        text.append(formatType("CASH", cash));
 
         text.append("\n".repeat(2));
-        text.append(formatType1("TOTAL PAYMENT", total));
+        text.append(formatType("TOTAL PAYMENT", total));
         text.append("\n");
-        text.append(formatType1("CHANGE", cashChange));
+        text.append(formatType("CHANGE", cashChange));
 
         return text.toString();
     }
 
-    private String formatType1(String name, double price) {
+    private String formatType(String name, double price) {
         name = name.toUpperCase();
         int nameWidth = 22;
         int priceWidth = 9;
-        int spaces = (nameWidth + priceWidth) - (name.length() + String.valueOf(price).length());
-
+        int spaces = (nameWidth + priceWidth) - (name.length() + String.valueOf(price).length()) - 1;
         if (name.length() > nameWidth) name = name.substring(0, nameWidth);
-
-        String nameFormat = "%-" + nameWidth + "s" + "-"; // Left-align, fixed width
-        String priceFormat = "%" + priceWidth + ".2f"; // Right-align, fixed width, 2 decimal places
-
-        String formattedName = String.format(Locale.getDefault(), nameFormat, name);
-        String formattedPrice = String.format(Locale.getDefault(), priceFormat, price);
-
-        return formattedName + formattedPrice;
+        return name + " ".repeat(spaces) + df.format(price);
     }
+
 
     private String getFooter(){
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-        String dateTime = formatter.format(new Date());
+        dateTime = formatter.format(new Date());
 
         return separator + "\n" +
                 "THANK YOU!" + "\n" +

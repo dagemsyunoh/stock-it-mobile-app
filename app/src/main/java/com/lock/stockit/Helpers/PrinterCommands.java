@@ -24,11 +24,11 @@ public class PrinterCommands {
     public static final byte[] ESC_CANCEL_BOLD = new byte[]{0x1B, 0x45, 0};
     /*********************************************/
     public static final byte[] ESC_HORIZONTAL_CENTERS = new byte[]{0x1B, 0x44, 20, 28, 00};
-    public static final byte[] ESC_CANCLE_HORIZONTAL_CENTERS = new byte[]{0x1B, 0x44, 00};
+    public static final byte[] ESC_CANCEL_HORIZONTAL_CENTERS = new byte[]{0x1B, 0x44, 00};
     /*********************************************/
 
     public static final byte[] ESC_ENTER = new byte[]{0x1B, 0x4A, 0x40};
-    public static final byte[] PRINTE_TEST = new byte[]{0x1D, 0x28, 0x41};
+    public static final byte[] PRINTER_TEST = new byte[]{0x1D, 0x28, 0x41};
     public static byte[] FEED_LINE = {10};
     public static byte[] SELECT_FONT_A = {20, 33, 0};
     public static byte[] SET_BAR_CODE_HEIGHT = {29, 104, 100};
