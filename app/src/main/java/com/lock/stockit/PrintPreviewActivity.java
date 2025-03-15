@@ -27,6 +27,7 @@ import androidx.preference.PreferenceManager;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.lock.stockit.Helpers.PrinterCommands;
+import com.lock.stockit.Helpers.SecurePreferences;
 import com.lock.stockit.Models.ReceiptModel;
 
 import java.io.IOException;
@@ -42,11 +43,11 @@ import java.util.UUID;
 public class PrintPreviewActivity extends Activity implements Runnable {
     private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("format");
     private static final int REQUEST_CONNECT_DEVICE = 1;
-    private String header, body, footer;
-    private ArrayList<String> headerArray;
+    private static final int REQUEST_ENABLE_BT = 2,CONNECTION_TIMEOUT = 5000; // 5 seconds
+    private final String separator = "-".repeat(32);
+    private final ArrayList<String> headerList = new ArrayList<>();
     private ArrayList<ReceiptModel> receiptList;
-    private static final int REQUEST_ENABLE_BT = 2;
-    private static final int CONNECTION_TIMEOUT = 5000; // 5 seconds
+    private String header, body, footer, invoice;
     private final UUID applicationUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     Button mScan, mPrint, mDisc;
     BluetoothAdapter mBluetoothAdapter;
@@ -66,7 +67,7 @@ public class PrintPreviewActivity extends Activity implements Runnable {
         }
     });
     private OutputStream os;
-    private String text;
+    private Double cash;
     private boolean isConnected = false;
 
     @Override
@@ -77,7 +78,6 @@ public class PrintPreviewActivity extends Activity implements Runnable {
         checkForPermission();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String savedPrinterAddress = sharedPreferences.getString("bluetooth_address", null);
-        //Connect directly if there's a saved address
         checkSavedDevice(savedPrinterAddress);
 
         printerName = findViewById(R.id.printer_name);
@@ -87,28 +87,15 @@ public class PrintPreviewActivity extends Activity implements Runnable {
         Button cancelButton = findViewById(R.id.cancel_button);
         Button printButton = findViewById(R.id.print_button);
         receiptList = getIntent().getExtras().getParcelableArrayList("receiptList");
-        headerArray = getIntent().getExtras().getStringArrayList("header");
+        invoice = getIntent().getExtras().getString("invoice");
+        cash = getIntent().getExtras().getDouble("cash");
 
         getHeaderBodyFooter();
         setHeaderBodyFooter();
 
-        cancelButton.setOnClickListener(v -> {
-            try {
-                if (mBluetoothSocket != null)
-                    mBluetoothSocket.close();
-            } catch (Exception e) {
-                Log.e("Tag", "Exe ", e);
-            }
-            Intent i = new Intent(this, ReceiptFragment.class);
-            i.putExtra("receiptList", receiptList);
-            setResult(RESULT_CANCELED,i);
-            finish();
-        });
+        cancelButton.setOnClickListener(v -> onBackPressed());
 
         printButton.setOnClickListener(v -> {
-            //size 1 = large, size 2 = medium, size 3 = small
-            //style 1 = Regular, style 2 = Bold
-            //align 0 = left, align 1 = center, align 2 = right
             Thread t = new Thread() {
                 public void run() {
                     try {
@@ -116,7 +103,7 @@ public class PrintPreviewActivity extends Activity implements Runnable {
 
                         printConfig(header, 2, 1, 1);
                         printConfig(body, 2, 1, 0);
-                        printConfig(footer, 2, 1, 1);
+                        printConfig(getFooter(), 2, 1, 1);
 
                     } catch (Exception e) {
                         Log.e("MainActivity", "Exe ", e);
@@ -247,26 +234,26 @@ public class PrintPreviewActivity extends Activity implements Runnable {
 
     @Override
     protected void onDestroy() {
-        // TODO Auto-generated method stub
         super.onDestroy();
-        try {
-            if (mBluetoothSocket != null)
-                mBluetoothSocket.close();
-        } catch (Exception e) {
-            Log.e("Tag", "Exe ", e);
-        }
+        checkSocket();
     }
 
     @Override
     public void onBackPressed() {
+        checkSocket();
+        Intent i = new Intent(this, ReceiptFragment.class);
+        i.putExtra("receiptList", receiptList);
+        setResult(RESULT_CANCELED,i);
+        finish();
+    }
+
+    private void checkSocket() {
         try {
             if (mBluetoothSocket != null)
                 mBluetoothSocket.close();
         } catch (Exception e) {
             Log.e("Tag", "Exe ", e);
         }
-        setResult(RESULT_CANCELED);
-        finish();
     }
 
     private void startTimeout() {
@@ -391,40 +378,66 @@ public class PrintPreviewActivity extends Activity implements Runnable {
 
     private String getHeader() {
         StringBuilder text = new StringBuilder();
-        for (String s : headerArray) text.append(s.toUpperCase()).append("\n");
-        String separator = "-".repeat(32);
+        SecurePreferences preferences = new SecurePreferences(getApplicationContext(), "store-preferences", "store-key", true);
+        headerList.clear();
+        headerList.add(preferences.getString("name"));
+        headerList.add(preferences.getString("address 1"));
+        headerList.add(preferences.getString("address 2"));
+        headerList.add(preferences.getString("contact"));
+        for (String s : headerList) {
+            text.append(s.toUpperCase()).append("\n");
+        }
+        text.append(separator).append("\n");
+        text.append(invoice).append("\n");
         text.append(separator).append("\n");
         return text.toString();
     }
 
     private String getBody() {
         StringBuilder text = new StringBuilder();
+        double total = 0;
         for (ReceiptModel receipt : receiptList) {
-            String row1 = String.format(Locale.US, "%-22s %9.2f",
-                    receipt.getItemName().toUpperCase(),
-                    receipt.getItemTotalPrice());
-
-            String row2 = String.format(Locale.US, "     %-6s     %4d @ %8.2f",
-                    receipt.getItemSize(),
-                    receipt.getItemQuantity(),
-                    receipt.getItemUnitPrice());
-            text.append(row1).append("\n")
-                    .append(row2).append("\n");
+            total += receipt.getItemTotalPrice();
+            text.append(formatType1(receipt.getItemName(), receipt.getItemTotalPrice())).append("\n");
         }
+        double cashChange = cash - total;
+        text.append("\n".repeat(2));
+        text.append(formatType1("TOTAL", total));
+        text.append("\n").append("AMOUNT TENDERED").append("\n");
+        text.append(formatType1("CASH", cash));
+
+        text.append("\n".repeat(2));
+        text.append(formatType1("TOTAL PAYMENT", total));
+        text.append("\n");
+        text.append(formatType1("CHANGE", cashChange));
+
         return text.toString();
     }
 
+    private String formatType1(String name, double price) {
+        name = name.toUpperCase();
+        int nameWidth = 22;
+        int priceWidth = 9;
+        int spaces = (nameWidth + priceWidth) - (name.length() + String.valueOf(price).length());
+
+        if (name.length() > nameWidth) name = name.substring(0, nameWidth);
+
+        String nameFormat = "%-" + nameWidth + "s" + "-"; // Left-align, fixed width
+        String priceFormat = "%" + priceWidth + ".2f"; // Right-align, fixed width, 2 decimal places
+
+        String formattedName = String.format(Locale.getDefault(), nameFormat, name);
+        String formattedPrice = String.format(Locale.getDefault(), priceFormat, price);
+
+        return formattedName + formattedPrice;
+    }
+
     private String getFooter(){
-        String separator = "-".repeat(32); // 32-character wide separator
-        String thankYouMessage = "THANK YOU!";
-        String visitAgain = "Please Visit Again!";
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
         String dateTime = formatter.format(new Date());
 
-
         return separator + "\n" +
-                thankYouMessage + "\n" +
-                visitAgain + "\n" +
+                "THANK YOU!" + "\n" +
+                "PLEASE VISIT AGAIN!" + "\n" +
                 separator + "\n" +
                 dateTime + "\n".repeat(2);
     }

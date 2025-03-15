@@ -4,16 +4,19 @@ import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
@@ -37,6 +40,7 @@ import com.lock.stockit.Adapters.ReceiptAdapter;
 import com.lock.stockit.Helpers.CustomLinearLayoutManager;
 import com.lock.stockit.Helpers.QtyMover;
 import com.lock.stockit.Helpers.ReceiptListeners;
+import com.lock.stockit.Helpers.SecurePreferences;
 import com.lock.stockit.Helpers.SwipeState;
 import com.lock.stockit.Helpers.sizeComparator;
 import com.lock.stockit.Models.ReceiptModel;
@@ -69,6 +73,9 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private int transactionNo = 1, flag;
     ActivityResultLauncher<Intent> launcher;
     private boolean cancelled, recyclerViewFlag = true;
+    private String invoice;
+    private double cash = 0, sum;
+
     public static Intent newIntent(Context context) {
         return new Intent(context, ReceiptListeners.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
     }
@@ -110,6 +117,11 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
                 header.add(documentSnapshot.getString("address 1"));
                 header.add(documentSnapshot.getString("address 2"));
                 header.add(documentSnapshot.getString("contact"));
+                SecurePreferences preferences = new SecurePreferences(getActivity().getApplicationContext(), "store-preferences", "store-key", true);
+                preferences.put("name", header.get(0));
+                preferences.put("address 1", header.get(1));
+                preferences.put("address 2", header.get(2));
+                preferences.put("contact", header.get(3));
             }
         });
     }
@@ -120,8 +132,8 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
             if (error != null || value == null) return;
             if (!cancelled) receiptList.clear();
             for (DocumentSnapshot documentSnapshot : value.getDocuments()) transactionNo++;
-            String titleText = "Receipt #" + transactionNo;
-            title.setText(titleText);
+            invoice = "INVOICE #" + transactionNo;
+            title.setText(invoice);
             while (recyclerViewFlag) {
                 setRecyclerView();
                 recyclerViewFlag = false;
@@ -229,8 +241,31 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private void printPreview() {
         Intent i = new Intent(getActivity(), PrintPreviewActivity.class);
         i.putExtra("receiptList", receiptList);
-        i.putExtra("header", header);
-        launcher.launch(i);
+        i.putExtra("invoice", invoice);
+
+        EditText input = new EditText(getActivity());
+        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Print Receipt");
+        builder.setMessage("Input Cash Amount");
+        builder.setView(input);
+        builder.setCancelable(true);
+        builder.setPositiveButton("Print", (dialog, which) -> {
+            if (input.getText().toString().isEmpty()) {
+                Toast.makeText(getActivity(), "Please enter cash amount", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (Double.parseDouble(input.getText().toString()) < sum) {
+                Toast.makeText(getActivity(), "Cash amount cannot be less than total amount", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            cash = Double.parseDouble(String.format(Locale.getDefault(), "%.2f", Double.parseDouble(input.getText().toString())));
+            i.putExtra("cash", cash);
+            dialog.dismiss();
+            launcher.launch(i);
+                });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        builder.show();
     }
 
     private void setLayout(boolean show) {
@@ -330,11 +365,12 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     }
 
     private void getSum() {
-        Double sum = 0.0;
+        sum = 0.0;
         if (!item[4].isEmpty()) grandTotal.add(Double.parseDouble(item[4]));
         for (Double total : grandTotal) {
             sum += total;
         }
+
         String sumText = "₱" + String.format(Locale.getDefault(), "%.2f", sum);
         grandTotalPrice.setText(sumText);
     }
