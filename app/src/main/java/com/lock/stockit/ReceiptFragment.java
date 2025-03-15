@@ -230,7 +230,10 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK) {
                 Toast.makeText(getActivity(), "Print successful", Toast.LENGTH_SHORT).show();
+                receiptList.clear();
                 grandTotal.clear();
+                getSum();
+                adapter.setReceipts(receiptList);
             }
             if (result.getResultCode() == RESULT_CANCELED) {
                 receiptList.clear();

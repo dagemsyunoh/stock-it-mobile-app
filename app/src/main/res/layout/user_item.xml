@@ -59,7 +59,7 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="@dimen/trailing" />
     <!--endregion-->
-    <!--region Horizontal Guidlines-->
+    <!--region Horizontal Guidelines-->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/constraint_guideline_horizontal_top"
         android:layout_width="wrap_content"

@@ -11,8 +11,6 @@ import androidx.cardview.widget.CardView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.lock.stockit.Models.ReceiptModel;
 import com.lock.stockit.R;
 
@@ -26,7 +24,6 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
     private final FloatingActionButton plusOne, minusOne;
     private final ImageView rightImage;
     private final CardView cardView;
-    private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("receipts");
 
     public ReceiptViewHolder(View itemView, ReceiptListeners customListeners) {
         super(itemView, customListeners);

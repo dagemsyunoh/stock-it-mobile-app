@@ -41,7 +41,7 @@ public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.Au
     private final ArrayList<String> emails = new ArrayList<>();
     protected AuthCredential credential;
     protected ExtendedFloatingActionButton buttonBack;
-    protected boolean authenticated = false, emailExists, verifySent = false;
+    protected boolean authenticated = false, emailExists;
     private TextView changeText;
     private TextInputLayout passwordLayout, confirmPasswordLayout;
     private TextInputEditText changeEmail, changePassword, changeConfirmPassword;

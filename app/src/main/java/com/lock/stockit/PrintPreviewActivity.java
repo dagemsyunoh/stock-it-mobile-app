@@ -59,21 +59,9 @@ public class PrintPreviewActivity extends Activity implements Runnable {
     private BluetoothSocket mBluetoothSocket;
     private AlertDialog dialog;
     private BluetoothDevice mBluetoothDevice;
-    private final Handler mHandler = new Handler(new Handler.Callback() {
-        @Override
-        public boolean handleMessage(@NonNull Message msg) {
-            dialog.dismiss();
-            checkForPermission();
-            String pName = "Printer Name: " + mBluetoothDevice.getName();
-            printerName.setText(pName);
-            Toast.makeText(PrintPreviewActivity.this, "Device Connected", Toast.LENGTH_SHORT).show();
-            return true;
-        }
-    });
     private OutputStream os;
     private double cash, total;
     private boolean isConnected = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,9 +93,9 @@ public class PrintPreviewActivity extends Activity implements Runnable {
                     try {
                         os = mBluetoothSocket.getOutputStream();
 
-                        printConfig(header, 1, 1);
-                        printConfig(body, 1, 0);
-                        printConfig(getFooter(),  1, 1);
+                        printConfig(header, 1);
+                        printConfig(body, 0);
+                        printConfig(getFooter(), 1);
 
                     } catch (Exception e) {
                         Log.e("MainActivity", "Exe ", e);
@@ -116,9 +104,6 @@ public class PrintPreviewActivity extends Activity implements Runnable {
             };
             t.start();
             saveReceipt();
-            Intent i = new Intent(this, ReceiptFragment.class);
-            setResult(RESULT_OK);
-            finish();
         });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -127,6 +112,33 @@ public class PrintPreviewActivity extends Activity implements Runnable {
             return insets;
         });
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        checkSocket();
+    }
+
+    @Override
+    public void onBackPressed() {
+        checkSocket();
+        Intent i = new Intent(this, ReceiptFragment.class);
+        i.putExtra("receiptList", receiptList);
+        setResult(RESULT_CANCELED,i);
+        finish();
+    }
+
+    private final Handler mHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            dialog.dismiss();
+            checkForPermission();
+            String pName = "Printer Name: " + mBluetoothDevice.getName();
+            printerName.setText(pName);
+            Toast.makeText(PrintPreviewActivity.this, "Device Connected", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+    });
 
     private void saveReceipt() {
         ArrayList<String> items = new ArrayList<>();
@@ -142,6 +154,8 @@ public class PrintPreviewActivity extends Activity implements Runnable {
         receiptMap.put("change", cash - total);
         try {
             receiptRef.add(receiptMap);
+            setResult(RESULT_OK);
+            finish();
         } catch (Exception e) {
             Log.e("TAG", "Error Code " + e);
         }
@@ -260,21 +274,6 @@ public class PrintPreviewActivity extends Activity implements Runnable {
         startTimeout();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        checkSocket();
-    }
-
-    @Override
-    public void onBackPressed() {
-        checkSocket();
-        Intent i = new Intent(this, ReceiptFragment.class);
-        i.putExtra("receiptList", receiptList);
-        setResult(RESULT_CANCELED,i);
-        finish();
-    }
-
     private void checkSocket() {
         try {
             if (mBluetoothSocket != null)
@@ -330,7 +329,7 @@ public class PrintPreviewActivity extends Activity implements Runnable {
     }
 
 
-    protected void printConfig(String bill, int style, int align) {
+    protected void printConfig(String bill, int align) {
         //size 1 = large, size 2 = medium, size 3 = small
         //style 1 = Regular, style 2 = Bold
         //align 0 = left, align 1 = center, align 2 = right
@@ -338,15 +337,8 @@ public class PrintPreviewActivity extends Activity implements Runnable {
         try {
 
             byte[] format = new byte[]{27,33, 0};
-            byte[] change = new byte[]{27,33, 0};
 
             os.write(format);
-
-            //different sizes, same style Regular
-            if(style==2) {
-                change[2] = (byte) (0x8);
-                os.write(change);
-            }
 
             switch (align) {
                 case 0:

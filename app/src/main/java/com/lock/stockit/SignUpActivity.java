@@ -3,6 +3,7 @@ package com.lock.stockit;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -18,17 +19,21 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class SignUpActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
-    protected static Boolean create = false;
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
     private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+    private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
     private final ArrayList<String> emails = new ArrayList<>();
     protected Button buttonSignUp;
     protected TextView signIn;
@@ -62,15 +67,21 @@ public class SignUpActivity extends AppCompatActivity implements FirebaseAuth.Au
                 progressBar.setVisibility(View.GONE);
                 return;
             }
+            buttonSignUp.setActivated(false);
+            signIn.setClickable(false);
             auth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(task -> {
                         progressBar.setVisibility(View.GONE);
                         if (task.isSuccessful()) {
                             Toast.makeText(SignUpActivity.this, "Account successfully created.", Toast.LENGTH_SHORT).show();
-                            create = true;
+                            Log.d("TAG", task.getResult().getUser().getUid());
+                            createData(email, colRef.document(task.getResult().getUser().getUid()));
                             verifyEmail();
-                        } else
-                            Toast.makeText(SignUpActivity.this, "Account creation failed. Please try again.", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        Toast.makeText(SignUpActivity.this, "Account creation failed. Please try again.", Toast.LENGTH_SHORT).show();
+                        buttonSignUp.setActivated(true);
+                        signIn.setClickable(true);
                     });
             progressBar.setVisibility(View.GONE);
         });
@@ -180,11 +191,22 @@ public class SignUpActivity extends AppCompatActivity implements FirebaseAuth.Au
     private void verifyEmail() {
         if (auth.getCurrentUser() == null) return;
         auth.getCurrentUser().sendEmailVerification().addOnCompleteListener(task -> {
-            if (task.isSuccessful())
+            if (task.isSuccessful()) {
                 Toast.makeText(SignUpActivity.this, "Verification email sent.", Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(SignUpActivity.this, "Failed to send verification email.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Toast.makeText(SignUpActivity.this, "Failed to send verification email.", Toast.LENGTH_SHORT).show();
+            buttonSignUp.setActivated(true);
+            signIn.setClickable(true);
         });
+    }
+
+    private void createData(String email, DocumentReference docRef) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("activated", false);
+        data.put("admin", false);
+        data.put("email", email);
+        docRef.set(data);
     }
 
     @Override

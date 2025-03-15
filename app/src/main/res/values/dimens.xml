@@ -6,7 +6,7 @@
     <dimen name="card_radius_minimum">5dp</dimen>
     <dimen name="card_radius_micro">3dp</dimen>
     <!-- endregion -->
-    <!-- CardView Elavation -->
+    <!-- CardView Elevation -->
     <dimen name="card_elevation_maximum">5dp</dimen>
     <dimen name="card_elevation">2dp</dimen>
     <dimen name="card_elevation_minimum">1dp</dimen>

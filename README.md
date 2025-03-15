@@ -1,15 +1,14 @@
 # stock-it-mobile-app
 
 TO-DO: <br>
-1. Home Fragment
-- printer connection
-- print format
+- printer connection (partially done)
+- print format (partially done)
 - history log (admin)
 - daily sales (?)
-2. Receipt Fragment
-- print
-3. More Fragment
 - settings
+- hardware partnership discounts
+- design
+- testing & bug checking
 
 DONE: <br>
 - user database
@@ -28,3 +27,4 @@ DONE: <br>
 - inventory add item
 - add items
 - edit/delete items
+- print
