@@ -71,6 +71,7 @@ abstract public class UserBaseViewHolder extends RecyclerView.ViewHolder {
         view.animate().x(dx).setDuration(duration).start();
     }
 
+    /** @noinspection unused*/
     protected Float onSwipeMove(Float currentLead, Float currentTrail, SwipeState swipeState) {
         if (swipeState == SwipeState.LEFT || swipeState == SwipeState.RIGHT || swipeState == SwipeState.LEFT_RIGHT)
             return currentLead;

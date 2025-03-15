@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
  */
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Base64;
@@ -59,8 +60,9 @@ public class SecurePreferences {
      * @param encryptKeys settings this to false will only encrypt the values,
      * true will encrypt both values and keys. Keys can contain a lot of information about
      * the plaintext value of the value which can be used to decipher the value.
-     * @throws SecurePreferencesException
+     * @throws SecurePreferencesException This.
      */
+    @SuppressLint("GetInstance")
     public SecurePreferences(Context context, String preferenceName, String secureKey, boolean encryptKeys) throws SecurePreferencesException {
         try {
             this.writer = Cipher.getInstance(TRANSFORMATION);

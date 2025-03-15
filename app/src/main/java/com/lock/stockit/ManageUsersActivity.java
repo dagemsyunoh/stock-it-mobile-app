@@ -181,7 +181,6 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
         data.put("pending delete", true);
         colRef.whereEqualTo("email", email).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) return;
-            String uid = task.getResult().getDocuments().get(0).getId();
             colRef.document(task.getResult().getDocuments().get(0).getId()).delete();
             FirebaseFirestore.getInstance().collection("bin").document(email).set(data);
             dialog.dismiss();
