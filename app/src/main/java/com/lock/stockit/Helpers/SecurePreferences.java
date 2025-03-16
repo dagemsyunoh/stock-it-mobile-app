@@ -71,7 +71,7 @@ public class SecurePreferences {
 
             initCiphers(secureKey);
 
-            this.preferences = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
+            preferences = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
 
             this.encryptKeys = encryptKeys;
         }

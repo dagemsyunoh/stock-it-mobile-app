@@ -1,14 +1,16 @@
 package com.lock.stockit;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.text.InputType;
-import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +26,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,8 +40,11 @@ import com.lock.stockit.Helpers.SwipeState;
 import com.lock.stockit.Helpers.UserListeners;
 import com.lock.stockit.Models.UserModel;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class ManageUsersActivity extends AppCompatActivity implements UserListeners {
@@ -51,21 +57,12 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
     protected ExtendedFloatingActionButton buttonBack;
     protected AuthCredential credential;
     private AlertDialog dialog;
-    private final Handler mHandler = new Handler(new Handler.Callback() {
-        @Override
-        public boolean handleMessage(@NonNull Message msg) {
-            dialog.dismiss();
-            Toast.makeText(ManageUsersActivity.this, "User deleted.", Toast.LENGTH_SHORT).show();
-            return true;
-        }
-    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_manage_users);
-
         buttonBack = findViewById(R.id.back_button);
         recyclerView = findViewById(R.id.user_view);
         usersList = new ArrayList<>();
@@ -109,10 +106,31 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
         recyclerView.setAdapter(adapter);
     }
 
+    private final Handler mHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            dialog.dismiss();
+            Toast.makeText(ManageUsersActivity.this, "User deleted.", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+    });
+
+    /** @noinspection unused*/
+    public static Intent newIntent(Context context) {
+        return new Intent(context, ManageUsersActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    }
+
     private void reAuth(EditText passwordInput, int pos) {
         String email = user.getEmail();
         String password = String.valueOf(passwordInput.getText());
-        assert email != null;
+        if (email == null) {
+            Toast.makeText(ManageUsersActivity.this, "Internal Error. Please try again.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (password.isEmpty()) {
+            Toast.makeText(ManageUsersActivity.this, "Please enter your password.", Toast.LENGTH_SHORT).show();
+            return;
+        }
         credential = EmailAuthProvider.getCredential(email, password);
 
         user.reauthenticate(credential)
@@ -127,43 +145,36 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
                 });
     }
 
-    /** @noinspection unused*/
-    public static Intent newIntent(Context context) {
-        return new Intent(context, ManageUsersActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    }
-
     private void alertPassword(int position, boolean again) {
-        final EditText passwordInput = new EditText(this);
-        passwordInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        passwordInput.setHint("Password");
-        passwordInput.setSingleLine();
-        passwordInput.setTransformationMethod(PasswordTransformationMethod.getInstance());
 
         String message;
         if (again) message = "User Data will be permanently deleted. Are you sure?\n\nPassword Incorrect.\nPlease try again.";
         else message = "User Data will be permanently deleted. Are you sure?\n\nPlease enter your password to confirm.";
 
-        AlertDialog alertDialog = new AlertDialog.Builder(ManageUsersActivity.this)
-                .setIcon(R.drawable.ic_warning)
-                .setTitle("Warning! User Deletion")
-                .setMessage(message)
-                .setPositiveButton("Delete User", (d, which) -> {
-                    reAuth(passwordInput, position);
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setCancelable(false);
-                    builder.setView(R.layout.loading_dialog);
-                    dialog = builder.create();
-                    dialog.show();
-                    TextView loadingText = dialog.findViewById(R.id.loading_dialog_text);
-                    String show = "Deleting User " + usersList.get(position).getEmail();
-                    loadingText.setText(show);
-                    d.dismiss();
-                })
-                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
-                .setCancelable(false)
-                .create();
-        alertDialog.setView(passwordInput);
-        alertDialog.show();
+        Dialog passDialog = new Dialog(ManageUsersActivity.this);
+        passDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        passDialog.setContentView(R.layout.re_auth);
+        passDialog.setCancelable(false);
+        passDialog.create();
+        passDialog.show();
+        TextView loadingDialogText = passDialog.findViewById(R.id.password_text);
+        loadingDialogText.setText(message);
+        TextInputEditText inputPassword = passDialog.findViewById(R.id.password);
+        Button buttonDelete = passDialog.findViewById(R.id.delete_button);
+        Button buttonCancel = passDialog.findViewById(R.id.cancel_button);
+        buttonCancel.setOnClickListener(v -> passDialog.dismiss());
+        buttonDelete.setOnClickListener(v -> {
+            reAuth(inputPassword, position);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setCancelable(false);
+            builder.setView(R.layout.loading_dialog);
+            dialog = builder.create();
+            dialog.show();
+            TextView loadingText = dialog.findViewById(R.id.loading_dialog_text);
+            String show = "Deleting User " + usersList.get(position).getEmail();
+            loadingText.setText(show);
+            passDialog.dismiss();
+        });
     }
 
     public void run() {
@@ -171,7 +182,7 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
 
             mHandler.sendEmptyMessage(0);
         } catch (Exception e) {
-            Log.e("Error", e.getMessage());
+            Log.e("TAG", e.getMessage());
         }
     }
 
@@ -182,9 +193,21 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
         colRef.whereEqualTo("email", email).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) return;
             colRef.document(task.getResult().getDocuments().get(0).getId()).delete();
-            FirebaseFirestore.getInstance().collection("bin").document(email).set(data);
+            FirebaseFirestore.getInstance().collection("user delete request").document(email).set(data);
+            setLog(email);
             dialog.dismiss();
         });
+    }
+
+    protected void setLog(String target) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        String dateTime = formatter.format(new Date());
+        Map<String, Object> log = new HashMap<>();
+        log.put("action", "delete");
+        log.put("target", target);
+        log.put("user", user.getEmail());
+        log.put("date-time", dateTime);
+        FirebaseFirestore.getInstance().collection("user log").document().set(log);
     }
 
     @Override
