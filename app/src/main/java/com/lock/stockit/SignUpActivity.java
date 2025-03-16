@@ -25,8 +25,11 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -207,6 +210,17 @@ public class SignUpActivity extends AppCompatActivity implements FirebaseAuth.Au
         data.put("admin", false);
         data.put("email", email);
         docRef.set(data);
+        setLog(email);
+    }
+    protected void setLog(String target) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        String dateTime = formatter.format(new Date());
+        Map<String, Object> log = new HashMap<>();
+        log.put("action", "create");
+        log.put("target", target);
+        log.put("user", target);
+        log.put("date-time", dateTime);
+        FirebaseFirestore.getInstance().collection("user log").document().set(log);
     }
 
     @Override

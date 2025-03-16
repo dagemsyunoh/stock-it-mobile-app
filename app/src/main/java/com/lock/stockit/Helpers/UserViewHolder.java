@@ -10,10 +10,17 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.cardview.widget.CardView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.lock.stockit.Models.UserModel;
 import com.lock.stockit.R;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 public class UserViewHolder extends UserBaseViewHolder {
 
@@ -99,6 +106,7 @@ public class UserViewHolder extends UserBaseViewHolder {
                 .setMessage(message)
                 .setPositiveButton("OK", (dialog, which) -> {
                     updateData(field, switchClicked);
+                    setLog(field + " set to " + switchClicked.isChecked(), email.getText().toString());
                     dialog.dismiss();
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
@@ -108,5 +116,16 @@ public class UserViewHolder extends UserBaseViewHolder {
                 .setCancelable(false)
                 .create();
         alertDialog.show();
+    }
+
+    protected void setLog(String action, String target) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        String dateTime = formatter.format(new Date());
+        Map<String, Object> log = new HashMap<>();
+        log.put("action", action);
+        log.put("target", target);
+        log.put("user", FirebaseAuth.getInstance().getCurrentUser().getEmail());
+        log.put("date-time", dateTime);
+        FirebaseFirestore.getInstance().collection("user log").document().set(log);
     }
 }

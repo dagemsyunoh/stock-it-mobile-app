@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -117,11 +118,20 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
                 header.add(documentSnapshot.getString("address 1"));
                 header.add(documentSnapshot.getString("address 2"));
                 header.add(documentSnapshot.getString("contact"));
-                SecurePreferences preferences = new SecurePreferences(getActivity().getApplicationContext(), "store-preferences", "store-key", true);
-                preferences.put("name", header.get(0));
-                preferences.put("address 1", header.get(1));
-                preferences.put("address 2", header.get(2));
-                preferences.put("contact", header.get(3));
+                try {
+                    SecurePreferences preferences = new SecurePreferences(getContext(), "store-preferences", "store-key", true);
+                    preferences.put("name", header.get(0));
+                    preferences.put("address 1", header.get(1));
+                    preferences.put("address 2", header.get(2));
+                    preferences.put("contact", header.get(3));
+                    Log.d("TAG", "Header updated");
+                    Log.d("TAG", "Name: " + preferences.getString("name"));
+                    Log.d("TAG", "Address 1: " + preferences.getString("address 1"));
+                    Log.d("TAG", "Address 2: " + preferences.getString("address 2"));
+                    Log.d("TAG", "Contact: " + preferences.getString("contact"));
+                } catch (Exception e) {
+                    Log.e("TAG", e.getMessage());
+                }
             }
         });
     }
@@ -155,7 +165,6 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         Dialog addPopUp = new Dialog(getActivity());
         addPopUp.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         addPopUp.setContentView(R.layout.receipt_add);
-        addPopUp.setTitle("Add Item to Receipt");
         addPopUp.setCancelable(false);
         addPopUp.show();
 

@@ -47,4 +47,6 @@
     <string name="print">Print</string>
     <string name="cancel">Cancel</string>
     <string name="bluetooth_devices">Bluetooth Devices</string>
+    <string name="delete_user">Delete User</string>
+    <string name="warning_user_deletion">Warning! User Deletion</string>
 </resources>
