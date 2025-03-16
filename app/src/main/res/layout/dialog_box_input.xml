@@ -24,31 +24,27 @@
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:layout_margin="5dp"
-            android:text="@string/warning_user_deletion"
             android:textSize="20sp"
-            android:textStyle="bold"
-            app:drawableStartCompat="@drawable/ic_warning" />
+            android:textStyle="bold"/>
         <TextView
-            android:id="@+id/password_text"
+            android:id="@+id/dialog_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/header"
             android:layout_margin="5dp"
             android:textSize="15sp" />
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/password_layout"
+            android:id="@+id/input_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/password_text"
-            android:layout_margin="5dp"
-            app:passwordToggleEnabled="true">
+            android:layout_below="@id/dialog_text"
+            android:layout_margin="5dp">
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/password"
+                android:id="@+id/input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="15dp"
-                android:hint="@string/password"
-                android:inputType="textPassword" />
+                tools:ignore="VisualLintTextFieldSize" />
         </com.google.android.material.textfield.TextInputLayout>
         <Button
             android:id="@+id/cancel_button"
@@ -56,16 +52,16 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_margin="5dp"
-            android:layout_toStartOf="@+id/delete_button"
+            android:layout_toStartOf="@+id/ok_button"
             android:text="@string/cancel" />
         <Button
-            android:id="@+id/delete_button"
+            android:id="@+id/ok_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             android:layout_margin="5dp"
-            android:text="@string/delete_user" />
+            android:text="@string/ok" />
     </RelativeLayout>
 
 </androidx.cardview.widget.CardView>

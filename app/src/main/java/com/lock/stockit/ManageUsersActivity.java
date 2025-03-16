@@ -9,6 +9,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.InputType;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
@@ -152,15 +154,28 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
 
         Dialog passDialog = new Dialog(ManageUsersActivity.this);
         passDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        passDialog.setContentView(R.layout.re_auth);
+        passDialog.setContentView(R.layout.dialog_box_input);
         passDialog.setCancelable(false);
         passDialog.create();
         passDialog.show();
-        TextView loadingDialogText = passDialog.findViewById(R.id.password_text);
-        loadingDialogText.setText(message);
-        TextInputEditText inputPassword = passDialog.findViewById(R.id.password);
-        Button buttonDelete = passDialog.findViewById(R.id.delete_button);
+
+        TextView header = passDialog.findViewById(R.id.header);
+        header.setText(R.string.warning_user_deletion);
+        header.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_warning, 0, 0, 0);
+
+        TextView dialogText = passDialog.findViewById(R.id.dialog_text);
+        dialogText.setText(message);
+
+        TextInputLayout inputLayout = passDialog.findViewById(R.id.input_layout);
+        inputLayout.setEndIconMode(TextInputLayout.END_ICON_PASSWORD_TOGGLE);
+
+        TextInputEditText inputPassword = passDialog.findViewById(R.id.input);
+        inputPassword.setHint(R.string.password);
+        inputPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+
         Button buttonCancel = passDialog.findViewById(R.id.cancel_button);
+        Button buttonDelete = passDialog.findViewById(R.id.ok_button);
+        buttonDelete.setText(R.string.delete_user);
 
         buttonCancel.setOnClickListener(v -> passDialog.dismiss());
         buttonDelete.setOnClickListener(v -> {

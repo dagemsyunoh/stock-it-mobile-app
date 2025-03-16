@@ -51,4 +51,10 @@
     <string name="warning_user_deletion">Warning! User Deletion</string>
     <string name="warning_user_status_change">Warning! User Status Change</string>
     <string name="ok">OK</string>
+    <string name="email_verification_required">Email Verification Required</string>
+    <string name="email_verification_required_text">Please verify your new email before signing in again.\n Email will only be changed after verification.</string>
+    <string name="introduce_yourself">Introduce Yourself!</string>
+    <string name="enter_your_name">Please enter your name.</string>
+    <string name="display_name">Name</string>
+    <string name="enter_name">Enter Name</string>
 </resources>

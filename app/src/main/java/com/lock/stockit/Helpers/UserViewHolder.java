@@ -100,13 +100,15 @@ public class UserViewHolder extends UserBaseViewHolder {
         else message.append(" will be unable to access certain data and functions. Are you sure you want to continue?");
         Dialog changeDialog = new Dialog(cardView.getContext());
         changeDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        changeDialog.setContentView(R.layout.change_status);
+        changeDialog.setContentView(R.layout.dialog_box);
         changeDialog.setCancelable(false);
         changeDialog.create();
         changeDialog.show();
-        TextView confirmText = changeDialog.findViewById(R.id.confirm_text);
-        confirmText.setText(message.toString());
-        Button buttonChange = changeDialog.findViewById(R.id.change_button);
+        TextView header = changeDialog.findViewById(R.id.header);
+        header.setText(R.string.warning_user_status_change);
+        TextView text = changeDialog.findViewById(R.id.text);
+        text.setText(message.toString());
+        Button buttonOk = changeDialog.findViewById(R.id.ok_button);
         Button buttonCancel = changeDialog.findViewById(R.id.cancel_button);
 
         buttonCancel.setOnClickListener(v -> {
@@ -114,7 +116,7 @@ public class UserViewHolder extends UserBaseViewHolder {
             changeDialog.dismiss();
         });
 
-        buttonChange.setOnClickListener(v -> {
+        buttonOk.setOnClickListener(v -> {
             updateData(field, switchClicked);
             logger.setUserLog(field + " set to " + switchClicked.isChecked(),
                     email.getText().toString(),

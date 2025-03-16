@@ -1,9 +1,15 @@
 package com.lock.stockit;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -15,7 +21,10 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.lock.stockit.Adapters.ViewPagerAdapter;
@@ -115,15 +124,51 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
             return insets;
         });
     }
+    private void checkName() {
+        if (auth.getCurrentUser().getDisplayName() != null || docRef.get().getResult().getString("name") != null) return;
+        Dialog nameDialog = new Dialog(MainActivity.this);
+        nameDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        nameDialog.setContentView(R.layout.dialog_box_input);
+        nameDialog.setCancelable(false);
+        nameDialog.create();
+        nameDialog.show();
+
+        TextView header = nameDialog.findViewById(R.id.header);
+        header.setText(R.string.introduce_yourself);
+
+        TextView dialogText = nameDialog.findViewById(R.id.dialog_text);
+        dialogText.setText(R.string.enter_your_name);
+
+        TextInputLayout inputLayout = nameDialog.findViewById(R.id.input_layout);
+        inputLayout.setEndIconMode(TextInputLayout.END_ICON_NONE);
+
+        TextInputEditText inputName = nameDialog.findViewById(R.id.input);
+        inputName.setInputType(InputType.TYPE_CLASS_TEXT);
+        inputName.setHint(R.string.display_name);
+
+        Button buttonCancel = nameDialog.findViewById(R.id.cancel_button);
+        Button buttonEnter = nameDialog.findViewById(R.id.ok_button);
+        buttonEnter.setText(R.string.enter_name);
+
+        buttonCancel.setOnClickListener(v -> nameDialog.dismiss());
+        buttonEnter.setOnClickListener(v -> {
+            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder().setDisplayName(inputName.getText().toString()).build();
+            auth.getCurrentUser().updateProfile(profileUpdates);
+            docRef.update("name", inputName.getText().toString());
+            nameDialog.dismiss();
+        });
+    }
 
     @Override
     protected void onStart() {
         super.onStart();
+        checkName();
         docRef.get().addOnSuccessListener(doc -> LoaderActivity.admin = Boolean.TRUE.equals(doc.getBoolean("admin")))
                 .addOnFailureListener(e -> LoaderActivity.admin = false)
                 .addOnCompleteListener(task -> bottomNavigationView.getMenu().findItem(R.id.inventory).setVisible(LoaderActivity.admin));
         auth.addAuthStateListener(this);
     }
+
 
     @Override
     protected void onStop() {

@@ -7,6 +7,7 @@ TO-DO: <br>
 - daily sales (?)
 - settings
 - hardware discounts
+- cashier name
 - design
 - testing & bug checking
 

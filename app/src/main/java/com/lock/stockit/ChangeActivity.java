@@ -1,6 +1,9 @@
 package com.lock.stockit;
 
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -11,7 +14,6 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -141,17 +143,25 @@ public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.Au
                 Toast.makeText(ChangeActivity.this, "Error. Please try again.", Toast.LENGTH_SHORT).show();
                 return;
             }
+            Dialog changeDialog = new Dialog(this);
+            changeDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            changeDialog.setContentView(R.layout.dialog_box);
+            changeDialog.setCancelable(false);
+            changeDialog.create();
+            changeDialog.show();
+            TextView header = changeDialog.findViewById(R.id.header);
+            header.setText(R.string.email_verification_required);
+            TextView text = changeDialog.findViewById(R.id.text);
+            text.setText(R.string.email_verification_required_text);
+            Button buttonOk = changeDialog.findViewById(R.id.ok_button);
+            Button buttonCancel = changeDialog.findViewById(R.id.cancel_button);
+            buttonCancel.setVisibility(View.GONE);
 
-            AlertDialog alertDialog = new AlertDialog.Builder(this)
-                    .setTitle("Email verification required.")
-                    .setMessage("Please verify your new email before signing in again.\n Email will only be changed after verification.")
-                    .setNegativeButton("OK", (dialog, which) -> {
-                        logger.setUserLog("email changed", "email", user.getEmail());
-                        auth.signOut();
-                        dialog.dismiss();
-                    })
-                    .create();
-            alertDialog.show();
+            buttonOk.setOnClickListener(v -> {
+                logger.setUserLog("email changed", user.getEmail(), user.getEmail());
+                auth.signOut();
+                changeDialog.dismiss();
+            });
         });
         progressBar.setVisibility(View.GONE);
     }
