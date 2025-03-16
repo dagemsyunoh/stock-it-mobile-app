@@ -161,6 +161,7 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
         TextInputEditText inputPassword = passDialog.findViewById(R.id.password);
         Button buttonDelete = passDialog.findViewById(R.id.delete_button);
         Button buttonCancel = passDialog.findViewById(R.id.cancel_button);
+
         buttonCancel.setOnClickListener(v -> passDialog.dismiss());
         buttonDelete.setOnClickListener(v -> {
             reAuth(inputPassword, position);
@@ -187,15 +188,19 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
 
     private void deleteUser(int pos) {
         String email = usersList.get(pos).getEmail();
-        Map<String, Object> data = new HashMap<>();
-        data.put("pending delete", true);
         colRef.whereEqualTo("email", email).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) return;
-            colRef.document(task.getResult().getDocuments().get(0).getId()).delete();
-            FirebaseFirestore.getInstance().collection("user delete request").document(email).set(data);
+            String uid = task.getResult().getDocuments().get(0).getId();
+            colRef.document(uid).delete();
+            requestDelete(email);
             logger.setUserLog("delete", email, user.getEmail());
             dialog.dismiss();
         });
+    }
+    private void requestDelete(String email) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("pending delete", true);
+        FirebaseFirestore.getInstance().collection("user delete request").document(email).set(data);
     }
 
     @Override

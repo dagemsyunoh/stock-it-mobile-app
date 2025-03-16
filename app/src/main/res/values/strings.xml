@@ -49,4 +49,6 @@
     <string name="bluetooth_devices">Bluetooth Devices</string>
     <string name="delete_user">Delete User</string>
     <string name="warning_user_deletion">Warning! User Deletion</string>
+    <string name="warning_user_status_change">Warning! User Status Change</string>
+    <string name="ok">OK</string>
 </resources>

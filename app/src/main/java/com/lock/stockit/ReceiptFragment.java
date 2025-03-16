@@ -124,11 +124,6 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
                     preferences.put("address 1", header.get(1));
                     preferences.put("address 2", header.get(2));
                     preferences.put("contact", header.get(3));
-                    Log.d("TAG", "Header updated");
-                    Log.d("TAG", "Name: " + preferences.getString("name"));
-                    Log.d("TAG", "Address 1: " + preferences.getString("address 1"));
-                    Log.d("TAG", "Address 2: " + preferences.getString("address 2"));
-                    Log.d("TAG", "Contact: " + preferences.getString("contact"));
                 } catch (Exception e) {
                     Log.e("TAG", e.getMessage());
                 }

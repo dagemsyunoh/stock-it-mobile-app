@@ -1,12 +1,15 @@
 package com.lock.stockit.Helpers;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.cardview.widget.CardView;
 
@@ -92,27 +95,31 @@ public class UserViewHolder extends UserBaseViewHolder {
     }
 
     private void confirmChange(String field, SwitchCompat switchClicked) {
-        String message;
-        if (switchClicked.isChecked()) message = email.getText().toString() + " will be able to access certain data and functions. Are you sure you want to continue?";
-        else message = email.getText().toString() + " will be unable to access certain data and functions. Are you sure you want to continue?";
-        AlertDialog.Builder builder = new AlertDialog.Builder(cardView.getContext());
-        builder.setIcon(R.drawable.ic_warning);
-        builder.setTitle("Warning! User status will be changed");
-        builder.setMessage(message);
-        builder.setPositiveButton("OK", (dialog, which) -> {
+        StringBuilder message = new StringBuilder(email.getText().toString());
+        if (switchClicked.isChecked()) message.append(" will be able to access certain data and functions. Are you sure you want to continue?");
+        else message.append(" will be unable to access certain data and functions. Are you sure you want to continue?");
+        Dialog changeDialog = new Dialog(cardView.getContext());
+        changeDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        changeDialog.setContentView(R.layout.change_status);
+        changeDialog.setCancelable(false);
+        changeDialog.create();
+        changeDialog.show();
+        TextView confirmText = changeDialog.findViewById(R.id.confirm_text);
+        confirmText.setText(message.toString());
+        Button buttonChange = changeDialog.findViewById(R.id.change_button);
+        Button buttonCancel = changeDialog.findViewById(R.id.cancel_button);
+
+        buttonCancel.setOnClickListener(v -> {
+            switchClicked.setChecked(!switchClicked.isChecked());
+            changeDialog.dismiss();
+        });
+
+        buttonChange.setOnClickListener(v -> {
             updateData(field, switchClicked);
             logger.setUserLog(field + " set to " + switchClicked.isChecked(),
                     email.getText().toString(),
                     FirebaseAuth.getInstance().getCurrentUser().getEmail());
-            dialog.dismiss();
+            changeDialog.dismiss();
         });
-        builder.setNegativeButton("Cancel", (dialog, which) -> {
-            switchClicked.setChecked(!switchClicked.isChecked());
-            dialog.dismiss();
-        });
-        builder.setCancelable(false);
-        AlertDialog alertDialog = builder
-                .create();
-        alertDialog.show();
     }
 }

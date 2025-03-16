@@ -2,9 +2,9 @@ package com.lock.stockit;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,14 +25,11 @@ import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.lock.stockit.Helpers.Logger;
+import com.lock.stockit.Helpers.Validator;
 
 import java.util.ArrayList;
-import java.util.Objects;
-import java.util.regex.Pattern;
 
 public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
 
@@ -50,6 +47,7 @@ public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.Au
     private Button changeButton;
     private String oldPassword;
     private final Logger logger = new Logger();
+    private final Validator validator = new Validator();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,10 +76,7 @@ public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.Au
             else if(getIntent().getStringExtra("change").equals("email")) newEmail();
             // If user wants to change password
             else {
-                String newPassword, confirmPassword;
-                newPassword = String.valueOf(changePassword.getText());
-                confirmPassword = String.valueOf(changeConfirmPassword.getText());
-                newPassword(oldPassword, newPassword, confirmPassword);
+                newPassword(oldPassword, changePassword, changeConfirmPassword);
             }
         });
 
@@ -113,20 +108,19 @@ public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.Au
                 });
     }
 
-    @SuppressWarnings("deprecation")
     private void changeLayout(String change) {
         String text = "Enter your new " + change;
         String button = "Change " + change;
         changeText.setText(text);
         changeButton.setText(button);
 
-        passwordLayout.setPasswordVisibilityToggleEnabled(false);
+        passwordLayout.setEndIconMode(TextInputLayout.END_ICON_PASSWORD_TOGGLE);
         changeEmail.setText("");
         changePassword.setText("");
         changeConfirmPassword.setText("");
 
         if (change.equals("email")) {
-            fetchEmail();
+            validator.fetchEmail();
             changeEmail.setVisibility(View.VISIBLE);
             passwordLayout.setVisibility(View.GONE);
             confirmPasswordLayout.setVisibility(View.GONE);
@@ -135,22 +129,13 @@ public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.Au
             changePassword.setVisibility(View.VISIBLE);
             confirmPasswordLayout.setVisibility(View.VISIBLE);
             changePassword.setHint(R.string.new_password);
-            passwordLayout.setPasswordVisibilityToggleEnabled(true);
+            passwordLayout.setEndIconMode(TextInputLayout.END_ICON_PASSWORD_TOGGLE);
         }
-    }
-    private void fetchEmail() {
-        colRef.get().addOnCompleteListener(task -> {
-            if (!task.isSuccessful()) return;
-            QuerySnapshot querySnapshot = task.getResult();
-            if (querySnapshot == null) return;
-            for (DocumentSnapshot document : querySnapshot.getDocuments())
-                emails.add(document.getString("email"));
-        });
     }
 
     private void newEmail() {
         String email = String.valueOf(changeEmail.getText());
-        if (!emailChecker(email)) return;
+        if (!validator.emailChecker(this, changeEmail)) return;
         user.verifyBeforeUpdateEmail(email).addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Toast.makeText(ChangeActivity.this, "Error. Please try again.", Toast.LENGTH_SHORT).show();
@@ -171,9 +156,9 @@ public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.Au
         progressBar.setVisibility(View.GONE);
     }
 
-    private void newPassword(String oldPassword, String password, String confirmPassword) {
-        if (!passwordChecker(oldPassword, password, confirmPassword)) return;
-        user.updatePassword(password).addOnCompleteListener(task -> {
+    private void newPassword(String oldPassword, EditText password, EditText confirmPassword) {
+        if (!validator.passwordChecker(this, password, confirmPassword, user.getEmail(), oldPassword)) return;
+        user.updatePassword(password.getText().toString()).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 Toast.makeText(ChangeActivity.this, "Password successfully changed. Please sign in again.", Toast.LENGTH_SHORT).show();
                 logger.setUserLog("password changed", user.getEmail(), user.getEmail());
@@ -183,82 +168,6 @@ public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.Au
                 Toast.makeText(ChangeActivity.this, "Error. Please try again.", Toast.LENGTH_SHORT).show();
         });
         progressBar.setVisibility(View.GONE);
-    }
-
-    private boolean emailChecker(String email) {
-        emailExists = false; //returns true if email exists in database
-        for (String e : emails)
-            if (e.equals(email)) {
-                emailExists = true;
-                break;
-            }
-        if (TextUtils.isEmpty(email)) {
-            Toast.makeText(ChangeActivity.this, "Email is required.", Toast.LENGTH_SHORT).show();
-            changeEmail.setError("Email is required.");
-            return false;
-        } if (!email.contains("@") || !email.contains(".") || email.contains(" ")) {
-            Toast.makeText(ChangeActivity.this, "Invalid email.", Toast.LENGTH_SHORT).show();
-            changeEmail.setError("Invalid email.");
-            return false;
-        } if (Objects.equals(user.getEmail(), email)) {
-            Toast.makeText(ChangeActivity.this, "New email cannot be the same as the old email.", Toast.LENGTH_SHORT).show();
-            changeEmail.setError("New email cannot be the same as the old email.");
-            return false;
-        } if (emailExists) {
-            Toast.makeText(ChangeActivity.this, "Email already exists.", Toast.LENGTH_SHORT).show();
-            changeEmail.setError("Email already exists.");
-        }
-        return !emailExists;
-    }
-
-    private boolean passwordChecker(String oldPassword, String newPassword,String confirmPassword) {
-        Pattern specialChar = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
-        Pattern upperCase = Pattern.compile("[A-Z ]");
-        Pattern lowerCase = Pattern.compile("[a-z ]");
-        Pattern digitCase = Pattern.compile("[0-9 ]");
-        changePassword.setText("");
-        changeConfirmPassword.setText("");
-
-        if (TextUtils.isEmpty(newPassword) || TextUtils.isEmpty(confirmPassword)) {
-            Toast.makeText(ChangeActivity.this, "Password is required.", Toast.LENGTH_SHORT).show();
-            changePassword.setError("Password is required.");
-            return false;
-        } if (newPassword.length() < 8) {
-            Toast.makeText(ChangeActivity.this, "Password must be at least 8 characters.", Toast.LENGTH_SHORT).show();
-            changePassword.setError("Password must be at least 8 characters.");
-            return false;
-        } if (!specialChar.matcher(newPassword).find()) {
-            Toast.makeText(ChangeActivity.this, "Password must contain a special character.", Toast.LENGTH_SHORT).show();
-            changePassword.setError("Password must contain a special character.");
-            return false;
-        } if (!upperCase.matcher(newPassword).find()) {
-            Toast.makeText(ChangeActivity.this, "Password must contain an uppercase letter.", Toast.LENGTH_SHORT).show();
-            changePassword.setError("Password must contain an uppercase letter.");
-            return false;
-        } if (!lowerCase.matcher(newPassword).find()) {
-            Toast.makeText(ChangeActivity.this, "Password must contain a lowercase letter.", Toast.LENGTH_SHORT).show();
-            changePassword.setError("Password must contain a lowercase letter.");
-            return false;
-        } if (!digitCase.matcher(newPassword).find()) {
-            Toast.makeText(ChangeActivity.this, "Password must contain a digit.", Toast.LENGTH_SHORT).show();
-            changePassword.setError("Password must contain a digit.");
-            return false;
-        } if (newPassword.contains(" ") || confirmPassword.contains(" ")) {
-            Toast.makeText(ChangeActivity.this, "Password cannot contain spaces.", Toast.LENGTH_SHORT).show();
-            changePassword.setError("Password cannot contain spaces.");
-            return false;
-        } if (!newPassword.equals(confirmPassword)) {
-            Toast.makeText(ChangeActivity.this, "Passwords do not match.", Toast.LENGTH_SHORT).show();
-            changeConfirmPassword.setError("Passwords do not match.");
-            return false;
-        } if (newPassword.equals(oldPassword)) {
-            Toast.makeText(ChangeActivity.this, "New password cannot be the same as the old password.", Toast.LENGTH_SHORT).show();
-            changePassword.setError("New password cannot be the same as the old password.");
-            changePassword.setText("");
-            changeConfirmPassword.setText("");
-            return false;
-        }
-        return true;
     }
 
     @Override
