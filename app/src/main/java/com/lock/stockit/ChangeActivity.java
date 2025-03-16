@@ -28,13 +28,9 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.lock.stockit.Helpers.Logger;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -53,6 +49,7 @@ public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.Au
     private ProgressBar progressBar;
     private Button changeButton;
     private String oldPassword;
+    private final Logger logger = new Logger();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,7 +161,7 @@ public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.Au
                     .setTitle("Email verification required.")
                     .setMessage("Please verify your new email before signing in again.\n Email will only be changed after verification.")
                     .setNegativeButton("OK", (dialog, which) -> {
-                        setLog("email changed");
+                        logger.setUserLog("email changed", "email", user.getEmail());
                         auth.signOut();
                         dialog.dismiss();
                     })
@@ -179,7 +176,7 @@ public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.Au
         user.updatePassword(password).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 Toast.makeText(ChangeActivity.this, "Password successfully changed. Please sign in again.", Toast.LENGTH_SHORT).show();
-                setLog("password changed");
+                logger.setUserLog("password changed", user.getEmail(), user.getEmail());
                 auth.signOut();
                 finish();
             } else
@@ -264,16 +261,6 @@ public class ChangeActivity extends AppCompatActivity implements FirebaseAuth.Au
         return true;
     }
 
-    protected void setLog(String action) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        String dateTime = formatter.format(new Date());
-        Map<String, Object> log = new HashMap<>();
-        log.put("action", action);
-        log.put("target", user.getEmail());
-        log.put("user", user.getEmail());
-        log.put("date-time", dateTime);
-        FirebaseFirestore.getInstance().collection("user log").document().set(log);
-    }
     @Override
     protected void onStart() {
         super.onStart();

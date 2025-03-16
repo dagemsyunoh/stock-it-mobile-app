@@ -36,15 +36,13 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.lock.stockit.Adapters.UserAdapter;
 import com.lock.stockit.Helpers.CustomLinearLayoutManager;
+import com.lock.stockit.Helpers.Logger;
 import com.lock.stockit.Helpers.SwipeState;
 import com.lock.stockit.Helpers.UserListeners;
 import com.lock.stockit.Models.UserModel;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 public class ManageUsersActivity extends AppCompatActivity implements UserListeners {
@@ -57,6 +55,7 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
     protected ExtendedFloatingActionButton buttonBack;
     protected AuthCredential credential;
     private AlertDialog dialog;
+    private final Logger logger = new Logger();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,20 +193,9 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
             if (!task.isSuccessful()) return;
             colRef.document(task.getResult().getDocuments().get(0).getId()).delete();
             FirebaseFirestore.getInstance().collection("user delete request").document(email).set(data);
-            setLog(email);
+            logger.setUserLog("delete", email, user.getEmail());
             dialog.dismiss();
         });
-    }
-
-    protected void setLog(String target) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        String dateTime = formatter.format(new Date());
-        Map<String, Object> log = new HashMap<>();
-        log.put("action", "delete");
-        log.put("target", target);
-        log.put("user", user.getEmail());
-        log.put("date-time", dateTime);
-        FirebaseFirestore.getInstance().collection("user log").document().set(log);
     }
 
     @Override

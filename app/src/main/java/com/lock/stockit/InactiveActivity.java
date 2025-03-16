@@ -17,13 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import com.lock.stockit.Helpers.Logger;
 
 public class InactiveActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
 
@@ -35,6 +29,7 @@ public class InactiveActivity extends AppCompatActivity implements FirebaseAuth.
     private int i = 5; //temporary for testing, change back to 30 upon deployment
     private Runnable runnable;
     private boolean clicked;
+    private final Logger logger = new Logger();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +49,7 @@ public class InactiveActivity extends AppCompatActivity implements FirebaseAuth.
             reload.setText(R.string.reloadV);
             resendDelay();
         } else if (!LoaderActivity.activated){
-            setLog();
+            logger.setUserLog("email verified", user.getEmail(), user.getEmail());
             buttonResend.setVisibility(View.GONE);
             inactiveText.setText(R.string.account_inactive);
             reload.setText(R.string.reloadA);
@@ -87,16 +82,6 @@ public class InactiveActivity extends AppCompatActivity implements FirebaseAuth.
         });
     }
 
-    protected void setLog() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        String dateTime = formatter.format(new Date());
-        Map<String, Object> log = new HashMap<>();
-        log.put("action", "email verified");
-        log.put("target", user.getEmail());
-        log.put("user", user.getEmail());
-        log.put("date-time", dateTime);
-        FirebaseFirestore.getInstance().collection("user log").document().set(log);
-    }
     private void resendDelay() {
         //delay loop will pause when i is 0, enabling resend button. Loop will continue if i value is changed.
         runnable = () -> {

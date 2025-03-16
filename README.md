@@ -3,10 +3,10 @@
 TO-DO: <br>
 - printer connection (partially done)
 - print format (partially done)
-- history log (admin)
+- history log (partially done)
 - daily sales (?)
 - settings
-- hardware partnership discounts
+- hardware discounts
 - design
 - testing & bug checking
 

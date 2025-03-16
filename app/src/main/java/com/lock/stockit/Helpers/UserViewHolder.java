@@ -16,12 +16,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.lock.stockit.Models.UserModel;
 import com.lock.stockit.R;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-
 public class UserViewHolder extends UserBaseViewHolder {
 
 
@@ -30,6 +24,7 @@ public class UserViewHolder extends UserBaseViewHolder {
     private final ImageView rightImage;
     private final CardView cardView;
     private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
+    private final Logger logger = new Logger();
 
     public UserViewHolder(View itemView, UserListeners customListeners) {
         super(itemView, customListeners);
@@ -100,32 +95,24 @@ public class UserViewHolder extends UserBaseViewHolder {
         String message;
         if (switchClicked.isChecked()) message = email.getText().toString() + " will be able to access certain data and functions. Are you sure you want to continue?";
         else message = email.getText().toString() + " will be unable to access certain data and functions. Are you sure you want to continue?";
-        AlertDialog alertDialog = new AlertDialog.Builder(cardView.getContext())
-                .setIcon(R.drawable.ic_warning)
-                .setTitle("Warning! User status will be changed")
-                .setMessage(message)
-                .setPositiveButton("OK", (dialog, which) -> {
-                    updateData(field, switchClicked);
-                    setLog(field + " set to " + switchClicked.isChecked(), email.getText().toString());
-                    dialog.dismiss();
-                })
-                .setNegativeButton("Cancel", (dialog, which) -> {
-                    switchClicked.setChecked(!switchClicked.isChecked());
-                    dialog.dismiss();
-                })
-                .setCancelable(false)
+        AlertDialog.Builder builder = new AlertDialog.Builder(cardView.getContext());
+        builder.setIcon(R.drawable.ic_warning);
+        builder.setTitle("Warning! User status will be changed");
+        builder.setMessage(message);
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            updateData(field, switchClicked);
+            logger.setUserLog(field + " set to " + switchClicked.isChecked(),
+                    email.getText().toString(),
+                    FirebaseAuth.getInstance().getCurrentUser().getEmail());
+            dialog.dismiss();
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            switchClicked.setChecked(!switchClicked.isChecked());
+            dialog.dismiss();
+        });
+        builder.setCancelable(false);
+        AlertDialog alertDialog = builder
                 .create();
         alertDialog.show();
-    }
-
-    protected void setLog(String action, String target) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        String dateTime = formatter.format(new Date());
-        Map<String, Object> log = new HashMap<>();
-        log.put("action", action);
-        log.put("target", target);
-        log.put("user", FirebaseAuth.getInstance().getCurrentUser().getEmail());
-        log.put("date-time", dateTime);
-        FirebaseFirestore.getInstance().collection("user log").document().set(log);
     }
 }
