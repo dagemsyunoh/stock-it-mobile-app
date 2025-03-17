@@ -68,19 +68,9 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
             rightImage.setOnClickListener(view -> getListener().onClickRight(item, position));
         }
 
-        plusOne.setOnClickListener(view -> {
-            if (itemQty.getText() == null || itemQty.getText().toString().isEmpty()) itemQty.setText(String.valueOf(0));
-            if (checkMinMax(1)) return;
-            QtyEditor.changeQty(itemQty, 1);
-            changeValues(item, position);
-        });
+        plusOne.setOnClickListener(view -> checkMinMax(item, position, 1));
 
-        minusOne.setOnClickListener(view -> {
-            if (itemQty.getText() == null || itemQty.getText().toString().isEmpty()) itemQty.setText(String.valueOf(0));
-            if (checkMinMax(-1)) return;
-            QtyEditor.changeQty(itemQty, -1);
-            changeValues(item, position);
-        });
+        minusOne.setOnClickListener(view -> checkMinMax(item, position, -1));
 
 
         cardView.setOnClickListener(view -> { }); // Do not remove, it is required for the swipe to work
@@ -114,7 +104,8 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
         //endregion
     }
 
-    private boolean checkMinMax(int val) {
+    private void checkMinMax(ReceiptModel item, int position,int val) {
+        if (itemQty.getText() == null || itemQty.getText().toString().isEmpty()) itemQty.setText(String.valueOf(0));
         int flag = 0;
         String iName = itemName.getText().toString();
         String iSize = itemSize.getText().toString();
@@ -123,14 +114,18 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
         ArrayList<Integer> qty = ReceiptFragment.qty;
         for (int i = 0; i < names.size(); i++)
             if (iName.equals(names.get(i)) && iSize.equals(sizes.get(i))) flag = i;
-
-        if (Integer.parseInt(itemQty.getText().toString()) + val > qty.get(flag)) {
+        if (qty.get(flag) == 0) {
+            Toast.makeText(cardView.getContext(), "This item is out of stock.", Toast.LENGTH_SHORT).show();
+            return;
+        } if (Integer.parseInt(itemQty.getText().toString()) + val > qty.get(flag)) {
             Toast.makeText(cardView.getContext(), "You've reached the maximum quantity.", Toast.LENGTH_SHORT).show();
-            return true;
+            return;
         } if (Integer.parseInt(itemQty.getText().toString()) + val < 1) {
             Toast.makeText(cardView.getContext(), "You've reached the minimum quantity.", Toast.LENGTH_SHORT).show();
-            return true;
-        } return false;
+            return;
+        }
+        QtyEditor.changeQty(itemQty, val);
+        changeValues(item, position);
     }
 
     private void changeValues (ReceiptModel item, int position) {

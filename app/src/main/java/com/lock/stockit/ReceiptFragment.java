@@ -77,6 +77,8 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private String invoice;
     private double cash = 0, sum;
 
+    private Dialog addPopUp;
+
     public static Intent newIntent(Context context) {
         return new Intent(context, ReceiptListeners.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
     }
@@ -155,9 +157,8 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         recyclerView.setAdapter(adapter);
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private void addItemPopUp() {
-        Dialog addPopUp = new Dialog(getActivity());
+        addPopUp  = new Dialog(getActivity());
         addPopUp.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         addPopUp.setContentView(R.layout.receipt_add);
         addPopUp.setCancelable(false);
@@ -186,40 +187,11 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
             setItemText();
         });
 
-        plusOne.setOnClickListener(view -> {
-            if (itemQty.getText() == null || itemQty.getText().toString().isEmpty()) itemQty.setText(String.valueOf(0));
-            if (checkMinMax(1)) return;
-            QtyEditor.changeQty(itemQty, 1);
-            setItemText();
-        });
+        plusOne.setOnClickListener(view -> checkMinMax(1));
 
-        minusOne.setOnClickListener(view -> {
-            if (itemQty.getText() == null || itemQty.getText().toString().isEmpty()) itemQty.setText(String.valueOf(0));
-            if (checkMinMax(-1)) return;
-            QtyEditor.changeQty(itemQty, -1);
-            if (Integer.parseInt(itemQty.getText().toString()) == 1) {
-                Toast.makeText(getActivity(), "Quantity cannot be less than 1", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            setItemText();
-        });
+        minusOne.setOnClickListener(view -> checkMinMax(-1));
 
-        saveButton.setOnClickListener(v -> {
-            if (checkMinMax(0)) return;
-            setItemText();
-            for (ReceiptModel receipt : receiptList)
-                if (receipt.getItemName().equals(item[0]) && receipt.getItemSize().equals(item[1])) {
-                    Toast.makeText(getActivity(), "Item already exists", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-            receiptList.add(new ReceiptModel(item[0], item[1], Integer.parseInt(item[2]), Double.parseDouble(item[3]), Double.parseDouble(item[4])));
-            setLayout(true);
-            getSum();
-            for (int i = 0; i < 5; i++) item[i] = "";
-            adapter.setReceipts(receiptList);
-            adapter.notifyDataSetChanged();
-            addPopUp.dismiss();
-        });
+        saveButton.setOnClickListener(v -> checkMinMax(0));
 
         back.setOnClickListener(v -> addPopUp.cancel());
     }
@@ -303,11 +275,8 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private void changeSizeValues(int pos) {
         String nameVal = namesUnique.get(pos);
         sizesUnique.clear();
-        for (int i = 0; i < names.size() -1; i++) {
-            if (names.get(i).equals(nameVal)) {
-                sizesUnique.add(sizes.get(i));
-            }
-        }
+        for (int i = 0; i < names.size(); i++)
+            if (names.get(i).equals(nameVal)) sizesUnique.add(sizes.get(i));
         sizesUnique.sort(new sizeComparator());
         String[] sizeDisplay = sizesUnique.toArray(new String[0]);
         setNumberPicker(itemSize, sizeDisplay, sizesUnique);
@@ -315,7 +284,6 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         setItemText();
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private void fetchData() {
         colRefStock.addSnapshotListener((value, error) -> {
             if (error != null || value == null) return;
@@ -337,23 +305,43 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         });
     }
     
-    private boolean checkMinMax(int val) {
-        if ((itemQty.getText() == null || itemQty.getText().toString().isEmpty() || Integer.parseInt(itemQty.getText().toString()) < 1) && val < 1) {
+    @SuppressLint("NotifyDataSetChanged")
+    private void checkMinMax(int val) {
+        if (itemQty.getText() == null || itemQty.getText().toString().isEmpty()) itemQty.setText(String.valueOf(0));
+        if (Integer.parseInt(itemQty.getText().toString()) < 1 && val < 1) {
             Toast.makeText(getActivity(), "Please enter quantity.", Toast.LENGTH_SHORT).show();
-            return true;
+            return;
         }
         String iName = namesUnique.get(itemName.getValue());
         String iSize = sizesUnique.get(itemSize.getValue());
         for (int i = 0; i < names.size(); i++)
             if (iName.equals(names.get(i)) && iSize.equals(sizes.get(i))) flag = i;
-        if (Integer.parseInt(itemQty.getText().toString()) + val > qty.get(flag)) {
+        if (qty.get(flag) == 0) {
+            Toast.makeText(getActivity(), "This item is out of stock.", Toast.LENGTH_SHORT).show();
+            return;
+        } if (Integer.parseInt(itemQty.getText().toString()) + val > qty.get(flag)) {
             Toast.makeText(getActivity(), "Not enough stock. Automatically set to maximum.", Toast.LENGTH_SHORT).show();
             itemQty.setText(String.valueOf(qty.get(flag)));
-            return true;
+            return;
         } if (Integer.parseInt(itemQty.getText().toString()) + val < 1) {
             Toast.makeText(getActivity(), "You've reached the minimum quantity.", Toast.LENGTH_SHORT).show();
-            return true;
-        } return false;
+            return;
+        }
+        QtyEditor.changeQty(itemQty, val);
+        setItemText();
+        if (val != 0) return;
+        for (ReceiptModel receipt : receiptList)
+            if (receipt.getItemName().equals(item[0]) && receipt.getItemSize().equals(item[1])) {
+                Toast.makeText(getActivity(), "Item already exists", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        receiptList.add(new ReceiptModel(item[0], item[1], Integer.parseInt(item[2]), Double.parseDouble(item[3]), Double.parseDouble(item[4])));
+        setLayout(true);
+        getSum();
+        for (int i = 0; i < 5; i++) item[i] = "";
+        adapter.setReceipts(receiptList);
+        adapter.notifyDataSetChanged();
+        addPopUp.dismiss();
     }
 
     private void setItemText() {
