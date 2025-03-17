@@ -124,7 +124,7 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
         for (int i = 0; i < names.size(); i++)
             if (iName.equals(names.get(i)) && iSize.equals(sizes.get(i))) flag = i;
 
-        if (Integer.parseInt(itemQty.getText().toString()) > qty.get(flag)) {
+        if (Integer.parseInt(itemQty.getText().toString()) + val > qty.get(flag)) {
             Toast.makeText(cardView.getContext(), "You've reached the maximum quantity.", Toast.LENGTH_SHORT).show();
             return true;
         } if (Integer.parseInt(itemQty.getText().toString()) + val < 1) {
