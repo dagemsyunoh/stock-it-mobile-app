@@ -11,9 +11,9 @@ public class sizeComparator implements Comparator<String> {
         for (int i = 0; i < 3; i++ ) {
             int a = Integer.parseInt(d1[i]);
             int b = Integer.parseInt(d2[i]);
-            if (a > b) return a;
-            else if (a < b) return b;
+            int compareSize = Integer.compare(a, b);
+            if (compareSize != 0) return compareSize;
         }
-        return o1.compareTo(o2);
+        return 0;
     }
 }

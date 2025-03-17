@@ -30,6 +30,7 @@ import com.lock.stockit.Helpers.CustomLinearLayoutManager;
 import com.lock.stockit.Helpers.QtyEditor;
 import com.lock.stockit.Helpers.StockListeners;
 import com.lock.stockit.Helpers.SwipeState;
+import com.lock.stockit.Helpers.stockComparator;
 import com.lock.stockit.Models.StockModel;
 
 import java.util.ArrayList;
@@ -112,6 +113,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
                 stockList.add(new StockModel(name, size, qty, price));
             }
             setRecyclerView();
+            stockList.sort(new stockComparator());
             adapter.setStocks(stockList);
             adapter.notifyDataSetChanged();
         });
