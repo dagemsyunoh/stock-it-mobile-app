@@ -39,7 +39,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.lock.stockit.Adapters.ReceiptAdapter;
 import com.lock.stockit.Helpers.CustomLinearLayoutManager;
-import com.lock.stockit.Helpers.QtyMover;
+import com.lock.stockit.Helpers.QtyEditor;
 import com.lock.stockit.Helpers.ReceiptListeners;
 import com.lock.stockit.Helpers.SecurePreferences;
 import com.lock.stockit.Helpers.SwipeState;
@@ -60,13 +60,13 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private TextInputEditText itemQty;
     private TextView title, itemUnitPrice, itemTotalPrice, noItem, grandTotalPrice;
     private LinearLayout grandTotalLayout;
-    private final ArrayList<ReceiptModel> receiptList = new ArrayList<>();
+    public final static ArrayList<String> names = new ArrayList<>();
     private ReceiptAdapter adapter;
-    private final ArrayList<String> names = new ArrayList<>();
+    public final static ArrayList<String> sizes = new ArrayList<>();
     private final ArrayList<String> namesUnique = new ArrayList<>();
-    private final ArrayList<String> sizes = new ArrayList<>();
+    public final static ArrayList<Integer> qty = new ArrayList<>();
     private final ArrayList<String> sizesUnique = new ArrayList<>();
-    private final ArrayList<Integer> qty = new ArrayList<>();
+    private final static ArrayList<ReceiptModel> receiptList = new ArrayList<>();
     private final ArrayList<Double> unitPrice = new ArrayList<>();
     private final ArrayList<Double> grandTotal = new ArrayList<>();
     private final String[] item = new String[5];
@@ -183,35 +183,30 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
 
         itemSize.setOnValueChangedListener((np, oldPos, newPos) -> {
             itemQty.setText(String.valueOf(0));
-            setItem();
-        });
-
-        itemQty.setOnFocusChangeListener((view, b) -> {
-            if (checkStock()) return;
-            setItem();
+            setItemText();
         });
 
         plusOne.setOnClickListener(view -> {
-            if (checkStock()) return;
-            QtyMover.onPlusOne(itemQty);
-            setItem();
+            if (itemQty.getText() == null || itemQty.getText().toString().isEmpty()) itemQty.setText(String.valueOf(0));
+            if (checkMinMax(1)) return;
+            QtyEditor.changeQty(itemQty, 1);
+            setItemText();
         });
 
         minusOne.setOnClickListener(view -> {
-            QtyMover.onMinusOne(itemQty);
+            if (itemQty.getText() == null || itemQty.getText().toString().isEmpty()) itemQty.setText(String.valueOf(0));
+            if (checkMinMax(-1)) return;
+            QtyEditor.changeQty(itemQty, -1);
             if (Integer.parseInt(itemQty.getText().toString()) == 1) {
                 Toast.makeText(getActivity(), "Quantity cannot be less than 1", Toast.LENGTH_SHORT).show();
                 return;
             }
-            setItem();
+            setItemText();
         });
 
         saveButton.setOnClickListener(v -> {
-            if (itemQty.getText() == null || itemQty.getText().toString().isEmpty() || Integer.parseInt(itemQty.getText().toString()) == 0) {
-                Toast.makeText(getActivity(), "Please enter quantity", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            setItem();
+            if (checkMinMax(0)) return;
+            setItemText();
             for (ReceiptModel receipt : receiptList)
                 if (receipt.getItemName().equals(item[0]) && receipt.getItemSize().equals(item[1])) {
                     Toast.makeText(getActivity(), "Item already exists", Toast.LENGTH_SHORT).show();
@@ -317,7 +312,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         String[] sizeDisplay = sizesUnique.toArray(new String[0]);
         setNumberPicker(itemSize, sizeDisplay, sizesUnique);
         itemQty.setText(String.valueOf(0));
-        setItem();
+        setItemText();
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -342,19 +337,26 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         });
     }
     
-    private boolean checkStock() {
+    private boolean checkMinMax(int val) {
+        if ((itemQty.getText() == null || itemQty.getText().toString().isEmpty() || Integer.parseInt(itemQty.getText().toString()) < 1) && val < 1) {
+            Toast.makeText(getActivity(), "Please enter quantity.", Toast.LENGTH_SHORT).show();
+            return true;
+        }
         String iName = namesUnique.get(itemName.getValue());
         String iSize = sizesUnique.get(itemSize.getValue());
         for (int i = 0; i < names.size(); i++)
             if (iName.equals(names.get(i)) && iSize.equals(sizes.get(i))) flag = i;
-
-        if (Integer.parseInt(itemQty.getText().toString()) > qty.get(flag)) {
-            Toast.makeText(getActivity(), "Not enough stock", Toast.LENGTH_SHORT).show();
+        if (Integer.parseInt(itemQty.getText().toString()) + val > qty.get(flag)) {
+            Toast.makeText(getActivity(), "Not enough stock. Automatically set to maximum.", Toast.LENGTH_SHORT).show();
+            itemQty.setText(String.valueOf(qty.get(flag)));
+            return true;
+        } if (Integer.parseInt(itemQty.getText().toString()) + val < 1) {
+            Toast.makeText(getActivity(), "You've reached the minimum quantity.", Toast.LENGTH_SHORT).show();
             return true;
         } return false;
     }
 
-    private void setItem() {
+    private void setItemText() {
         item[0] = namesUnique.get(itemName.getValue());
         item[1] = sizesUnique.get(itemSize.getValue());
         item[2] = itemQty.getText().toString();
@@ -379,14 +381,25 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     }
 
     private void getSum() {
-        sum = 0.0;
         if (!item[4].isEmpty()) grandTotal.add(Double.parseDouble(item[4]));
+        setSum();
+    }
+    private void setSum() {
+        sum = 0.0;
         for (Double total : grandTotal) {
             sum += total;
         }
-
         String sumText = "₱" + String.format(Locale.getDefault(), "%.2f", sum);
         grandTotalPrice.setText(sumText);
+    }
+
+    @Override
+    public void changeQty(ReceiptModel item, int position) {
+        grandTotal.set(position, item.getItemTotalPrice());
+        setSum();
+        receiptList.set(position, item);
+        adapter.setReceipts(receiptList);
+        adapter.notifyItemChanged(position);
     }
 
     @Override

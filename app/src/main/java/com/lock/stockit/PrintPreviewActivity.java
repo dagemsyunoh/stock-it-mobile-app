@@ -233,7 +233,8 @@ public class PrintPreviewActivity extends Activity implements Runnable {
                     ListPairedDevices();
                     launchDeviceList();
                 } else {
-                    Toast.makeText(PrintPreviewActivity.this, "Message", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PrintPreviewActivity.this, "Bluetooth disabled. Turn on bluetooth to print.", Toast.LENGTH_SHORT).show();
+                    onBackPressed();
                 }
                 break;
         }

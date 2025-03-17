@@ -1,6 +1,7 @@
 package com.lock.stockit.Helpers;
 
 import android.annotation.SuppressLint;
+import android.text.InputType;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -13,7 +14,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.lock.stockit.Models.ReceiptModel;
 import com.lock.stockit.R;
+import com.lock.stockit.ReceiptFragment;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class ReceiptViewHolder extends ReceiptBaseViewHolder {
@@ -49,6 +52,9 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
         itemQty.setText(qtyText);
         itemUnitPrice.setText(unitPriceText);
         itemTotalPrice.setText(totalPriceText);
+        itemQty.setFocusable(false);
+        itemQty.setClickable(true);
+        itemQty.setInputType(InputType.TYPE_NULL);
         //endregion
         //region Swipe
         setSwipe(cardView, item.getState());
@@ -63,18 +69,19 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
         }
 
         plusOne.setOnClickListener(view -> {
-            QtyMover.onPlusOne(itemQty);
-            itemTotalPrice.setText(String.valueOf(Double.parseDouble(String.valueOf(itemQty.getText())) * item.getItemUnitPrice()));
+            if (itemQty.getText() == null || itemQty.getText().toString().isEmpty()) itemQty.setText(String.valueOf(0));
+            if (checkMinMax(1)) return;
+            QtyEditor.changeQty(itemQty, 1);
+            changeValues(item, position);
         });
 
         minusOne.setOnClickListener(view -> {
-            if (Integer.parseInt(itemQty.getText().toString()) == 1) {
-                Toast.makeText(cardView.getContext(), "Quantity cannot be less than 1. Please delete the item instead.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            QtyMover.onMinusOne(itemQty);
-            itemTotalPrice.setText(String.valueOf(Double.parseDouble(String.valueOf(itemQty.getText())) * item.getItemUnitPrice()));
+            if (itemQty.getText() == null || itemQty.getText().toString().isEmpty()) itemQty.setText(String.valueOf(0));
+            if (checkMinMax(-1)) return;
+            QtyEditor.changeQty(itemQty, -1);
+            changeValues(item, position);
         });
+
 
         cardView.setOnClickListener(view -> { }); // Do not remove, it is required for the swipe to work
         //endregion
@@ -105,5 +112,31 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
             }
         });
         //endregion
+    }
+
+    private boolean checkMinMax(int val) {
+        int flag = 0;
+        String iName = itemName.getText().toString();
+        String iSize = itemSize.getText().toString();
+        ArrayList<String> names = ReceiptFragment.names;
+        ArrayList<String> sizes = ReceiptFragment.sizes;
+        ArrayList<Integer> qty = ReceiptFragment.qty;
+        for (int i = 0; i < names.size(); i++)
+            if (iName.equals(names.get(i)) && iSize.equals(sizes.get(i))) flag = i;
+
+        if (Integer.parseInt(itemQty.getText().toString()) > qty.get(flag)) {
+            Toast.makeText(cardView.getContext(), "You've reached the maximum quantity.", Toast.LENGTH_SHORT).show();
+            return true;
+        } if (Integer.parseInt(itemQty.getText().toString()) + val < 1) {
+            Toast.makeText(cardView.getContext(), "You've reached the minimum quantity.", Toast.LENGTH_SHORT).show();
+            return true;
+        } return false;
+    }
+
+    private void changeValues (ReceiptModel item, int position) {
+        item.setItemQuantity(Integer.parseInt(itemQty.getText().toString()));
+        item.setItemTotalPrice(item.getItemQuantity() * item.getItemUnitPrice());
+        itemTotalPrice.setText(String.valueOf(item.getItemTotalPrice()));
+        getListener().changeQty(item, position);
     }
 }

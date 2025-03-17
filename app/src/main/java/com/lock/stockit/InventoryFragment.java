@@ -27,7 +27,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.lock.stockit.Adapters.StockAdapter;
 import com.lock.stockit.Helpers.CustomLinearLayoutManager;
-import com.lock.stockit.Helpers.QtyMover;
+import com.lock.stockit.Helpers.QtyEditor;
 import com.lock.stockit.Helpers.StockListeners;
 import com.lock.stockit.Helpers.SwipeState;
 import com.lock.stockit.Models.StockModel;
@@ -171,10 +171,10 @@ public class InventoryFragment extends Fragment implements StockListeners {
             itemSize.setText(output);
         });
 
-        plusOne.setOnClickListener(view -> QtyMover.onPlusOne(itemQty));
+        plusOne.setOnClickListener(view -> QtyEditor.changeQty(itemQty, 1));
 
         minusOne.setOnClickListener(view -> {
-            QtyMover.onMinusOne(itemQty);
+            QtyEditor.changeQty(itemQty, -1);
             if (Integer.parseInt(itemQty.getText().toString()) == 1)
                 Toast.makeText(getActivity(), "Quantity cannot be less than 1", Toast.LENGTH_SHORT).show();
         });
