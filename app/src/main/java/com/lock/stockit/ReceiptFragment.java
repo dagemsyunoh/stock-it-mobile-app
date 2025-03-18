@@ -231,6 +231,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
             if (result.getResultCode() == RESULT_OK) {
                 Toast.makeText(getActivity(), "Print successful", Toast.LENGTH_SHORT).show();
                 receiptList.clear();
+                grandTotal.clear();
                 setSum();
                 adapter.setReceipts(receiptList);
             }
@@ -342,7 +343,6 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
                 return;
             }
         receiptList.add(new ReceiptModel(item[0], item[1], Integer.parseInt(item[2]), Double.parseDouble(item[3]), Double.parseDouble(item[4])));
-        Log.d("TAG", item[0] + ", " + item[1] + ", " + item[2] + ", " + item[3] + ", " + item[4]);
         setLayout(true);
         getSum();
         for (int i = 0; i < 5; i++) item[i] = "";
@@ -351,7 +351,6 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         addPopUp.dismiss();
     }
     private void checkNameSize() {
-        Log.d("TAG", namesUnique.get(itemName.getValue()) + ", " + sizesUnique.get(itemSize.getValue()));
         String iName = namesUnique.get(itemName.getValue());
         String iSize = sizesUnique.get(itemSize.getValue());
         for (int i = 0; i < stockList.size(); i++)
@@ -372,6 +371,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     }
 
     private void setNumberPicker(NumberPicker numberPicker, String[] array, ArrayList<String> arrayList) {
+        if (arrayList == null) return;
         numberPicker.setDisplayedValues(null);
         numberPicker.setMinValue(0);
         numberPicker.setMaxValue(arrayList.size() - 1);
