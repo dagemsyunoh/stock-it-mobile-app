@@ -48,7 +48,8 @@ public class PrintPreviewActivity extends Activity implements Runnable {
     private final CollectionReference receiptRef = FirebaseFirestore.getInstance().collection("receipts");
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2,CONNECTION_TIMEOUT = 5000; // 5 seconds
-    private final String separator = "-".repeat(32);
+    private final String sSeparator = "-".repeat(32);
+    private final String dSeparator = "=".repeat(32);
     private final ArrayList<String> headerList = new ArrayList<>();
     private ArrayList<ReceiptModel> receiptList;
     private final DecimalFormat df = new DecimalFormat("#.00");
@@ -62,6 +63,7 @@ public class PrintPreviewActivity extends Activity implements Runnable {
     private OutputStream os;
     private double cash, total;
     private boolean isConnected = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -372,30 +374,34 @@ public class PrintPreviewActivity extends Activity implements Runnable {
     }
 
     private void getHeaderBodyFooter() {
-        header = getHeader();
-        body = getBody();
+        SecurePreferences preferences = new SecurePreferences(getApplicationContext(), "store-preferences", "store-key", true);
+        header = getHeader(preferences);
+        body = getBody(preferences);
         footer = getFooter();
     }
 
-    private String getHeader() {
+    private String getHeader(SecurePreferences preferences) {
         StringBuilder text = new StringBuilder();
-        SecurePreferences preferences = new SecurePreferences(getApplicationContext(), "store-preferences", "store-key", true);
         headerList.clear();
         headerList.add(preferences.getString("name"));
         headerList.add(preferences.getString("address 1"));
         headerList.add(preferences.getString("address 2"));
         headerList.add(preferences.getString("contact"));
-        for (String s : headerList) {
-            text.append(s.toUpperCase()).append("\n");
-        }
-        text.append(separator).append("\n");
-        text.append(invoice).append("\n");
-        text.append(separator).append("\n");
+        for (String s : headerList) text.append(s.toUpperCase()).append("\n");
+        text.append(dSeparator).append("\n");
         return text.toString();
     }
 
-    private String getBody() {
+    private String getBody(SecurePreferences preferences) {
         StringBuilder text = new StringBuilder();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+        dateTime = formatter.format(new Date());
+        String cashierName = preferences.getString("cashier name").toUpperCase();
+        text.append("DATE & TIME: ").append(dateTime).append("\n");
+        text.append(invoice).append("\n");
+        text.append("CASHIER: ").append(cashierName).append("\n");
+        text.append(sSeparator).append("\n");
+
         total = 0;
         for (ReceiptModel receipt : receiptList) {
             total += receipt.getItemTotalPrice();
@@ -427,13 +433,9 @@ public class PrintPreviewActivity extends Activity implements Runnable {
 
 
     private String getFooter(){
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-        dateTime = formatter.format(new Date());
-
-        return separator + "\n" +
+        return dSeparator + "\n" +
                 "THANK YOU!" + "\n" +
                 "PLEASE VISIT AGAIN!" + "\n" +
-                separator + "\n" +
-                dateTime + "\n".repeat(2);
+                dSeparator + "\n".repeat(2);
     }
 }

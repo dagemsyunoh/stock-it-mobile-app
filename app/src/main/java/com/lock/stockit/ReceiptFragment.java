@@ -33,10 +33,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.lock.stockit.Adapters.ReceiptAdapter;
 import com.lock.stockit.Helpers.CustomLinearLayoutManager;
 import com.lock.stockit.Helpers.QtyEditor;
@@ -44,7 +46,9 @@ import com.lock.stockit.Helpers.ReceiptListeners;
 import com.lock.stockit.Helpers.SecurePreferences;
 import com.lock.stockit.Helpers.SwipeState;
 import com.lock.stockit.Helpers.sizeComparator;
+import com.lock.stockit.Helpers.stockComparator;
 import com.lock.stockit.Models.ReceiptModel;
+import com.lock.stockit.Models.StockModel;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -54,21 +58,19 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("receipts");
     private final CollectionReference colRefStock = FirebaseFirestore.getInstance().collection("stocks");
     private final DocumentReference docRef = FirebaseFirestore.getInstance().collection("format").document("store info");
+    public static final ArrayList<StockModel> stockList = new ArrayList<>();
     protected RecyclerView recyclerView;
     protected FloatingActionButton addButton, printButton, saveButton, plusOne, minusOne;
     private NumberPicker itemName, itemSize;
     private TextInputEditText itemQty;
     private TextView title, itemUnitPrice, itemTotalPrice, noItem, grandTotalPrice;
     private LinearLayout grandTotalLayout;
-    public final static ArrayList<String> names = new ArrayList<>();
     private ReceiptAdapter adapter;
-    public final static ArrayList<String> sizes = new ArrayList<>();
+    private final DocumentReference userRef = FirebaseFirestore.getInstance().collection("users").document(LoaderActivity.uid);
     private final ArrayList<String> namesUnique = new ArrayList<>();
-    public final static ArrayList<Integer> qty = new ArrayList<>();
     private final ArrayList<String> sizesUnique = new ArrayList<>();
-    private final static ArrayList<ReceiptModel> receiptList = new ArrayList<>();
-    private final ArrayList<Double> unitPrice = new ArrayList<>();
     private final ArrayList<Double> grandTotal = new ArrayList<>();
+    private final static ArrayList<ReceiptModel> receiptList = new ArrayList<>();
     private final String[] item = new String[5];
     private final ArrayList<String> header = new ArrayList<>();
     private int transactionNo, flag;
@@ -78,6 +80,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private double cash = 0, sum;
 
     private Dialog addPopUp;
+    private SecurePreferences preferences;
 
     public static Intent newIntent(Context context) {
         return new Intent(context, ReceiptListeners.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -112,28 +115,28 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         fetchHeader();
     }
 
-    private void fetchHeader() {
-        docRef.get().addOnSuccessListener(documentSnapshot -> {
-            if (documentSnapshot.exists()) {
-                header.clear();
-                header.add(documentSnapshot.getString("name"));
-                header.add(documentSnapshot.getString("address 1"));
-                header.add(documentSnapshot.getString("address 2"));
-                header.add(documentSnapshot.getString("contact"));
-                try {
-                    SecurePreferences preferences = new SecurePreferences(getContext(), "store-preferences", "store-key", true);
-                    preferences.put("name", header.get(0));
-                    preferences.put("address 1", header.get(1));
-                    preferences.put("address 2", header.get(2));
-                    preferences.put("contact", header.get(3));
-                } catch (Exception e) {
-                    Log.e("TAG", e.getMessage());
-                }
+    private void fetchData() {
+        colRefStock.orderBy("item name", Query.Direction.ASCENDING).addSnapshotListener((value, error) -> {
+            if (error != null || value == null) return;
+            stockList.clear();
+            namesUnique.clear();
+            sizesUnique.clear();
+            for (DocumentSnapshot documentSnapshot : value.getDocuments()) {
+                stockList.add(new StockModel(documentSnapshot.getString("item name"),
+                        documentSnapshot.getString("item size"),
+                        documentSnapshot.getDouble("qty").intValue(),
+                        documentSnapshot.getDouble("price")));
+                if (!namesUnique.contains(documentSnapshot.getString("item name")))
+                    namesUnique.add(documentSnapshot.getString("item name"));
+                if (!sizesUnique.contains(documentSnapshot.getString("item size")))
+                    sizesUnique.add(documentSnapshot.getString("item size"));
             }
+            stockList.sort(new stockComparator());
+            namesUnique.sort(String::compareToIgnoreCase);
+            sizesUnique.sort(new sizeComparator());
         });
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private void fetchTransNo() {
         transactionNo = 1;
         colRef.get().addOnCompleteListener(task -> {
@@ -149,6 +152,33 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
                 }
             }
         });
+    }
+
+    private void fetchHeader() {
+        String cashierName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+        try {
+            preferences = new SecurePreferences(getContext(), "store-preferences", "store-key", true);
+            preferences.put("cashier name", cashierName);
+        } catch (Exception e) {
+            Log.e("TAG", e.getMessage());
+        }
+            docRef.get().addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    header.clear();
+                    header.add(documentSnapshot.getString("name"));
+                    header.add(documentSnapshot.getString("address 1"));
+                    header.add(documentSnapshot.getString("address 2"));
+                    header.add(documentSnapshot.getString("contact"));
+                    try {
+                        preferences.put("name", header.get(0));
+                        preferences.put("address 1", header.get(1));
+                        preferences.put("address 2", header.get(2));
+                        preferences.put("contact", header.get(3));
+                    } catch (Exception e) {
+                        Log.e("TAG", e.getMessage());
+                    }
+                }
+            });
     }
 
     private void setRecyclerView() {
@@ -175,7 +205,6 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         saveButton = addPopUp.findViewById(R.id.add_item);
 
         fetchData();
-        namesUnique.sort(String::compareToIgnoreCase);
         String[] nameDisplay = namesUnique.toArray(new String[0]);
         setNumberPicker(itemName, nameDisplay, namesUnique);
         changeSizeValues(itemName.getValue());
@@ -202,8 +231,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
             if (result.getResultCode() == RESULT_OK) {
                 Toast.makeText(getActivity(), "Print successful", Toast.LENGTH_SHORT).show();
                 receiptList.clear();
-                grandTotal.clear();
-                getSum();
+                setSum();
                 adapter.setReceipts(receiptList);
             }
             if (result.getResultCode() == RESULT_CANCELED) {
@@ -275,59 +303,37 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private void changeSizeValues(int pos) {
         String nameVal = namesUnique.get(pos);
         sizesUnique.clear();
-        for (int i = 0; i < names.size(); i++)
-            if (names.get(i).equals(nameVal)) sizesUnique.add(sizes.get(i));
-        sizesUnique.sort(new sizeComparator());
+        for (int i = 0; i < stockList.size(); i++)
+            if (stockList.get(i).getItemName().equals(nameVal)) sizesUnique.add(stockList.get(i).getItemSize());
         String[] sizeDisplay = sizesUnique.toArray(new String[0]);
         setNumberPicker(itemSize, sizeDisplay, sizesUnique);
         itemQty.setText(String.valueOf(0));
         setItemText();
     }
 
-    private void fetchData() {
-        colRefStock.addSnapshotListener((value, error) -> {
-            if (error != null || value == null) return;
-            names.clear();
-            sizes.clear();
-            qty.clear();
-            namesUnique.clear();
-            sizesUnique.clear();
-            for (DocumentSnapshot documentSnapshot : value.getDocuments()) {
-                names.add(documentSnapshot.getString("item name"));
-                sizes.add(documentSnapshot.getString("item size"));
-                qty.add(documentSnapshot.getDouble("qty").intValue());
-                unitPrice.add(documentSnapshot.getDouble("price"));
-                if (!namesUnique.contains(documentSnapshot.getString("item name")))
-                    namesUnique.add(documentSnapshot.getString("item name"));
-                if (!sizesUnique.contains(documentSnapshot.getString("item size")))
-                    sizesUnique.add(documentSnapshot.getString("item size"));
-            }
-        });
-    }
-    
-    @SuppressLint("NotifyDataSetChanged")
     private void checkMinMax(int val) {
         if (itemQty.getText() == null || itemQty.getText().toString().isEmpty()) itemQty.setText(String.valueOf(0));
         if (Integer.parseInt(itemQty.getText().toString()) < 1 && val < 1) {
             Toast.makeText(getActivity(), "Please enter quantity.", Toast.LENGTH_SHORT).show();
             return;
         }
-        String iName = namesUnique.get(itemName.getValue());
-        String iSize = sizesUnique.get(itemSize.getValue());
-        for (int i = 0; i < names.size(); i++)
-            if (iName.equals(names.get(i)) && iSize.equals(sizes.get(i))) flag = i;
-        if (qty.get(flag) == 0) {
+        checkNameSize();
+        if (stockList.get(flag).getItemQuantity() == 0) {
             Toast.makeText(getActivity(), "This item is out of stock.", Toast.LENGTH_SHORT).show();
             return;
-        } if (Integer.parseInt(itemQty.getText().toString()) + val > qty.get(flag)) {
+        } if (Integer.parseInt(itemQty.getText().toString()) + val > stockList.get(flag).getItemQuantity()) {
             Toast.makeText(getActivity(), "Not enough stock. Automatically set to maximum.", Toast.LENGTH_SHORT).show();
-            itemQty.setText(String.valueOf(qty.get(flag)));
+            itemQty.setText(String.valueOf(stockList.get(flag).getItemQuantity()));
             return;
         } if (Integer.parseInt(itemQty.getText().toString()) + val < 1) {
             Toast.makeText(getActivity(), "You've reached the minimum quantity.", Toast.LENGTH_SHORT).show();
             return;
         }
-        QtyEditor.changeQty(itemQty, val);
+        editQty(val);
+    }
+
+    private void editQty(int val) {
+        QtyEditor.qtyEditor(itemQty, val);
         setItemText();
         if (val != 0) return;
         for (ReceiptModel receipt : receiptList)
@@ -336,25 +342,29 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
                 return;
             }
         receiptList.add(new ReceiptModel(item[0], item[1], Integer.parseInt(item[2]), Double.parseDouble(item[3]), Double.parseDouble(item[4])));
+        Log.d("TAG", item[0] + ", " + item[1] + ", " + item[2] + ", " + item[3] + ", " + item[4]);
         setLayout(true);
         getSum();
         for (int i = 0; i < 5; i++) item[i] = "";
         adapter.setReceipts(receiptList);
-        adapter.notifyDataSetChanged();
+        adapter.notifyItemInserted(receiptList.size());
         addPopUp.dismiss();
+    }
+    private void checkNameSize() {
+        Log.d("TAG", namesUnique.get(itemName.getValue()) + ", " + sizesUnique.get(itemSize.getValue()));
+        String iName = namesUnique.get(itemName.getValue());
+        String iSize = sizesUnique.get(itemSize.getValue());
+        for (int i = 0; i < stockList.size(); i++)
+            if (iName.equals(stockList.get(i).getItemName()) && iSize.equals(stockList.get(i).getItemSize())) flag = i;
     }
 
     private void setItemText() {
-        item[0] = namesUnique.get(itemName.getValue());
-        item[1] = sizesUnique.get(itemSize.getValue());
+        checkNameSize();
+        item[0] = stockList.get(flag).getItemName();
+        item[1] = stockList.get(flag).getItemSize();
         item[2] = itemQty.getText().toString();
-        for (int i = 0; i < names.size(); i++) {
-            if (item[0].equals(names.get(i)) && item[1].equals(sizes.get(i))) {
-                flag = i;
-                item[3] = String.valueOf(unitPrice.get(i));
-                item[4] = String.valueOf(Double.parseDouble(item[2]) * Double.parseDouble(item[3]));
-            }
-        }
+        item[3] = String.valueOf(stockList.get(flag).getItemPrice());
+        item[4] = String.valueOf(Double.parseDouble(item[2]) * Double.parseDouble(item[3]));
         String unitPriceText = "₱" + String.format(Locale.getDefault(), "%.2f", Double.parseDouble(item[3]));
         String totalPriceText = "₱" + String.format(Locale.getDefault(), "%.2f", Double.parseDouble(item[4]));
         itemUnitPrice.setText(unitPriceText);
@@ -369,32 +379,31 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     }
 
     private void getSum() {
-        if (!item[4].isEmpty()) grandTotal.add(Double.parseDouble(item[4]));
+        grandTotal.clear();
+        for (ReceiptModel receipt : receiptList) grandTotal.add(receipt.getItemTotalPrice());
         setSum();
     }
     private void setSum() {
         sum = 0.0;
-        for (Double total : grandTotal) {
-            sum += total;
-        }
+        for (Double total : grandTotal) sum += total;
         String sumText = "₱" + String.format(Locale.getDefault(), "%.2f", sum);
         grandTotalPrice.setText(sumText);
     }
 
     @Override
     public void changeQty(ReceiptModel item, int position) {
+        receiptList.set(position, item);
         grandTotal.set(position, item.getItemTotalPrice());
         setSum();
-        receiptList.set(position, item);
         adapter.setReceipts(receiptList);
         adapter.notifyItemChanged(position);
     }
 
     @Override
     public void onClickRight(ReceiptModel item, int position) {
-        grandTotal.remove(position);
-        getSum();
         receiptList.remove(position);
+        grandTotal.remove(position);
+        setSum();
         adapter.setReceipts(receiptList);
         adapter.notifyItemRemoved(position);
         setLayout(!receiptList.isEmpty());

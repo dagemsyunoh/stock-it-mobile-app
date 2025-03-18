@@ -13,6 +13,7 @@ import androidx.cardview.widget.CardView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.lock.stockit.Models.ReceiptModel;
+import com.lock.stockit.Models.StockModel;
 import com.lock.stockit.R;
 import com.lock.stockit.ReceiptFragment;
 
@@ -109,22 +110,23 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
         int flag = 0;
         String iName = itemName.getText().toString();
         String iSize = itemSize.getText().toString();
-        ArrayList<String> names = ReceiptFragment.names;
-        ArrayList<String> sizes = ReceiptFragment.sizes;
-        ArrayList<Integer> qty = ReceiptFragment.qty;
-        for (int i = 0; i < names.size(); i++)
-            if (iName.equals(names.get(i)) && iSize.equals(sizes.get(i))) flag = i;
-        if (qty.get(flag) == 0) {
+        ArrayList<StockModel> stocks = ReceiptFragment.stockList;
+//        ArrayList<String> names = ReceiptFragment.names;
+//        ArrayList<String> sizes = ReceiptFragment.sizes;
+//        ArrayList<Integer> qty = ReceiptFragment.qty;
+        for (int i = 0; i < stocks.size(); i++)
+            if (iName.equals(stocks.get(i).getItemName()) && iSize.equals(stocks.get(i).getItemSize())) flag = i;
+        if (stocks.get(flag).getItemQuantity() == 0) {
             Toast.makeText(cardView.getContext(), "This item is out of stock.", Toast.LENGTH_SHORT).show();
             return;
-        } if (Integer.parseInt(itemQty.getText().toString()) + val > qty.get(flag)) {
+        } if (Integer.parseInt(itemQty.getText().toString()) + val > stocks.get(flag).getItemQuantity()) {
             Toast.makeText(cardView.getContext(), "You've reached the maximum quantity.", Toast.LENGTH_SHORT).show();
             return;
         } if (Integer.parseInt(itemQty.getText().toString()) + val < 1) {
             Toast.makeText(cardView.getContext(), "You've reached the minimum quantity.", Toast.LENGTH_SHORT).show();
             return;
         }
-        QtyEditor.changeQty(itemQty, val);
+        QtyEditor.qtyEditor(itemQty, val);
         changeValues(item, position);
     }
 

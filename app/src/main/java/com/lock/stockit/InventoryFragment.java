@@ -173,10 +173,10 @@ public class InventoryFragment extends Fragment implements StockListeners {
             itemSize.setText(output);
         });
 
-        plusOne.setOnClickListener(view -> QtyEditor.changeQty(itemQty, 1));
+        plusOne.setOnClickListener(view -> QtyEditor.qtyEditor(itemQty, 1));
 
         minusOne.setOnClickListener(view -> {
-            QtyEditor.changeQty(itemQty, -1);
+            QtyEditor.qtyEditor(itemQty, -1);
             if (Integer.parseInt(itemQty.getText().toString()) == 1)
                 Toast.makeText(getActivity(), "Quantity cannot be less than 1", Toast.LENGTH_SHORT).show();
         });

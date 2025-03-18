@@ -86,10 +86,10 @@ public class StockViewHolder extends StockBaseViewHolder {
 
         saveButton.setOnClickListener(view -> updateData(inputQty, inputPrice));
 
-        plusOne.setOnClickListener(view -> QtyEditor.changeQty(inputQty, 1));
+        plusOne.setOnClickListener(view -> QtyEditor.qtyEditor(inputQty, 1));
 
         minusOne.setOnClickListener(view -> {
-            QtyEditor.changeQty(inputQty, -1);
+            QtyEditor.qtyEditor(inputQty, -1);
             if (Integer.parseInt(inputQty.getText().toString()) == 1)
                 Toast.makeText(cardView.getContext(), "Quantity cannot be less than 1. Please delete the item instead.", Toast.LENGTH_SHORT).show();
         });

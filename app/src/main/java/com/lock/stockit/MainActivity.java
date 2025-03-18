@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
         });
     }
     private void checkName() {
-        if (auth.getCurrentUser().getDisplayName() != null || docRef.get().getResult().getString("name") != null) return;
+        if (auth.getCurrentUser().getDisplayName() != null) return;
         Dialog nameDialog = new Dialog(MainActivity.this);
         nameDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         nameDialog.setContentView(R.layout.dialog_box_input);
@@ -154,7 +154,6 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
         buttonEnter.setOnClickListener(v -> {
             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder().setDisplayName(inputName.getText().toString()).build();
             auth.getCurrentUser().updateProfile(profileUpdates);
-            docRef.update("name", inputName.getText().toString());
             nameDialog.dismiss();
         });
     }
