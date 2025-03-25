@@ -59,4 +59,13 @@
     <string name="enter_name">Enter Name</string>
     <string name="print_receipt">Print Receipt</string>
     <string name="please_enter_cash_amount">Please enter cash amount</string>
+    <string name="connection_timeout">Connection Timeout</string>
+    <string name="failed_to_connect_to_printer">Failed to connect to printer. Would you like to retry?</string>
+    <string name="retry">Retry</string>
+    <string name="invoice_no">Invoice #</string>
+    <string name="date_time">Date-Time</string>
+    <string name="total">Total</string>
+    <string name="amount_rendered_cash">Amount Rendered Cash</string>
+    <string name="items">Items</string>
+    <string name="receipt_history">Receipt History</string>
 </resources>

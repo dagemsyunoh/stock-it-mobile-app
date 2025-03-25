@@ -4,12 +4,49 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".HomeFragment">
-
-    <TextView
-        android:id="@+id/home_text"
-        android:gravity="center"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/home" />
+        android:orientation="vertical"
+        tools:ignore="UselessParent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="20dp"
+            android:gravity="top|center_horizontal"
+            android:text="@string/home"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/receipt_history">
+
+            <TableLayout
+                android:id="@+id/receipt_history"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="20dp"
+                android:stretchColumns="*" />
+
+        </HorizontalScrollView>
+
+        <!--TableLayout
+            android:id="@+id/stock_history"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="20dp"
+            android:scrollbars="horizontal" />
+
+        <TableLayout
+            android:id="@+id/user_history"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="20dp"
+            android:scrollbars="horizontal" /-->
+
+    </LinearLayout>
 
 </FrameLayout>
