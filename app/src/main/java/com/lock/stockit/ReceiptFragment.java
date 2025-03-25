@@ -74,7 +74,6 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private final String[] item = new String[5];
     private final ArrayList<String> header = new ArrayList<>();
     private int transactionNo, flag;
-    ActivityResultLauncher<Intent> launcher;
     private boolean cancelled, recyclerViewFlag = true;
     private String invoice;
     private double cash = 0, sum;
@@ -85,7 +84,28 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     public static Intent newIntent(Context context) {
         return new Intent(context, ReceiptListeners.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
     }
-    
+
+    @SuppressLint("NotifyDataSetChanged")
+    ActivityResultLauncher<Intent> launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if (result.getResultCode() == RESULT_OK) {
+            Toast.makeText(getActivity(), "Print successful", Toast.LENGTH_SHORT).show();
+            receiptList.clear();
+            grandTotal.clear();
+            setSum();
+            adapter.setReceipts(receiptList);
+            setLayout(!receiptList.isEmpty());
+        }
+        if (result.getResultCode() == RESULT_CANCELED) {
+            receiptList.clear();
+            receiptList.addAll(result.getData().getExtras().getParcelableArrayList("receiptList"));
+            getSum();
+            adapter.setReceipts(receiptList);
+            adapter.notifyDataSetChanged();
+            cancelled = true;
+            Toast.makeText(getActivity(), "Print cancelled", Toast.LENGTH_SHORT).show();
+        }
+    });
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -97,8 +117,8 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         noItem = view.findViewById(R.id.no_item);
         grandTotalLayout = view.findViewById(R.id.grand_total_layout);
         grandTotalPrice = view.findViewById(R.id.grand_total_val);
-        initializeLauncher();
         cancelled = false;
+        addButton.setClickable(false);
 
         addButton.setOnClickListener(v -> addItemPopUp());
 
@@ -150,6 +170,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
                     setRecyclerView();
                     recyclerViewFlag = false;
                 }
+                addButton.setClickable(true);
             }
         });
     }
@@ -223,28 +244,6 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         saveButton.setOnClickListener(v -> checkMinMax(0));
 
         back.setOnClickListener(v -> addPopUp.cancel());
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private void initializeLauncher() {
-        launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-            if (result.getResultCode() == RESULT_OK) {
-                Toast.makeText(getActivity(), "Print successful", Toast.LENGTH_SHORT).show();
-                receiptList.clear();
-                grandTotal.clear();
-                setSum();
-                adapter.setReceipts(receiptList);
-            }
-            if (result.getResultCode() == RESULT_CANCELED) {
-                receiptList.clear();
-                receiptList.addAll(result.getData().getExtras().getParcelableArrayList("receiptList"));
-                getSum();
-                adapter.setReceipts(receiptList);
-                adapter.notifyDataSetChanged();
-                cancelled = true;
-                Toast.makeText(getActivity(), "Print cancelled", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     private void printPreview() {

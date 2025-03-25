@@ -1,6 +1,5 @@
 package com.lock.stockit;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -18,7 +17,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -44,7 +47,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-public class PrintPreviewActivity extends Activity implements Runnable {
+public class PrintPreviewActivity extends AppCompatActivity implements Runnable {
     private final CollectionReference receiptRef = FirebaseFirestore.getInstance().collection("receipts");
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2,CONNECTION_TIMEOUT = 5000; // 5 seconds
@@ -52,7 +55,7 @@ public class PrintPreviewActivity extends Activity implements Runnable {
     private final String dSeparator = "=".repeat(32);
     private final ArrayList<String> headerList = new ArrayList<>();
     private ArrayList<ReceiptModel> receiptList;
-    private final DecimalFormat df = new DecimalFormat("#.00");
+    private final DecimalFormat df = new DecimalFormat("0.00");
     private final UUID applicationUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private String header, body, footer, invoice, dateTime;
     private BluetoothAdapter mBluetoothAdapter;
@@ -68,14 +71,7 @@ public class PrintPreviewActivity extends Activity implements Runnable {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_print_preview);
-        checkForPermission();
-        try {
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            String savedPrinterAddress = sharedPreferences.getString("bluetooth_address", null);
-            checkSavedDevice(savedPrinterAddress); //connect directly if there's a saved address
-        } catch (Exception e) {
-            Log.e("TAG", e.getMessage());
-        }
+        checkPreferences();
 
         printerName = findViewById(R.id.printer_name);
         printHeader = findViewById(R.id.print_header);
@@ -90,7 +86,7 @@ public class PrintPreviewActivity extends Activity implements Runnable {
         getHeaderBodyFooter();
         setHeaderBodyFooter();
 
-        cancelButton.setOnClickListener(v -> onBackPressed());
+        cancelButton.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         printButton.setOnClickListener(v -> {
             Thread t = new Thread() {
@@ -108,7 +104,18 @@ public class PrintPreviewActivity extends Activity implements Runnable {
                 }
             };
             t.start();
-            //saveReceipt();
+            saveReceipt();
+        });
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                checkSocket();
+                Intent i = new Intent(PrintPreviewActivity.this, ReceiptFragment.class);
+                i.putExtra("receiptList", receiptList);
+                setResult(RESULT_CANCELED,i);
+                finish();
+            }
         });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -116,21 +123,94 @@ public class PrintPreviewActivity extends Activity implements Runnable {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }    private final ActivityResultLauncher<Intent> connectLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        checkForPermission();
+        if (result.getResultCode() == RESULT_CANCELED) {
+            Toast.makeText(PrintPreviewActivity.this, "Bluetooth connection cancelled", Toast.LENGTH_SHORT).show();
+            getOnBackPressedDispatcher().onBackPressed();
+            return;
+        }
+        Intent data = result.getData();
+        if (data == null || data.getExtras() == null) {
+            return;
+        }
+        Bundle mExtra = data.getExtras();
+        String mDeviceAddress = Objects.requireNonNull(mExtra).getString("DeviceAddress");
+        mBluetoothDevice = mBluetoothAdapter.getRemoteDevice(mDeviceAddress);
+        loadDialog();
+    });
+
+    private void checkPreferences() {
+        checkForPermission();
+        try {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            String savedPrinterAddress = sharedPreferences.getString("bluetooth_address", null);
+            checkSavedDevice(savedPrinterAddress); //connect directly if there's a saved address
+        } catch (Exception e) {
+            Log.e("TAG", e.getMessage());
+        }
+    }    private final ActivityResultLauncher<Intent> enableLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        checkForPermission();
+        if (result.getResultCode() == RESULT_OK) {
+            Log.d("TAG", "Bluetooth enabled");
+            Toast.makeText(PrintPreviewActivity.this, "Bluetooth enabled", Toast.LENGTH_SHORT).show();
+            checkPreferences();
+        } else {
+            Log.d("TAG", "Bluetooth disabled");
+            Toast.makeText(PrintPreviewActivity.this, "Bluetooth disabled. Turn on bluetooth to print.", Toast.LENGTH_SHORT).show();
+            getOnBackPressedDispatcher().onBackPressed();
+        }
+    });
+
+    private void saveReceipt() {
+        ArrayList<String> items = new ArrayList<>();
+        for (ReceiptModel val : receiptList) {
+            items.add(val.getItemName() + " " + val.getItemSize() + ", " + val.getItemQuantity() + " pcs");
+        }
+        Map<String, Object> receiptMap = new HashMap<>();
+        receiptMap.put("invoice no", invoice);
+        receiptMap.put("date-time", dateTime);
+        receiptMap.put("total", total);
+        receiptMap.put("amount rendered cash", cash);
+        receiptMap.put("items", items);
+        try {
+            receiptRef.add(receiptMap);
+            setResult(RESULT_OK);
+            finish();
+        } catch (Exception e) {
+            Log.e("TAG", "Error Code " + e);
+        }
+    }
+
+    private void checkSavedDevice(String savedPrinterAddress) {
+        checkForPermission();
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        if (mBluetoothAdapter == null) {
+            Toast.makeText(this, "Bluetooth is not supported on this device", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        if (!mBluetoothAdapter.isEnabled()) {
+            // Bluetooth not enabled, show dialog before requesting enable
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            enableLauncher.launch(enableBtIntent);
+        } else {
+            if (savedPrinterAddress != null) {
+                mBluetoothDevice = mBluetoothAdapter.getRemoteDevice(savedPrinterAddress);
+                loadDialog();
+                return;
+            }
+            listPairedDevices();
+            launchDeviceList();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         checkSocket();
-    }
-
-    @Override
-    public void onBackPressed() {
-        checkSocket();
-        Intent i = new Intent(this, ReceiptFragment.class);
-        i.putExtra("receiptList", receiptList);
-        setResult(RESULT_CANCELED,i);
-        finish();
     }
 
     private final Handler mHandler = new Handler(new Handler.Callback() {
@@ -145,25 +225,10 @@ public class PrintPreviewActivity extends Activity implements Runnable {
         }
     });
 
-    private void saveReceipt() {
-        ArrayList<String> items = new ArrayList<>();
-        for (ReceiptModel val : receiptList) {
-         items.add(val.getItemName() + " " + val.getItemSize() + ", " + val.getItemQuantity() + " pcs");
-        }
-        Map<String, Object> receiptMap = new HashMap<>();
-        receiptMap.put("invoice no", invoice);
-        receiptMap.put("date-time", dateTime);
-        receiptMap.put("total", total);
-        receiptMap.put("amount rendered cash", cash);
-        receiptMap.put("items", items);
-        receiptMap.put("change", cash - total);
-        try {
-            receiptRef.add(receiptMap);
-            setResult(RESULT_OK);
-            finish();
-        } catch (Exception e) {
-            Log.e("TAG", "Error Code " + e);
-        }
+    private void launchDeviceList() {
+        Toast.makeText(PrintPreviewActivity.this,"Select printer from paired devices", Toast.LENGTH_SHORT).show();
+        Intent connectIntent = new Intent(PrintPreviewActivity.this, DeviceListActivity.class);
+        connectLauncher.launch(connectIntent);
     }
 
     private void checkForPermission() {
@@ -184,67 +249,7 @@ public class PrintPreviewActivity extends Activity implements Runnable {
         }
     }
 
-    // You can do the assignment inside onAttach or onCreate, i.e, before the activity is displayed
-//    ActivityResultLauncher<Intent> launcher = registerForActivityResult(
-//            new ActivityResultContracts.StartActivityForResult(),
-//            result -> {
-//                if (result.getResultCode() == Activity.RESULT_OK) {
-//                    Intent data = result.getData();
-//                }
-//            });
-
-    private void checkSavedDevice(String savedPrinterAddress) {
-        checkForPermission();
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
-            // Bluetooth not enabled, ask the user to turn it on.
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        } if(savedPrinterAddress != null) {
-            mBluetoothDevice = mBluetoothAdapter.getRemoteDevice(savedPrinterAddress);
-            // Show loading dialog
-            loadDialog();
-            return;
-        }
-        ListPairedDevices();
-        launchDeviceList();
-    }
-
-    public void onActivityResult(int mRequestCode, int mResultCode, Intent mDataIntent) {
-        super.onActivityResult(mRequestCode, mResultCode, mDataIntent);
-        checkForPermission();
-        switch (mRequestCode) {
-            case REQUEST_CONNECT_DEVICE:
-                if (mResultCode == Activity.RESULT_OK) {
-                    Bundle mExtra = mDataIntent.getExtras();
-                    String mDeviceAddress = Objects.requireNonNull(mExtra).getString("DeviceAddress");
-                    Log.v("TAG", "Coming incoming address " + mDeviceAddress);
-                    mBluetoothDevice = mBluetoothAdapter.getRemoteDevice(mDeviceAddress);
-                    loadDialog();
-                    // pairToDevice(mBluetoothDevice); This method is replaced by progress dialog with thread
-                }
-                break;
-
-            case REQUEST_ENABLE_BT:
-                if (mResultCode == Activity.RESULT_OK) {
-                    ListPairedDevices();
-                    launchDeviceList();
-                } else {
-                    Toast.makeText(PrintPreviewActivity.this, "Bluetooth disabled. Turn on bluetooth to print.", Toast.LENGTH_SHORT).show();
-                    onBackPressed();
-                }
-                break;
-        }
-    }
-
-    private void launchDeviceList() {
-        Toast.makeText(PrintPreviewActivity.this,"Select printer from paired devices", Toast.LENGTH_SHORT).show();
-        Intent connectIntent = new Intent(PrintPreviewActivity.this,
-                DeviceListActivity.class);
-        startActivityForResult(connectIntent, REQUEST_CONNECT_DEVICE);
-    }
-
-    private void ListPairedDevices() {
+    private void listPairedDevices() {
         checkForPermission();
         Set<BluetoothDevice> mPairedDevices = mBluetoothAdapter
                 .getBondedDevices();
@@ -253,6 +258,55 @@ public class PrintPreviewActivity extends Activity implements Runnable {
                 Log.v("TAG", "PairedDevices: " + mDevice.getName() + "  "
                         + mDevice.getAddress());
             }
+        }
+    }
+
+    private void startTimeout() {
+        Thread mTimeoutThread = new Thread(() -> {
+            try {
+                Thread.sleep(CONNECTION_TIMEOUT);
+                if (!isConnected) { // If still not connected after timeout
+                    runOnUiThread(() -> {
+                        // Timeout occurred
+                        dialog.dismiss();
+                        closeSocket(mBluetoothSocket);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                        builder.setCancelable(false);
+                        builder.setView(R.layout.dialog_box);
+                        dialog = builder.create();
+                        dialog.show();
+
+                        TextView header = dialog.findViewById(R.id.header);
+                        TextView text = dialog.findViewById(R.id.text);
+                        Button okButton = dialog.findViewById(R.id.ok_button);
+                        Button cancelButton = dialog.findViewById(R.id.cancel_button);
+
+                        header.setText(R.string.connection_timeout);
+                        text.setText(R.string.failed_to_connect_to_printer);
+                        okButton.setText(R.string.retry);
+                        cancelButton.setText(R.string.cancel);
+
+                        okButton.setOnClickListener(v -> checkPreferences());
+                        cancelButton.setOnClickListener(v -> {
+                            listPairedDevices();
+                            launchDeviceList();
+                        });
+                    });
+                }
+            } catch (InterruptedException e) {
+                // Timeout thread interrupted
+                Log.e("TAG", "Timeout thread interrupted", e);
+            }
+        });
+        mTimeoutThread.start();
+    }
+
+    private void checkSocket() {
+        try {
+            if (mBluetoothSocket != null)
+                mBluetoothSocket.close();
+        } catch (Exception e) {
+            Log.e("Tag", "Exe ", e);
         }
     }
 
@@ -273,37 +327,9 @@ public class PrintPreviewActivity extends Activity implements Runnable {
         startTimeout();
     }
 
-    private void checkSocket() {
-        try {
-            if (mBluetoothSocket != null)
-                mBluetoothSocket.close();
-        } catch (Exception e) {
-            Log.e("Tag", "Exe ", e);
-        }
-    }
 
-    private void startTimeout() {
-        Thread mTimeoutThread = new Thread(() -> {
-            try {
-                Thread.sleep(CONNECTION_TIMEOUT);
-                if (!isConnected) { // If still not connected after timeout
-                    runOnUiThread(() -> {
-                        // Timeout occurred
-                        dialog.dismiss();
-                        closeSocket(mBluetoothSocket);
-                        Toast.makeText(PrintPreviewActivity.this, "Connection Timeout", Toast.LENGTH_SHORT).show();
 
-                        ListPairedDevices();
-                        launchDeviceList();
-                    });
-                }
-            } catch (InterruptedException e) {
-                // Timeout thread interrupted
-                Log.e("TAG", "Timeout thread interrupted", e);
-            }
-        });
-        mTimeoutThread.start();
-    }
+
 
     private void closeSocket(BluetoothSocket nOpenSocket) {
         try {

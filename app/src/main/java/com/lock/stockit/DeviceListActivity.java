@@ -16,43 +16,44 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.preference.PreferenceManager;
 
 import java.util.Set;
 
 
-public class DeviceListActivity extends Activity {
-    protected static final String TAG = "TAG";
+public class DeviceListActivity extends AppCompatActivity {
     private BluetoothAdapter mBluetoothAdapter;
 
-    @Override
-    protected void onCreate(Bundle mSavedInstanceState) {
-        super.onCreate(mSavedInstanceState);
-//        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        setContentView(R.layout.device_list);
+    private final OnItemClickListener mDeviceClickListener = new OnItemClickListener() {
+        public void onItemClick(AdapterView<?> mAdapterView, View mView, int mPosition, long mLong) {
 
-        setResult(Activity.RESULT_CANCELED);
-        ArrayAdapter<String> mPairedDevicesArrayAdapter = new ArrayAdapter<>(this, R.layout.device_name);
+            try {
+                checkForPermission();
+                mBluetoothAdapter.cancelDiscovery();
+                String mDeviceInfo = ((TextView) mView).getText().toString();
+                String mDeviceAddress = mDeviceInfo.substring(mDeviceInfo.length() - 17);
+                String mDeviceName = mDeviceInfo.substring(0, mDeviceInfo.length() - 17);
+                Log.v("TAG", "Device_Address " + mDeviceAddress);
 
-        ListView mPairedListView = findViewById(R.id.paired_devices);
-        mPairedListView.setAdapter(mPairedDevicesArrayAdapter);
-        mPairedListView.setOnItemClickListener(mDeviceClickListener);
+                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putString("bluetooth_address", mDeviceAddress); //
+                editor.putString("bluetooth_name", mDeviceName);
+                editor.apply();
 
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        checkForPermission();
-        Set<BluetoothDevice> mPairedDevices = mBluetoothAdapter.getBondedDevices();
-
-        if (!mPairedDevices.isEmpty()) {
-            findViewById(R.id.title_paired_devices).setVisibility(View.VISIBLE);
-            for (BluetoothDevice mDevice : mPairedDevices) {
-                mPairedDevicesArrayAdapter.add(mDevice.getName() + "\n" + mDevice.getAddress());
+                Bundle mBundle = new Bundle();
+                mBundle.putString("DeviceAddress", mDeviceAddress);
+                Intent mBackIntent = new Intent();
+                mBackIntent.putExtras(mBundle);
+                setResult(Activity.RESULT_OK, mBackIntent);
+                finish();
+            } catch (Exception ex) {
+                Log.e("TAG", "Exception Code: ", ex);
             }
-        } else {
-            String mNoDevices = "None Paired";//getResources().getText(R.string.none_paired).toString();
-            mPairedDevicesArrayAdapter.add(mNoDevices);
         }
-    }
+    };
 
     private void checkForPermission() {
         if (ActivityCompat.checkSelfPermission(this,
@@ -88,33 +89,33 @@ public class DeviceListActivity extends Activity {
         }
     }
 
-    private final OnItemClickListener mDeviceClickListener = new OnItemClickListener() {
-        public void onItemClick(AdapterView<?> mAdapterView, View mView, int mPosition, long mLong) {
+    @Override
+    protected void onCreate(Bundle mSavedInstanceState) {
+        super.onCreate(mSavedInstanceState);
+//        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        setContentView(R.layout.device_list);
 
-            try {
-                checkForPermission();
-                mBluetoothAdapter.cancelDiscovery();
-                String mDeviceInfo = ((TextView) mView).getText().toString();
-                String mDeviceAddress = mDeviceInfo.substring(mDeviceInfo.length() - 17);
-                String mDeviceName = mDeviceInfo.substring(0, mDeviceInfo.length() - 17);
-                Log.v(TAG, "Device_Address " + mDeviceAddress);
+        setResult(Activity.RESULT_CANCELED);
+        ArrayAdapter<String> mPairedDevicesArrayAdapter = new ArrayAdapter<>(this, R.layout.device_name);
 
-                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putString("bluetooth_address", mDeviceAddress); //
-                editor.putString("bluetooth_name", mDeviceName);
-                editor.apply();
+        ListView mPairedListView = findViewById(R.id.paired_devices);
+        mPairedListView.setAdapter(mPairedDevicesArrayAdapter);
+        mPairedListView.setOnItemClickListener(mDeviceClickListener);
 
-                Bundle mBundle = new Bundle();
-                mBundle.putString("DeviceAddress", mDeviceAddress);
-                Intent mBackIntent = new Intent();
-                mBackIntent.putExtras(mBundle);
-                setResult(Activity.RESULT_OK, mBackIntent);
-                finish();
-            } catch (Exception ex) {
-                Log.e(TAG, "Exception Code: ", ex);
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        checkForPermission();
+        Set<BluetoothDevice> mPairedDevices = mBluetoothAdapter.getBondedDevices();
+
+        if (!mPairedDevices.isEmpty()) {
+            findViewById(R.id.title_paired_devices).setVisibility(View.VISIBLE);
+            for (BluetoothDevice mDevice : mPairedDevices) {
+                mPairedDevicesArrayAdapter.add(mDevice.getName() + "\n" + mDevice.getAddress());
             }
+        } else {
+            String mNoDevices = "None Paired";
+            //getResources().getText(R.string.none_paired).toString();
+            mPairedDevicesArrayAdapter.add(mNoDevices);
         }
-    };
+    }
 
 }
