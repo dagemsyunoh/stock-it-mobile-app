@@ -4,7 +4,6 @@ import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -17,7 +16,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
@@ -33,6 +32,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -252,14 +252,32 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         i.putExtra("receiptList", receiptList);
         i.putExtra("invoice", invoice);
 
-        EditText input = new EditText(getActivity());
+        Dialog inputDialog = new Dialog(getActivity());
+        inputDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        inputDialog.setContentView(R.layout.dialog_box_input);
+        inputDialog.setCancelable(false);
+        inputDialog.create();
+        inputDialog.show();
+
+        TextView header = inputDialog.findViewById(R.id.header);
+        header.setText(R.string.print_receipt);
+        header.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_print, 0, 0, 0);
+
+        TextView dialogText = inputDialog.findViewById(R.id.dialog_text);
+        dialogText.setText(R.string.please_enter_cash_amount);
+
+        TextInputLayout inputLayout = inputDialog.findViewById(R.id.input_layout);
+        inputLayout.setEndIconMode(TextInputLayout.END_ICON_NONE);
+
+        TextInputEditText input = inputDialog.findViewById(R.id.input);
+        input.setText(String.valueOf(0));
         input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Print Receipt");
-        builder.setMessage("Input Cash Amount");
-        builder.setView(input);
-        builder.setCancelable(true);
-        builder.setPositiveButton("Print", (dialog, which) -> {
+
+        Button buttonCancel = inputDialog.findViewById(R.id.cancel_button);
+        Button buttonPrint = inputDialog.findViewById(R.id.ok_button);
+        buttonCancel.setOnClickListener(v -> inputDialog.dismiss());
+
+        buttonPrint.setOnClickListener(v -> {
             if (input.getText().toString().isEmpty()) {
                 Toast.makeText(getActivity(), "Please enter cash amount", Toast.LENGTH_SHORT).show();
                 return;
@@ -270,11 +288,9 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
             }
             cash = Double.parseDouble(String.format(Locale.getDefault(), "%.2f", Double.parseDouble(input.getText().toString())));
             i.putExtra("cash", cash);
-            dialog.dismiss();
+            inputDialog.dismiss();
             launcher.launch(i);
-                });
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-        builder.show();
+        });
     }
 
     private void setLayout(boolean show) {
