@@ -123,6 +123,23 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    private void checkForPermission() {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
+            Log.d("TAG", "Bluetooth Permission not granted");
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.BLUETOOTH}, 5);
+        } else if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                Log.d("TAG", "Bluetooth Scan Permission not granted");
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.BLUETOOTH_SCAN}, 1);
+            }
+        } else if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                Log.d("TAG", "Bluetooth Connect Permission not granted");
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.BLUETOOTH_CONNECT}, 1);
+            }
+        }
     }    private final ActivityResultLauncher<Intent> connectLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
         checkForPermission();
         if (result.getResultCode() == RESULT_CANCELED) {
@@ -231,35 +248,16 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
         connectLauncher.launch(connectIntent);
     }
 
-    private void checkForPermission() {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
-            Log.d("TAG", "Bluetooth Permission not granted");
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.BLUETOOTH}, 5);
-        } else if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED){
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                Log.d("TAG", "Bluetooth Scan Permission not granted");
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.BLUETOOTH_SCAN}, 1);
-            }
-        }
-        else if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED){
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                Log.d("TAG", "Bluetooth Connect Permission not granted");
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.BLUETOOTH_CONNECT}, 1);
-            }
-        }
-    }
-
     private void listPairedDevices() {
         checkForPermission();
         Set<BluetoothDevice> mPairedDevices = mBluetoothAdapter
                 .getBondedDevices();
-        if (!mPairedDevices.isEmpty()) {
-            for (BluetoothDevice mDevice : mPairedDevices) {
-                Log.v("TAG", "PairedDevices: " + mDevice.getName() + "  "
-                        + mDevice.getAddress());
-            }
-        }
+        if (!mPairedDevices.isEmpty()) for (BluetoothDevice mDevice : mPairedDevices)
+            Log.v("TAG", "PairedDevices: " + mDevice.getName() + "  "
+                    + mDevice.getAddress());
     }
+
+
 
     private void startTimeout() {
         Thread mTimeoutThread = new Thread(() -> {
