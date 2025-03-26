@@ -3,11 +3,9 @@
 TO-DO: <br>
 - printer connection (partially done)
 - print format (partially done)
-- history log (partially done)
 - daily sales (?)
 - settings
 - hardware discounts
-- cashier name
 - design
 - testing & bug checking
 
@@ -29,3 +27,5 @@ DONE: <br>
 - add items
 - edit/delete items
 - print
+- history log
+- cashier name
