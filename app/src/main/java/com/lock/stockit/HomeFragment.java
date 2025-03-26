@@ -24,7 +24,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class HomeFragment extends Fragment {
-
     private final boolean type = LoaderActivity.admin;
     private final DecimalFormat df = new DecimalFormat("0.00");
     TableLayout receiptTable, userTable;
@@ -75,10 +74,32 @@ public class HomeFragment extends Fragment {
         addTextViewToRow(tableRow, target, Gravity.CENTER, typeface);
         addTextViewToRow(tableRow, user, Gravity.CENTER, typeface);
 
-        if (typeface == Typeface.NORMAL) tableRow.setOnClickListener(v -> {
-//            TODO: dialog
-        });
+        if (typeface == Typeface.NORMAL) tableRow.setOnClickListener(v -> showUserDialog(dateTime, action, target, user));
         userTable.addView(tableRow, new  TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT));
+    }
+
+    private void showUserDialog(String dateTime, String action, String target, String user) {
+        Dialog dialog = new Dialog(getActivity());
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.setContentView(R.layout.user_log_box);
+        dialog.show();
+        AppCompatImageView back = dialog.findViewById(R.id.back);
+        back.setOnClickListener(v1 -> dialog.dismiss());
+
+        TextView dateTimeText = dialog.findViewById(R.id.date_time_text);
+        TextView actionText = dialog.findViewById(R.id.action_text);
+        TextView targetText = dialog.findViewById(R.id.target_text);
+        TextView userText = dialog.findViewById(R.id.user_text);
+
+        String newDateTime = dateTimeText.getText() + ":\t\t" + dateTime;
+        String newAction = actionText.getText() + ":\t\t" + action;
+        String newTarget = targetText.getText() + ":\t\t" + target;
+        String newUser = userText.getText() + ":\t\t" + user;
+
+        dateTimeText.setText(newDateTime);
+        actionText.setText(newAction);
+        targetText.setText(newTarget);
+        userText.setText(newUser);
     }
 
     private void initializeReceiptLog() {
@@ -97,7 +118,8 @@ public class HomeFragment extends Fragment {
             for (var document : task.getResult()) {
                 StringBuilder items = new StringBuilder();
                 for (var item : (ArrayList<?>) document.get("items"))
-                    items.append(item.toString()).append("\n");
+                    items.append(item.toString().replaceAll(", ", "\t@")).append("\n");
+
                 getReceiptTableRow(document.getString("invoice no"),
                         document.getString("date-time"),
                         items.toString(),
@@ -128,28 +150,51 @@ public class HomeFragment extends Fragment {
     private void showReceiptDialog(String invoiceNo, String dateTime, String items, String amountRendered, String total, String change) {
         Dialog dialog = new Dialog(getActivity());
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.setContentView(R.layout.rh_box);
+        dialog.setContentView(R.layout.receipt_log_box);
         dialog.show();
         AppCompatImageView back = dialog.findViewById(R.id.back);
         back.setOnClickListener(v1 -> dialog.dismiss());
+
         TextView header = dialog.findViewById(R.id.header);
-        TextView dateTimeText = dialog.findViewById(R.id.date_time_val_text);
-        TextView amountRenderedText = dialog.findViewById(R.id.amount_rendered_val_text);
-        TextView totalText = dialog.findViewById(R.id.total_val_text);
-        TextView changeText = dialog.findViewById(R.id.change_val_text);
-        TextView itemsText = dialog.findViewById(R.id.items_val_text);
         header.setText(invoiceNo);
-        dateTimeText.setText(dateTime);
-        amountRenderedText.setText(amountRendered);
-        totalText.setText(total);
-        changeText.setText(change);
-        itemsText.setText(items);
+
+        TextView dateTimeText = dialog.findViewById(R.id.date_time_text);
+        TextView amountRenderedText = dialog.findViewById(R.id.amount_rendered_text);
+        TextView totalText = dialog.findViewById(R.id.total_text);
+        TextView changeText = dialog.findViewById(R.id.change_text);
+        TextView itemsText = dialog.findViewById(R.id.items_text);
+
+        String newDateTime = dateTimeText.getText() + ":";
+        String newAmountRendered = amountRenderedText.getText() + ":";
+        String newTotal = totalText.getText() + ":";
+        String newChange = changeText.getText() + ":";
+        String newItems = itemsText.getText() + ":";
+
+        dateTimeText.setText(newDateTime);
+        amountRenderedText.setText(newAmountRendered);
+        totalText.setText(newTotal);
+        changeText.setText(newChange);
+        itemsText.setText(newItems);
+
+        TextView dateTimeValText = dialog.findViewById(R.id.date_time_val_text);
+        TextView amountRenderedValText = dialog.findViewById(R.id.amount_rendered_val_text);
+        TextView totalValText = dialog.findViewById(R.id.total_val_text);
+        TextView changeValText = dialog.findViewById(R.id.change_val_text);
+        TextView itemsValText = dialog.findViewById(R.id.items_val_text);
+
+        String newItemsText = items.replaceAll("\t@", "\n@");
+
+        dateTimeValText.setText(dateTime);
+        amountRenderedValText.setText(amountRendered);
+        totalValText.setText(total);
+        changeValText.setText(change);
+        itemsValText.setText(newItemsText);
     }
 
     private void addTextViewToRow(TableRow tableRow, String text,int gravity, int typeface) {
         TextView textView = new TextView(getActivity());
         textView.setText(text);
-        textView.setPadding(20, 0, 20, 0);
+        textView.setPadding(20, 10, 20, 10);
         textView.setGravity(gravity);
         textView.setTypeface(null, typeface);
 
