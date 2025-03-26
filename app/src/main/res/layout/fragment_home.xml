@@ -13,39 +13,42 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="20dp"
+            android:layout_marginTop="20dp"
             android:gravity="top|center_horizontal"
             android:text="@string/home"
             android:textSize="20sp"
             android:textStyle="bold" />
 
-        <HorizontalScrollView
+        <LinearLayout
+            android:id="@+id/receipt_log_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:contentDescription="@string/receipt_history">
+            android:orientation="vertical">
 
-            <TableLayout
-                android:id="@+id/receipt_history"
-                android:layout_width="wrap_content"
+            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="20dp"
-                android:stretchColumns="*" />
+                android:gravity="top|center_horizontal"
+                android:text="@string/receipt_log"
+                android:textStyle="bold" />
 
-        </HorizontalScrollView>
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/receipt_log"
+                android:fadeScrollbars="false"
+                android:padding="20dp">
 
-        <!--TableLayout
-            android:id="@+id/stock_history"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="20dp"
-            android:scrollbars="horizontal" />
+                <TableLayout
+                    android:id="@+id/receipt_log"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="20dp" />
 
-        <TableLayout
-            android:id="@+id/user_history"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="20dp"
-            android:scrollbars="horizontal" /-->
+            </HorizontalScrollView>
+
+        </LinearLayout>
 
     </LinearLayout>
 

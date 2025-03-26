@@ -66,6 +66,9 @@
     <string name="date_time">Date-Time</string>
     <string name="total">Total</string>
     <string name="amount_rendered_cash">Amount Rendered Cash</string>
-    <string name="items">Items</string>
-    <string name="receipt_history">Receipt History</string>
+    <string name="items_purchased">Items Purchased</string>
+    <string name="change">Change</string>
+    <string name="input_field">Input Field</string>
+    <string name="receipt_log">Receipt Log</string>
+    <string name="user_log">User Log</string>
 </resources>
