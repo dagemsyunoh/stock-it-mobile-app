@@ -50,6 +50,38 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/user_log_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="20dp"
+                android:gravity="top|center_horizontal"
+                android:text="@string/user_log"
+                android:textStyle="bold" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/user_log"
+                android:fadeScrollbars="false"
+                android:padding="20dp">
+
+                <TableLayout
+                    android:id="@+id/user_log"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="20dp" />
+
+            </HorizontalScrollView>
+
+        </LinearLayout>
+
     </LinearLayout>
 
 </FrameLayout>

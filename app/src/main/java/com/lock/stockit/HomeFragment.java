@@ -9,6 +9,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -24,9 +25,9 @@ import java.util.ArrayList;
 
 public class HomeFragment extends Fragment {
 
-//    private final String type = LoaderActivity.admin ? "an Admin" : "a User";
+    private final boolean type = LoaderActivity.admin;
     private final DecimalFormat df = new DecimalFormat("0.00");
-    TableLayout receiptTable;
+    TableLayout receiptTable, userTable;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -35,7 +36,49 @@ public class HomeFragment extends Fragment {
         receiptTable = view.findViewById(R.id.receipt_log);
         initializeReceiptLog();
 
+        if (type) {
+            LinearLayout userLogLayout = view.findViewById(R.id.user_log_layout);
+            userLogLayout.setVisibility(View.VISIBLE);
+            userTable = view.findViewById(R.id.user_log);
+            initializeUserLog();
+        }
+
         return view;
+    }
+
+    private void initializeUserLog() {
+        FirebaseFirestore.getInstance().collection("user log").orderBy("date-time", Query.Direction.DESCENDING).get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) return;
+
+            getUserTableRow("Date & Time",
+                    "Action",
+                    "Target",
+                    "User",
+                    Typeface.BOLD);
+
+            for (var document : task.getResult()) {
+                getUserTableRow(document.getString("date-time"),
+                        document.getString("action"),
+                        document.getString("target"),
+                        document.getString("user"),
+                        Typeface.NORMAL);
+            }
+        });
+    }
+
+    private void getUserTableRow(String dateTime, String action, String target, String user,int typeface) {
+        TableRow tableRow = new TableRow(getActivity());
+        tableRow.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT));
+
+        addTextViewToRow(tableRow, dateTime, Gravity.CENTER, typeface);
+        addTextViewToRow(tableRow, action, Gravity.CENTER, typeface);
+        addTextViewToRow(tableRow, target, Gravity.CENTER, typeface);
+        addTextViewToRow(tableRow, user, Gravity.CENTER, typeface);
+
+        if (typeface == Typeface.NORMAL) tableRow.setOnClickListener(v -> {
+//            TODO: dialog
+        });
+        userTable.addView(tableRow, new  TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT));
     }
 
     private void initializeReceiptLog() {
