@@ -124,7 +124,10 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         cancelled = false;
         addButton.setClickable(false);
 
-        discountSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> discountFlag = isChecked);
+        discountSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            discountFlag = isChecked;
+            resetPrice();
+        });
 
         addButton.setOnClickListener(v -> addItemPopUp());
 
@@ -377,6 +380,18 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         String iSize = sizesUnique.get(itemSize.getValue());
         for (int i = 0; i < stockList.size(); i++)
             if (iName.equals(stockList.get(i).getItemName()) && iSize.equals(stockList.get(i).getItemSize())) flag = i;
+    }
+
+    private void resetPrice() {
+        for (int i = 0; i < stockList.size(); i++)
+            for (int j = 0; j < receiptList.size(); j++)
+                if (stockList.get(i).getItemName().equals(receiptList.get(j).getItemName()) && stockList.get(i).getItemSize().equals(receiptList.get(j).getItemSize())) {
+                    receiptList.get(j).setItemUnitPrice(discountFlag ? stockList.get(i).getItemDscPrice() : stockList.get(i).getItemRegPrice());
+                    receiptList.get(j).setItemTotalPrice(receiptList.get(j).getItemQuantity() * receiptList.get(j).getItemUnitPrice());
+                    adapter.setReceipts(receiptList);
+                    adapter.notifyItemChanged(j);
+                }
+
     }
 
     private void setItemText() {
