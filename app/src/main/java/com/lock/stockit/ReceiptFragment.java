@@ -145,7 +145,8 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
                 stockList.add(new StockModel(documentSnapshot.getString("item name"),
                         documentSnapshot.getString("item size"),
                         documentSnapshot.getDouble("qty").intValue(),
-                        documentSnapshot.getDouble("price")));
+                        documentSnapshot.getDouble("reg price"),
+                        documentSnapshot.getDouble("dsc price")));
                 if (!namesUnique.contains(documentSnapshot.getString("item name")))
                     namesUnique.add(documentSnapshot.getString("item name"));
                 if (!sizesUnique.contains(documentSnapshot.getString("item size")))
@@ -377,7 +378,8 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         item[0] = stockList.get(flag).getItemName();
         item[1] = stockList.get(flag).getItemSize();
         item[2] = itemQty.getText().toString();
-        item[3] = String.valueOf(stockList.get(flag).getItemPrice());
+        item[3] = String.valueOf(stockList.get(flag).getItemRegPrice());
+//        item[3] = String.valueOf(stockList.get(flag).getItemDscPrice());
         item[4] = String.valueOf(Double.parseDouble(item[2]) * Double.parseDouble(item[3]));
         String unitPriceText = "₱" + String.format(Locale.getDefault(), "%.2f", Double.parseDouble(item[3]));
         String totalPriceText = "₱" + String.format(Locale.getDefault(), "%.2f", Double.parseDouble(item[4]));

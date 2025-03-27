@@ -42,7 +42,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
     protected RecyclerView recyclerView;
     protected FloatingActionButton addButton, addItem, plusOne, minusOne;
     protected SearchView searchView;
-    private TextInputEditText itemName, itemSize, itemQty, itemPrice;
+    private TextInputEditText itemName, itemSize, itemQty, itemRegPrice, itemDscPrice;
     private TextView noResult;
     private ArrayList<StockModel> stockList;
     private StockAdapter adapter;
@@ -107,10 +107,11 @@ public class InventoryFragment extends Fragment implements StockListeners {
                 String name = documentSnapshot.getString("item name");
                 String size = documentSnapshot.getString("item size");
                 int qty = documentSnapshot.getDouble("qty").intValue();
-                double price = documentSnapshot.getDouble("price");
+                double regPrice = documentSnapshot.getDouble("reg price");
+                double dscPrice = documentSnapshot.getDouble("dsc price");
                 names.add(name);
                 sizes.add(size);
-                stockList.add(new StockModel(name, size, qty, price));
+                stockList.add(new StockModel(name, size, qty, regPrice, dscPrice));
             }
             setRecyclerView();
             stockList.sort(new stockComparator());
@@ -147,7 +148,8 @@ public class InventoryFragment extends Fragment implements StockListeners {
         itemName = addPopUp.findViewById(R.id.add_name);
         itemSize = addPopUp.findViewById(R.id.add_size);
         itemQty = addPopUp.findViewById(R.id.add_qty);
-        itemPrice = addPopUp.findViewById(R.id.add_price);
+        itemRegPrice = addPopUp.findViewById(R.id.add_reg_price);
+        itemDscPrice = addPopUp.findViewById(R.id.add_dsc_price);
 
         AppCompatImageView back = addPopUp.findViewById(R.id.back);
         plusOne = addPopUp.findViewById(R.id.add_plus_one);
@@ -186,7 +188,8 @@ public class InventoryFragment extends Fragment implements StockListeners {
             data.put("item name", itemName.getText().toString());
             data.put("item size", itemSize.getText().toString());
             data.put("qty", Double.parseDouble(itemQty.getText().toString()));
-            data.put("price", Double.parseDouble(itemPrice.getText().toString()));
+            data.put("reg price", Double.parseDouble(itemRegPrice.getText().toString()));
+            data.put("dsc price", Double.parseDouble(itemDscPrice.getText().toString()));
 
             if (isInvalid(data)) {
                 Toast.makeText(getActivity(), "Invalid input", Toast.LENGTH_SHORT).show();
@@ -211,7 +214,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
         if (data.get("item name").toString().isEmpty() || data.get("item size").toString().isEmpty())
             return true;
         // check if qty and price are greater than 0
-        return Double.parseDouble(data.get("qty").toString()) <= 0 && Double.parseDouble(data.get("price").toString()) <= 0;
+        return Double.parseDouble(data.get("qty").toString()) <= 0 && Double.parseDouble(data.get("reg price").toString()) <= 0 && Double.parseDouble(data.get("dsc price").toString()) <= 0;
     }
 
     private boolean exists(HashMap<String, Object> data) {

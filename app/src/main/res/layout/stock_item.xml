@@ -10,7 +10,7 @@
     <Space
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="20:13"
+        app:layout_constraintDimensionRatio="4:3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -227,22 +227,22 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/price_layout"
+                android:id="@+id/reg_price_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="55dp"
                 android:layout_below="@+id/qty_layout"
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/price_text"
+                    android:id="@+id/reg_price_text"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_marginHorizontal="5dp"
                     android:gravity="center"
-                    android:text="@string/unit_price"
+                    android:text="@string/reg_price"
                     android:textSize="15sp" />
                 <TextView
-                    android:id="@+id/price_val_text"
+                    android:id="@+id/reg_price_val_text"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_marginStart="7dp"
@@ -251,7 +251,7 @@
                     android:textSize="15sp" />
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/price_edit"
+                    android:id="@+id/reg_price_edit"
                     android:layout_width="100dp"
                     android:layout_height="55dp"
                     android:layout_marginStart="7dp"
@@ -259,7 +259,52 @@
                     android:visibility="gone">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/price"
+                        android:id="@+id/reg_price"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:inputType="numberDecimal"
+                        android:text="@string/price_default"
+                        android:textSize="15sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/dsc_price_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="55dp"
+                android:layout_below="@+id/reg_price_layout"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/dsc_price_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginHorizontal="5dp"
+                    android:gravity="center"
+                    android:text="@string/dsc_price"
+                    android:textSize="15sp" />
+                <TextView
+                    android:id="@+id/dsc_price_val_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="7dp"
+                    android:gravity="center"
+                    android:text="@string/price_default"
+                    android:textSize="15sp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/dsc_price_edit"
+                    android:layout_width="100dp"
+                    android:layout_height="55dp"
+                    android:layout_marginStart="7dp"
+                    android:layout_marginTop="-4dp"
+                    android:visibility="gone">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/dsc_price"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
