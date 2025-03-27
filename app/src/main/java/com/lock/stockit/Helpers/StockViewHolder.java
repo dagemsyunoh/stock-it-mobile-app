@@ -23,10 +23,10 @@ import java.util.Locale;
 public class StockViewHolder extends StockBaseViewHolder {
 
 
-    private final TextView itemName, itemSize, itemQty, itemPrice;
+    private final TextView itemName, itemSize, itemQty, itemRegPrice, itemDscPrice;
     private final LinearLayout editQty;
-    private final TextInputLayout editPrice;
-    private final TextInputEditText inputQty, inputPrice;
+    private final TextInputLayout editRegPrice, editDscPrice;
+    private final TextInputEditText inputQty, inputRegPrice, inputDscPrice;
     private final FloatingActionButton saveButton, plusOne, minusOne;
     private final ImageView leftImage, rightImage;
     private final CardView cardView;
@@ -37,13 +37,16 @@ public class StockViewHolder extends StockBaseViewHolder {
         itemName = itemView.findViewById(R.id.item_text);
         itemSize = itemView.findViewById(R.id.size_text);
         itemQty = itemView.findViewById(R.id.qty_val_text);
-        itemPrice = itemView.findViewById(R.id.price_val_text);
+        itemRegPrice = itemView.findViewById(R.id.reg_price_val_text);
+        itemDscPrice = itemView.findViewById(R.id.dsc_price_val_text);
         editQty = itemView.findViewById(R.id.qty_edit);
-        editPrice = itemView.findViewById(R.id.price_edit);
+        editRegPrice = itemView.findViewById(R.id.reg_price_edit);
+        editDscPrice = itemView.findViewById(R.id.dsc_price_edit);
         plusOne = itemView.findViewById(R.id.plus_one);
         minusOne = itemView.findViewById(R.id.minus_one);
         inputQty = itemView.findViewById(R.id.qty);
-        inputPrice = itemView.findViewById(R.id.price);
+        inputRegPrice = itemView.findViewById(R.id.reg_price);
+        inputDscPrice = itemView.findViewById(R.id.dsc_price);
         saveButton = itemView.findViewById(R.id.save_button);
         cardView = itemView.findViewById(R.id.card_view);
         leftImage = itemView.findViewById(R.id.button_left);
@@ -57,15 +60,19 @@ public class StockViewHolder extends StockBaseViewHolder {
         if (item.getItemName().contains("Lumber")) unit = " pcs";
         else unit = " kg";
         String qtyText = item.getItemQuantity() + unit;
-        String priceText = "₱" + String.format(Locale.getDefault(), "%.2f", item.getItemPrice());
+        String regPriceText = "₱" + String.format(Locale.getDefault(), "%.2f", item.getItemRegPrice());
+        String dscPriceText = "₱" + String.format(Locale.getDefault(), "%.2f", item.getItemDscPrice());
         itemName.setText(item.getItemName());
         itemSize.setText(item.getItemSize());
         itemQty.setText(qtyText);
-        itemPrice.setText(priceText);
+        itemRegPrice.setText(regPriceText);
+        itemDscPrice.setText(dscPriceText);
         inputQty.setText(String.valueOf(item.getItemQuantity()));
-        inputPrice.setText(String.valueOf(item.getItemPrice()));
+        inputRegPrice.setText(String.valueOf(item.getItemRegPrice()));
+        inputDscPrice.setText(String.valueOf(item.getItemDscPrice()));
         editQty.setVisibility(View.GONE);
-        editPrice.setVisibility(View.GONE);
+        editRegPrice.setVisibility(View.GONE);
+        editDscPrice.setVisibility(View.GONE);
         //endregion
         //region Swipe
         setSwipe(cardView, item.getState());
@@ -84,7 +91,7 @@ public class StockViewHolder extends StockBaseViewHolder {
             rightImage.setOnClickListener(view -> getListener().onClickRight(item, position));
         }
 
-        saveButton.setOnClickListener(view -> updateData(inputQty, inputPrice));
+        saveButton.setOnClickListener(view -> updateData(inputQty, inputRegPrice, inputDscPrice));
 
         plusOne.setOnClickListener(view -> QtyEditor.qtyEditor(inputQty, 1));
 
@@ -127,21 +134,27 @@ public class StockViewHolder extends StockBaseViewHolder {
 
     private void changeLayout(StockModel item, int position) {
         editQty.setVisibility(View.VISIBLE);
-        editPrice.setVisibility(View.VISIBLE);
+        editRegPrice.setVisibility(View.VISIBLE);
+        editDscPrice.setVisibility(View.VISIBLE);
         itemQty.setVisibility(View.GONE);
-        itemPrice.setVisibility(View.GONE);
+        itemRegPrice.setVisibility(View.GONE);
+        itemDscPrice.setVisibility(View.GONE);
         saveButton.setVisibility(View.VISIBLE);
         getListener().onClickLeft(item, position);
     }
 
-    private void updateData(TextInputEditText qty, TextInputEditText price) {
+    private void updateData(TextInputEditText qty, TextInputEditText regPrice, TextInputEditText dscPrice) {
         colRef.whereEqualTo("item name", itemName.getText().toString())
                 .whereEqualTo("item size", itemSize.getText().toString())
                 .get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) return;
-            colRef.document(task.getResult().getDocuments().get(0).getId())
-                    .update("qty", Double.parseDouble(qty.getText().toString()),
-                            "price", Double.parseDouble(price.getText().toString()));
+            colRef.document(task.getResult().getDocuments().get(0).getId()).update(
+                    "qty",
+                    Double.parseDouble(qty.getText().toString()),
+                    "price",
+                    Double.parseDouble(regPrice.getText().toString()),
+                    "dsc price",
+                    Double.parseDouble(dscPrice.getText().toString()));
         });
         returnLayout();
         Toast.makeText(itemView.getContext(), "Updated", Toast.LENGTH_SHORT).show();
@@ -149,9 +162,11 @@ public class StockViewHolder extends StockBaseViewHolder {
 
     private void returnLayout() {
         editQty.setVisibility(View.GONE);
-        editPrice.setVisibility(View.GONE);
+        editRegPrice.setVisibility(View.GONE);
+        editDscPrice.setVisibility(View.GONE);
         itemQty.setVisibility(View.VISIBLE);
-        itemPrice.setVisibility(View.VISIBLE);
+        itemRegPrice.setVisibility(View.VISIBLE);
+        itemDscPrice.setVisibility(View.VISIBLE);
         saveButton.setVisibility(View.GONE);
     }
 }

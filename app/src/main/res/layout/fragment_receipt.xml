@@ -15,12 +15,23 @@
         android:textSize="20sp"
         android:textStyle="bold" />
 
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/discount_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_below="@+id/receipt_title"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="5dp"
+        android:gravity="center"
+        android:text="@string/use_discounted_price"
+        android:textSize="20sp" />
+
     <TextView
         android:id="@+id/no_item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/print_button"
-        android:layout_below="@+id/receipt_title"
+        android:layout_below="@+id/discount_switch"
         android:gravity="center"
         android:text="@string/click_to_add"
         android:textSize="20sp" />
@@ -30,7 +41,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/print_button"
-        android:layout_below="@+id/receipt_title"
+        android:layout_below="@+id/discount_switch"
         android:scrollbars="vertical"
         android:visibility="invisible"
         tools:listitem="@layout/receipt_item" />

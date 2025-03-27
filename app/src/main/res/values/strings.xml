@@ -32,6 +32,8 @@
     <string name="stocks">Stocks</string>
     <string name="search_item">Search Item</string>
     <string name="add_item">Add Item</string>
+    <string name="reg_price">Regular Price</string>
+    <string name="dsc_price">Discounted Price</string>
     <string name="unit_price">Unit Price</string>
     <string name="total_price">Total Price</string>
     <string name="edit">Edit</string>
@@ -75,4 +77,5 @@
     <string name="target">Target</string>
     <string name="action">Action</string>
     <string name="user_action_details">User Action Details</string>
+    <string name="use_discounted_price">Use Discounted Price?</string>
 </resources>

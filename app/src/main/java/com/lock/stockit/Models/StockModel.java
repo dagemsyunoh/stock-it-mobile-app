@@ -6,22 +6,25 @@ public class StockModel {
     private String itemName;
     private String itemSize;
     private  int itemQty;
-    private double itemPrice;
+    private double itemRegPrice;
+    private double itemDscPrice;
     private SwipeState state;
 
-    public StockModel(String itemName, String itemSize, int itemQty, double itemPrice) {
+    public StockModel(String itemName, String itemSize, int itemQty, double itemRegPrice, double itemDscPrice) {
         this.setItemName(itemName);
         this.setItemSize(itemSize);
         this.setItemQuantity(itemQty);
-        this.setItemPrice(itemPrice);
+        this.setItemRegPrice(itemRegPrice);
+        this.setItemDscPrice(itemDscPrice);
         this.setState(SwipeState.NONE);
     }
 
-    public StockModel(String itemName, String itemSize, int itemQty, double itemPrice, SwipeState state) {
+    public StockModel(String itemName, String itemSize, int itemQty, double itemRegPrice, double itemDscPrice, SwipeState state) {
         this.setItemName(itemName);
         this.setItemSize(itemSize);
         this.setItemQuantity(itemQty);
-        this.setItemPrice(itemPrice);
+        this.setItemRegPrice(itemRegPrice);
+        this.setItemDscPrice(itemDscPrice);
         this.setState(state);
     }
     public String getItemName() {
@@ -48,12 +51,20 @@ public class StockModel {
         this.itemQty = itemQty;
     }
 
-    public double getItemPrice() {
-        return itemPrice;
+    public double getItemRegPrice() {
+        return itemRegPrice;
     }
 
-    public void setItemPrice(double itemPrice) {
-        this.itemPrice = itemPrice;
+    public void setItemRegPrice(double itemRegPrice) {
+        this.itemRegPrice = itemRegPrice;
+    }
+
+    public double getItemDscPrice() {
+        return itemDscPrice;
+    }
+
+    public void setItemDscPrice(double itemDscPrice) {
+        this.itemDscPrice = itemDscPrice;
     }
 
     public SwipeState getState() {
