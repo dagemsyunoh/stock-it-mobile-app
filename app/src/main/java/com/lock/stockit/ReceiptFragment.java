@@ -26,6 +26,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -74,7 +75,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private final String[] item = new String[5];
     private final ArrayList<String> header = new ArrayList<>();
     private int transactionNo, flag;
-    private boolean cancelled, recyclerViewFlag = true;
+    private boolean cancelled, discountFlag, recyclerViewFlag = true;
     private String invoice;
     private double cash = 0, sum;
 
@@ -117,8 +118,13 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         noItem = view.findViewById(R.id.no_item);
         grandTotalLayout = view.findViewById(R.id.grand_total_layout);
         grandTotalPrice = view.findViewById(R.id.grand_total_val);
+        SwitchCompat discountSwitch = view.findViewById(R.id.discount_switch);
+        discountSwitch.setChecked(false);
+        discountFlag = false;
         cancelled = false;
         addButton.setClickable(false);
+
+        discountSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> discountFlag = isChecked);
 
         addButton.setOnClickListener(v -> addItemPopUp());
 
@@ -378,8 +384,8 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         item[0] = stockList.get(flag).getItemName();
         item[1] = stockList.get(flag).getItemSize();
         item[2] = itemQty.getText().toString();
-        item[3] = String.valueOf(stockList.get(flag).getItemRegPrice());
-//        item[3] = String.valueOf(stockList.get(flag).getItemDscPrice());
+        if (discountFlag) item[3] = String.valueOf(stockList.get(flag).getItemDscPrice());
+        else item[3] = String.valueOf(stockList.get(flag).getItemRegPrice());
         item[4] = String.valueOf(Double.parseDouble(item[2]) * Double.parseDouble(item[3]));
         String unitPriceText = "₱" + String.format(Locale.getDefault(), "%.2f", Double.parseDouble(item[3]));
         String totalPriceText = "₱" + String.format(Locale.getDefault(), "%.2f", Double.parseDouble(item[4]));
