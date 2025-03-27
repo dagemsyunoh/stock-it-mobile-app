@@ -73,12 +73,12 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
 
         minusOne.setOnClickListener(view -> checkMinMax(item, position, -1));
 
-
         cardView.setOnClickListener(view -> { }); // Do not remove, it is required for the swipe to work
         //endregion
         //region On Touch Swipe
         if (swipeState == SwipeState.NONE) return;
         cardView.setOnTouchListener((view, event) -> {
+            view.performClick();
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     view.getParent().requestDisallowInterceptTouchEvent(false);
@@ -111,9 +111,6 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
         String iName = itemName.getText().toString();
         String iSize = itemSize.getText().toString();
         ArrayList<StockModel> stocks = ReceiptFragment.stockList;
-//        ArrayList<String> names = ReceiptFragment.names;
-//        ArrayList<String> sizes = ReceiptFragment.sizes;
-//        ArrayList<Integer> qty = ReceiptFragment.qty;
         for (int i = 0; i < stocks.size(); i++)
             if (iName.equals(stocks.get(i).getItemName()) && iSize.equals(stocks.get(i).getItemSize())) flag = i;
         if (stocks.get(flag).getItemQuantity() == 0) {
