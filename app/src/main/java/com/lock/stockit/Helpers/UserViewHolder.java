@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -28,6 +29,7 @@ public class UserViewHolder extends UserBaseViewHolder {
     private final CardView cardView;
     private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
     private final Logger logger = new Logger();
+    private boolean cancelFlag = false;
 
     public UserViewHolder(View itemView, UserListeners customListeners) {
         super(itemView, customListeners);
@@ -49,21 +51,30 @@ public class UserViewHolder extends UserBaseViewHolder {
         //endregion
         setSwipeEventListener(item, position, swipeState);
     }
+
     @SuppressLint("ClickableViewAccessibility")
     private void setSwipeEventListener(final UserModel item, final int position, final SwipeState swipeState) {
         //region On Click
         if (swipeState != SwipeState.NONE)
             rightImage.setOnClickListener(view -> getListener().onClickRight(item, position));
 
-        admin.setOnClickListener(view -> confirmChange("admin", admin));
+        admin.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (!cancelFlag) confirmChange("admin", admin);
+            cancelFlag = false;
+        });
 
-        activated.setOnClickListener(view -> confirmChange("activated", activated));
+        activated.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (!cancelFlag) confirmChange("activated", admin);
+            cancelFlag = false;
+        });
 
-        cardView.setOnClickListener(view -> {}); // Do not remove, it is required for the swipe to work
+        cardView.setOnClickListener(view -> Log.d("TAG", "click")); // Do not remove, it is required for the swipe to work
         //endregion
         //region On Touch Swipe
         if (swipeState == SwipeState.NONE) return;
+
         cardView.setOnTouchListener((view, event) -> {
+            view.performClick();
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     dXLead = view.getX() - event.getRawX();
@@ -112,6 +123,7 @@ public class UserViewHolder extends UserBaseViewHolder {
         Button buttonCancel = changeDialog.findViewById(R.id.cancel_button);
 
         buttonCancel.setOnClickListener(v -> {
+            cancelFlag = true;
             switchClicked.setChecked(!switchClicked.isChecked());
             changeDialog.dismiss();
         });
