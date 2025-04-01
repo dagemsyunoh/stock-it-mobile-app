@@ -52,6 +52,7 @@ import com.lock.stockit.Models.ReceiptModel;
 import com.lock.stockit.Models.StockModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
 
 public class ReceiptFragment extends Fragment implements ReceiptListeners {
@@ -383,15 +384,27 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     }
 
     private void resetPrice() {
-        for (int i = 0; i < stockList.size(); i++)
-            for (int j = 0; j < receiptList.size(); j++)
-                if (stockList.get(i).getItemName().equals(receiptList.get(j).getItemName()) && stockList.get(i).getItemSize().equals(receiptList.get(j).getItemSize())) {
-                    receiptList.get(j).setItemUnitPrice(discountFlag ? stockList.get(i).getItemDscPrice() : stockList.get(i).getItemRegPrice());
-                    receiptList.get(j).setItemTotalPrice(receiptList.get(j).getItemQuantity() * receiptList.get(j).getItemUnitPrice());
-                    adapter.setReceipts(receiptList);
-                    adapter.notifyItemChanged(j);
-                }
+        HashMap<String, StockModel> stockMap = new HashMap<>();
 
+        for (StockModel stock : stockList) {
+            String key = stock.getItemName() + "|" + stock.getItemSize();
+            stockMap.put(key, stock);
+        }
+
+        for (ReceiptModel receipt : receiptList) {
+            String key = receipt.getItemName() + "|" + receipt.getItemSize();
+            if (stockMap.containsKey(key)) {
+                StockModel stock = stockMap.get(key);
+                double unitPrice = discountFlag ? stock.getItemDscPrice() : stock.getItemRegPrice();
+
+                receipt.setItemUnitPrice(unitPrice);
+                receipt.setItemTotalPrice(receipt.getItemQuantity() * unitPrice);
+                adapter.notifyItemChanged(receiptList.indexOf(receipt)); // Update UI
+            }
+        }
+
+        adapter.setReceipts(receiptList);
+        getSum();
     }
 
     private void setItemText() {
