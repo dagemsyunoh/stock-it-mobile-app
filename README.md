@@ -29,4 +29,4 @@ DONE: <br>
 - history log
 - cashier name
 - daily sales
-- hardware discounts
+- customer discounts
