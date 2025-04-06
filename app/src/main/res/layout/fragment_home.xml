@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fadeScrollbars="false"
     tools:context=".HomeFragment">
 
@@ -21,6 +22,38 @@
             android:textStyle="bold" />
 
         <LinearLayout
+            android:id="@+id/chart_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="top|center_horizontal"
+                android:text="@string/daily_sales"
+                android:textStyle="bold" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:backgroundTint="@color/white"
+                android:gravity="center"
+                android:padding="20dp"
+                app:cardCornerRadius="@dimen/card_radius">
+
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/chart"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp" />
+
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/receipt_log_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -34,20 +67,29 @@
                 android:text="@string/receipt_log"
                 android:textStyle="bold" />
 
-            <HorizontalScrollView
+            <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="300dp"
                 android:contentDescription="@string/receipt_log"
                 android:fadeScrollbars="false"
-                android:padding="20dp">
+                android:paddingVertical="20dp">
 
-                <TableLayout
-                    android:id="@+id/receipt_log"
-                    android:layout_width="wrap_content"
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginVertical="20dp" />
+                    android:contentDescription="@string/receipt_log"
+                    android:fadeScrollbars="false"
+                    android:paddingHorizontal="20dp">
 
-            </HorizontalScrollView>
+                    <TableLayout
+                        android:id="@+id/receipt_log"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="20dp" />
+
+                </HorizontalScrollView>
+
+            </androidx.core.widget.NestedScrollView>
 
         </LinearLayout>
 
@@ -66,20 +108,29 @@
                 android:text="@string/user_log"
                 android:textStyle="bold" />
 
-            <HorizontalScrollView
+            <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="300dp"
                 android:contentDescription="@string/user_log"
                 android:fadeScrollbars="false"
-                android:padding="20dp">
+                android:paddingVertical="20dp">
 
-                <TableLayout
-                    android:id="@+id/user_log"
-                    android:layout_width="wrap_content"
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginVertical="20dp" />
+                    android:contentDescription="@string/user_log"
+                    android:fadeScrollbars="false"
+                    android:paddingHorizontal="20dp">
 
-            </HorizontalScrollView>
+                    <TableLayout
+                        android:id="@+id/user_log"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="20dp" />
+
+                </HorizontalScrollView>
+
+            </androidx.core.widget.NestedScrollView>
 
         </LinearLayout>
 

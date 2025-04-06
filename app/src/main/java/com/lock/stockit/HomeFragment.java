@@ -17,32 +17,79 @@ import android.widget.TextView;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.fragment.app.Fragment;
 
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class HomeFragment extends Fragment {
     private final boolean type = LoaderActivity.admin;
     private final DecimalFormat df = new DecimalFormat("0.00");
-    TableLayout receiptTable, userTable;
+    private final List<String> dateList = new ArrayList<>();
+    private final List<Double> salesList = new ArrayList<>();
+    private TableLayout receiptTable, userTable;
+    private LineChart lineChart;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
+        lineChart = view.findViewById(R.id.chart);
+
         receiptTable = view.findViewById(R.id.receipt_log);
         initializeReceiptLog();
 
-        if (type) {
-            LinearLayout userLogLayout = view.findViewById(R.id.user_log_layout);
-            userLogLayout.setVisibility(View.VISIBLE);
-            userTable = view.findViewById(R.id.user_log);
-            initializeUserLog();
-        }
+        LinearLayout userLogLayout = view.findViewById(R.id.user_log_layout);
+        userTable = view.findViewById(R.id.user_log);
+        initializeUserLog();
+        if (type) userLogLayout.setVisibility(View.VISIBLE);
 
         return view;
+    }
+
+    private void setChart() {
+        Description description = new Description();
+        description.setText("");
+        lineChart.setDescription(description);
+        lineChart.getAxisRight().setDrawLabels(false);
+
+        XAxis xAxis = lineChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(dateList));
+        xAxis.setLabelCount(dateList.size());
+        xAxis.setGranularity(1f);
+        xAxis.setLabelRotationAngle(-90);
+
+        YAxis yAxis = lineChart.getAxisLeft();
+        yAxis.setAxisMinimum(0f);
+        yAxis.setAxisMaximum(10000f);
+        yAxis.setAxisLineWidth(2f);
+        yAxis.setLabelCount(5);
+
+        List<Entry> entries = new ArrayList<>();
+        for (int i = 0; i < salesList.size(); i++)
+            entries.add(new Entry(i, salesList.get(i).floatValue()));
+
+        LineDataSet lineDataSet = new LineDataSet(entries, "Total Sales");
+        lineDataSet.setColor(Color.GREEN);
+
+        LineData lineData = new LineData(lineDataSet);
+        lineChart.setData(lineData);
+        lineChart.invalidate();
     }
 
     private void initializeUserLog() {
@@ -115,7 +162,26 @@ public class HomeFragment extends Fragment {
                     Gravity.CENTER,
                     Typeface.BOLD);
 
+            String startDate = task.getResult().getDocuments().get(task.getResult().size()-1).getString("date-time").split(" ")[0];
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            String endDate = LocalDate.now().toString();
+
+            LocalDate localStartDate = LocalDate.parse(startDate);
+            LocalDate localEndDate = LocalDate.parse(endDate);
+
+            long days = ChronoUnit.DAYS.between(localStartDate, localEndDate);
+
+            for (int i = 0; i <= days; i++) {
+                dateList.add(localStartDate.plusDays(i).toString());
+                salesList.add((double) 0);
+            }
+
             for (var document : task.getResult()) {
+                String date = document.getString("date-time").split(" ")[0];
+
+                if (dateList.contains(date))
+                    salesList.set(dateList.indexOf(date), salesList.get(dateList.indexOf(date)) + document.getDouble("total"));
+
                 StringBuilder items = new StringBuilder();
                 for (var item : (ArrayList<?>) document.get("items"))
                     items.append(item.toString().replaceAll(", ", "\t@")).append("\n");
@@ -128,6 +194,8 @@ public class HomeFragment extends Fragment {
                         "PHP " + df.format(document.getDouble("amount rendered cash") - document.getDouble("total")),
                         Gravity.START, Typeface.NORMAL);
             }
+
+            setChart();
         });
 
     }
