@@ -3,9 +3,8 @@
 TO-DO: <br>
 - printer connection (partially done)
 - print format (partially done)
-- daily sales (?)
+- different store functions
 - settings
-- hardware discounts
 - design
 - testing & bug checking
 
@@ -29,3 +28,5 @@ DONE: <br>
 - print
 - history log
 - cashier name
+- daily sales
+- hardware discounts
