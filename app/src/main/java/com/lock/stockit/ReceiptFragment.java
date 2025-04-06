@@ -57,8 +57,10 @@ import java.util.Locale;
 
 public class ReceiptFragment extends Fragment implements ReceiptListeners {
 
+    private final DocumentReference userRef = FirebaseFirestore.getInstance().collection("users").document(LoaderActivity.uid);
     private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("receipts");
     private final CollectionReference colRefStock = FirebaseFirestore.getInstance().collection("stocks");
+    private final CollectionReference colRefCustomer = FirebaseFirestore.getInstance().collection("customers");
     private final DocumentReference docRef = FirebaseFirestore.getInstance().collection("format").document("store info");
     public static final ArrayList<StockModel> stockList = new ArrayList<>();
     protected RecyclerView recyclerView;
@@ -68,7 +70,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private TextView title, itemUnitPrice, itemTotalPrice, noItem, grandTotalPrice;
     private LinearLayout grandTotalLayout;
     private ReceiptAdapter adapter;
-    private final DocumentReference userRef = FirebaseFirestore.getInstance().collection("users").document(LoaderActivity.uid);
+    private final ArrayList<String> customerList = new ArrayList<>();
     private final ArrayList<String> namesUnique = new ArrayList<>();
     private final ArrayList<String> sizesUnique = new ArrayList<>();
     private final ArrayList<Double> grandTotal = new ArrayList<>();
@@ -143,6 +145,15 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         fetchData();
         fetchTransNo();
         fetchHeader();
+        fetchCustomerData();
+    }
+
+    private void fetchCustomerData() {
+        colRefCustomer.addSnapshotListener((value, error) -> {
+           if (error != null || value == null) return;
+           for (DocumentSnapshot documentSnapshot : value.getDocuments())
+               customerList.add(documentSnapshot.getId());
+        });
     }
 
     private void fetchData() {
@@ -166,6 +177,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
             namesUnique.sort(String::compareToIgnoreCase);
             sizesUnique.sort(new sizeComparator());
         });
+
     }
 
     private void fetchTransNo() {
@@ -267,7 +279,42 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
         inputDialog.setContentView(R.layout.dialog_box_input);
         inputDialog.setCancelable(false);
         inputDialog.create();
-        inputDialog.show();
+
+
+        if (discountFlag) {
+            Dialog discountDialog = new Dialog(getActivity());
+            discountDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            discountDialog.setContentView(R.layout.dialog_box_input);
+            discountDialog.setCancelable(false);
+            discountDialog.create();
+            discountDialog.show();
+
+            TextView header = discountDialog.findViewById(R.id.header);
+            header.setText(R.string.pick_customer_name);
+
+            TextView dialogText = discountDialog.findViewById(R.id.dialog_text);
+            dialogText.setText(R.string.please_pick_customer_name);
+
+            TextInputLayout inputLayout = discountDialog.findViewById(R.id.input_layout);
+            inputLayout.setVisibility(View.GONE);
+
+            NumberPicker picker = discountDialog.findViewById(R.id.picker);
+            picker.setVisibility(View.VISIBLE);
+            picker.setMinValue(0);
+            picker.setMaxValue(customerList.size() - 1);
+            picker.setDisplayedValues(customerList.toArray(new String[0]));
+
+            String value = customerList.get(picker.getValue());
+
+            Button buttonCancel = discountDialog.findViewById(R.id.cancel_button);
+            Button buttonOk = discountDialog.findViewById(R.id.ok_button);
+            buttonCancel.setOnClickListener(v -> discountDialog.dismiss());
+            buttonOk.setOnClickListener(v -> {
+                i.putExtra("customer", value);
+                discountDialog.dismiss();
+                inputDialog.show();
+            });
+        } else inputDialog.show();
 
         TextView header = inputDialog.findViewById(R.id.header);
         header.setText(R.string.print_receipt);
