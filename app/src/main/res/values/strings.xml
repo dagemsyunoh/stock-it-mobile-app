@@ -54,7 +54,7 @@
     <string name="warning_user_status_change">Warning! User Status Change</string>
     <string name="ok">OK</string>
     <string name="email_verification_required">Email Verification Required</string>
-    <string name="email_verification_required_text">Please verify your new email before signing in again.\n Email will only be changed after verification.</string>
+    <string name="email_verification_required_text">Please verify your new email before signing in again.\nEmail will only be changed after verification.</string>
     <string name="introduce_yourself">Introduce Yourself!</string>
     <string name="enter_your_name">Please enter your name.</string>
     <string name="display_name">Name</string>
@@ -79,4 +79,6 @@
     <string name="user_action_details">User Action Details</string>
     <string name="use_discounted_price">Use Discounted Price?</string>
     <string name="daily_sales">Daily Sales</string>
+    <string name="pick_customer_name">Pick Customer Name</string>
+    <string name="please_pick_customer_name">Please pick customer name.\nIf name is not in the list, customer is not eligible for discount.\nMake sure to cancel the transaction and turn off discount if customer is not eligible.</string>
 </resources>

@@ -29,6 +29,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.preference.PreferenceManager;
 
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.lock.stockit.Helpers.PrinterCommands;
 import com.lock.stockit.Helpers.SecurePreferences;
@@ -49,6 +50,7 @@ import java.util.UUID;
 
 public class PrintPreviewActivity extends AppCompatActivity implements Runnable {
     private final CollectionReference receiptRef = FirebaseFirestore.getInstance().collection("receipts");
+    private final CollectionReference customerRef = FirebaseFirestore.getInstance().collection("customers");
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2,CONNECTION_TIMEOUT = 5000; // 5 seconds
     private final String sSeparator = "-".repeat(32);
@@ -66,6 +68,7 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
     private OutputStream os;
     private double cash, total;
     private boolean isConnected = false;
+    private String customer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +85,8 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
         receiptList = getIntent().getExtras().getParcelableArrayList("receiptList");
         invoice = getIntent().getExtras().getString("invoice");
         cash = getIntent().getExtras().getDouble("cash");
+        if (getIntent().getExtras().containsKey("customer"))
+            customer = getIntent().getExtras().getString("customer");
 
         getHeaderBodyFooter();
         setHeaderBodyFooter();
@@ -190,6 +195,10 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
         receiptMap.put("total", total);
         receiptMap.put("amount rendered cash", cash);
         receiptMap.put("items", items);
+        if (customer != null || !customer.isEmpty()) {
+            receiptMap.put("customer", customer);
+            addCustomerReceipt();
+        }
         try {
             receiptRef.add(receiptMap);
             setResult(RESULT_OK);
@@ -197,6 +206,20 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
         } catch (Exception e) {
             Log.e("TAG", "Error Code " + e);
         }
+    }
+
+    private void addCustomerReceipt() {
+        DocumentReference customerDocRef = customerRef.document(customer);
+        customerDocRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (!documentSnapshot.exists()) return;
+            int transactions = 1;
+            if (documentSnapshot.getDouble("transactions") != null)
+                transactions = documentSnapshot.getDouble("transactions").intValue() + 1;
+            Map<String, Object> customerMap = new HashMap<>();
+            customerMap.put("transactions", transactions);
+            customerMap.put("transaction #" + transactions, invoice);
+            customerDocRef.update(customerMap);
+        });
     }
 
     private void checkSavedDevice(String savedPrinterAddress) {
@@ -256,8 +279,6 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
             Log.v("TAG", "PairedDevices: " + mDevice.getName() + "  "
                     + mDevice.getAddress());
     }
-
-
 
     private void startTimeout() {
         Thread mTimeoutThread = new Thread(() -> {
@@ -422,6 +443,7 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
         text.append("DATE & TIME: ").append(dateTime).append("\n");
         text.append(invoice).append("\n");
         text.append("CASHIER: ").append(cashierName).append("\n");
+        if (customer != null || !customer.isEmpty()) text.append("CUSTOMER: ").append(customer).append("\n");
         text.append(sSeparator).append("\n");
 
         total = 0;
