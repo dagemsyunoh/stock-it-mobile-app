@@ -43,6 +43,8 @@ public class HomeFragment extends Fragment {
     private final List<Double> salesList = new ArrayList<>();
     private TableLayout receiptTable, userTable;
     private LineChart lineChart;
+    private double max = 0;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -64,6 +66,11 @@ public class HomeFragment extends Fragment {
     private void setChart() {
         Description description = new Description();
         description.setText("");
+
+        int digits = (int) Math.log10(max) + 1;
+        float maxLimit = (float) Math.pow(10, digits);
+        if (maxLimit / max > 2) maxLimit /= 2;
+
         lineChart.setDescription(description);
         lineChart.getAxisRight().setDrawLabels(false);
 
@@ -76,7 +83,7 @@ public class HomeFragment extends Fragment {
 
         YAxis yAxis = lineChart.getAxisLeft();
         yAxis.setAxisMinimum(0f);
-        yAxis.setAxisMaximum(10000f);
+        yAxis.setAxisMaximum(maxLimit);
         yAxis.setAxisLineWidth(2f);
         yAxis.setLabelCount(5);
 
@@ -89,6 +96,8 @@ public class HomeFragment extends Fragment {
 
         LineData lineData = new LineData(lineDataSet);
         lineChart.setData(lineData);
+        lineChart.setVisibleXRangeMinimum(3);
+        lineChart.setVisibleXRangeMaximum(30);
         lineChart.invalidate();
     }
 
@@ -179,8 +188,11 @@ public class HomeFragment extends Fragment {
             for (var document : task.getResult()) {
                 String date = document.getString("date-time").split(" ")[0];
 
-                if (dateList.contains(date))
-                    salesList.set(dateList.indexOf(date), salesList.get(dateList.indexOf(date)) + document.getDouble("total"));
+                if (dateList.contains(date)) {
+                    double dailyTotal = salesList.get(dateList.indexOf(date)) + document.getDouble("total");
+                    salesList.set(dateList.indexOf(date), dailyTotal);
+                    if (dailyTotal > max) max = dailyTotal;
+                }
 
                 StringBuilder items = new StringBuilder();
                 for (var item : (ArrayList<?>) document.get("items"))
