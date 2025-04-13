@@ -22,12 +22,11 @@ import com.lock.stockit.R;
 
 public class UserViewHolder extends UserBaseViewHolder {
 
-
+    private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
     private final TextView email;
     private final SwitchCompat admin, activated;
     private final ImageView rightImage;
     private final CardView cardView;
-    private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
     private final Logger logger = new Logger();
     private boolean cancelFlag = false;
 

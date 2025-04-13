@@ -84,6 +84,7 @@
         android:layout_marginHorizontal="15dp"
         android:contentDescription="@string/add_item_to_receipt"
         android:src="@drawable/ic_add"
+        android:visibility="gone"
         tools:ignore="RelativeOverlap" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

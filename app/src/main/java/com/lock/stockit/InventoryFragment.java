@@ -2,8 +2,6 @@ package com.lock.stockit;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -38,7 +36,7 @@ import java.util.HashMap;
 
 public class InventoryFragment extends Fragment implements StockListeners {
 
-    private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("stocks");
+    protected final CollectionReference stockRef = FirebaseFirestore.getInstance().collection("stores").document(LoaderActivity.sid).collection("stocks");
     protected RecyclerView recyclerView;
     protected FloatingActionButton addButton, addItem, plusOne, minusOne;
     protected SearchView searchView;
@@ -49,10 +47,6 @@ public class InventoryFragment extends Fragment implements StockListeners {
     private final ArrayList<String> names = new ArrayList<>();
     private final ArrayList<String> sizes = new ArrayList<>();
 
-    /** @noinspection unused*/
-    public static Intent newIntent(Context context) {
-        return new Intent(context, InventoryFragment.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -100,10 +94,10 @@ public class InventoryFragment extends Fragment implements StockListeners {
     }
     @SuppressLint("NotifyDataSetChanged")
     private void fetchData() {
-        colRef.addSnapshotListener((value, error) -> {
-            if (error != null || value == null) return;
+        stockRef.addSnapshotListener((querySnapshot, error) -> {
+            if (error != null || querySnapshot == null) return;
             stockList.clear();
-            for (DocumentSnapshot documentSnapshot : value.getDocuments()) {
+            for (DocumentSnapshot documentSnapshot : querySnapshot.getDocuments()) {
                 String name = documentSnapshot.getString("item name");
                 String size = documentSnapshot.getString("item size");
                 int qty = documentSnapshot.getDouble("qty").intValue();
@@ -129,7 +123,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
     private void deleteItem(int pos) {
         String name = stockList.get(pos).getItemName();
         String size = stockList.get(pos).getItemSize();
-        colRef.addSnapshotListener((value, error) -> {
+        stockRef.addSnapshotListener((value, error) -> {
             if (error != null || value == null) return;
             for (DocumentSnapshot documentSnapshot : value.getDocuments())
                 if (documentSnapshot.getString("item name").equals(name) && documentSnapshot.getString("item size").equals(size)) {
@@ -200,7 +194,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
                 return;
             }
 
-            colRef.add(data).addOnSuccessListener(documentReference -> {
+            stockRef.add(data).addOnSuccessListener(documentReference -> {
                 Toast.makeText(getActivity(), "Item added", Toast.LENGTH_SHORT).show();
                 addPopUp.dismiss();
             }).addOnFailureListener(e -> Toast.makeText(getActivity(), "Error adding item", Toast.LENGTH_SHORT).show());
