@@ -17,7 +17,10 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 
 public class SignInActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -82,17 +85,23 @@ public class SignInActivity extends AppCompatActivity implements FirebaseAuth.Au
     private void authUser(String email, String password) {
         buttonSignIn.setActivated(false);
         signUp.setClickable(false);
-        auth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    progressBar.setVisibility(View.GONE);
-                    if (task.isSuccessful()) {
-                        Toast.makeText(SignInActivity.this, "Sign in successful.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    Toast.makeText(SignInActivity.this, "Incorrect email or password. Please try again.", Toast.LENGTH_SHORT).show();
-                    buttonSignIn.setActivated(true);
-                    signUp.setClickable(true);
-                });
+
+        auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, task -> {
+            progressBar.setVisibility(View.GONE);
+            if (task.isSuccessful()) {
+                Toast.makeText(SignInActivity.this, "Sign in successful.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Exception exception = task.getException();
+            if (exception instanceof FirebaseAuthInvalidUserException)
+                Toast.makeText(SignInActivity.this, "No account found with this email.", Toast.LENGTH_SHORT).show();
+            else if (exception instanceof FirebaseAuthInvalidCredentialsException)
+                Toast.makeText(SignInActivity.this, "Incorrect password. Please try again.", Toast.LENGTH_SHORT).show();
+            else if (exception instanceof FirebaseNetworkException)
+                Toast.makeText(SignInActivity.this, "Network error. Please check your connection.", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(SignInActivity.this, "Authentication failed: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+        });
     }
 
     @Override

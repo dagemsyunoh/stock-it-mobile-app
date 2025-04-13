@@ -31,8 +31,9 @@ import com.lock.stockit.Adapters.ViewPagerAdapter;
 
 
 public class MainActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
+
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
-    private final DocumentReference docRef = FirebaseFirestore.getInstance().collection("users").document(LoaderActivity.uid);
+    private final DocumentReference docRef = FirebaseFirestore.getInstance().collection("users").document(auth.getUid());
     protected ViewPager2 viewPager2;
     protected ViewPagerAdapter viewPagerAdapter;
     protected BottomNavigationView bottomNavigationView;

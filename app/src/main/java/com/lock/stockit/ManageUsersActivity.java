@@ -2,12 +2,11 @@ package com.lock.stockit;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.text.InputType;
 import android.util.Log;
@@ -49,11 +48,11 @@ import java.util.Map;
 
 public class ManageUsersActivity extends AppCompatActivity implements UserListeners {
 
+    private final CollectionReference userRef = FirebaseFirestore.getInstance().collection("users");
+    private final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     private RecyclerView recyclerView;
     private ArrayList<UserModel> usersList;
     private UserAdapter adapter;
-    private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
-    private final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     protected ExtendedFloatingActionButton buttonBack;
     protected AuthCredential credential;
     private AlertDialog dialog;
@@ -82,10 +81,23 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
         super.onStart();
         fetchData();
     }
+    private final Handler mHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            dialog.dismiss();
+            Toast.makeText(ManageUsersActivity.this, "User deleted.", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    private void setRecyclerView() {
+        adapter = new UserAdapter(this, SwipeState.LEFT);
+        recyclerView.setLayoutManager(new CustomLinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        recyclerView.setAdapter(adapter);
+    }
 
     @SuppressLint("NotifyDataSetChanged")
     private void fetchData() {
-        colRef.addSnapshotListener((value, error) -> {
+        userRef.addSnapshotListener((value, error) -> {
             if (error != null || value == null) return;
             usersList.clear();
 
@@ -99,26 +111,6 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
             adapter.setUsers(usersList);
             adapter.notifyDataSetChanged();
         });
-    }
-
-    private void setRecyclerView() {
-        adapter = new UserAdapter(this, SwipeState.LEFT);
-        recyclerView.setLayoutManager(new CustomLinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        recyclerView.setAdapter(adapter);
-    }
-
-    private final Handler mHandler = new Handler(new Handler.Callback() {
-        @Override
-        public boolean handleMessage(@NonNull Message msg) {
-            dialog.dismiss();
-            Toast.makeText(ManageUsersActivity.this, "User deleted.", Toast.LENGTH_SHORT).show();
-            return true;
-        }
-    });
-
-    /** @noinspection unused*/
-    public static Intent newIntent(Context context) {
-        return new Intent(context, ManageUsersActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
     }
 
     private void reAuth(EditText passwordInput, int pos) {
@@ -203,10 +195,10 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
 
     private void deleteUser(int pos) {
         String email = usersList.get(pos).getEmail();
-        colRef.whereEqualTo("email", email).get().addOnCompleteListener(task -> {
+        userRef.whereEqualTo("email", email).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) return;
             String uid = task.getResult().getDocuments().get(0).getId();
-            colRef.document(uid).delete();
+            userRef.document(uid).delete();
             requestDelete(email);
             logger.setUserLog("delete", email, user.getEmail());
             dialog.dismiss();

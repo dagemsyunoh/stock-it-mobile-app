@@ -22,7 +22,7 @@ import java.util.Locale;
 
 public class StockViewHolder extends StockBaseViewHolder {
 
-
+    private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("stores").document(new SecurePreferences(itemView.getContext(), "store-preferences", "store-key", true).getString("sid")).collection("stocks");
     private final TextView itemName, itemSize, itemQty, itemRegPrice, itemDscPrice;
     private final LinearLayout editQty;
     private final TextInputLayout editRegPrice, editDscPrice;
@@ -30,7 +30,6 @@ public class StockViewHolder extends StockBaseViewHolder {
     private final FloatingActionButton saveButton, plusOne, minusOne;
     private final ImageView leftImage, rightImage;
     private final CardView cardView;
-    private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("stocks");
 
     public StockViewHolder(View itemView, StockListeners customListeners) {
         super(itemView, customListeners);

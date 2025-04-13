@@ -3,6 +3,7 @@ package com.lock.stockit;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -21,12 +22,12 @@ import com.lock.stockit.Helpers.Logger;
 
 public class InactiveActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
 
-    private final Handler handler = new Handler();
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
     private final FirebaseUser user = auth.getCurrentUser();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     protected TextView inactiveText, reload;
     protected Button buttonSignOut, buttonResend;
-    private int i = 5; //temporary for testing, change back to 30 upon deployment
+    private int i = 30;
     private Runnable runnable;
     private boolean clicked;
     private final Logger logger = new Logger();
@@ -56,7 +57,7 @@ public class InactiveActivity extends AppCompatActivity implements FirebaseAuth.
         }
 
         buttonResend.setOnClickListener(v -> {
-            i = 5; //to restart delay loop, change back to 30 upon deployment
+            i = 30;
             if (user == null || LoaderActivity.verified) return;
             user.sendEmailVerification().addOnCompleteListener(task -> {
                 if (task.isSuccessful())
