@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">StockIt</string>
-    <string name="home">Home</string>
-    <string name="receipt">Receipt</string>
-    <string name="inventory">Inventory</string>
-    <string name="more">More</string>
+    <string name="home">HOME</string>
+    <string name="receipt">RECEIPT</string>
+    <string name="inventory">INVENTORY</string>
+    <string name="more">MORE</string>
     <string name="sign_in">Sign In</string>
     <string name="sign_up">Sign Up</string>
     <string name="email">Email</string>
@@ -81,4 +81,11 @@
     <string name="daily_sales">Daily Sales</string>
     <string name="pick_customer_name">Pick Customer Name</string>
     <string name="please_pick_customer_name">Please pick customer name.\nIf name is not in the list, customer is not eligible for discount.\nMake sure to cancel the transaction and turn off discount if customer is not eligible.</string>
+    <string name="app_requires_bluetooth_permissions">App Requires Bluetooth Permissions</string>
+    <string name="grant_permissions">Grant Permissions</string>
+    <string name="saved_device_found">Saved Device Found</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
+    <string name="paired_devices">Paired Devices</string>
+    <string name="pair_new_device">Pair new device</string>
 </resources>
