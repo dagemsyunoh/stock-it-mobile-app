@@ -50,14 +50,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="20dp"
-        android:text="@string/paired_devices"
+        android:text="@string/active_paired_devices"
         android:textSize="15sp"
         android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/no_devices_paired"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="@string/no_devices_found"
+        android:textSize="15sp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/paired_devices"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:listitem="@layout/device_box" />
+
 
 </LinearLayout>

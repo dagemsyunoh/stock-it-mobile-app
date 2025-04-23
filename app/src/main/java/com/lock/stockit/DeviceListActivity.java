@@ -29,10 +29,12 @@ import java.util.Set;
 
 
 public class DeviceListActivity extends AppCompatActivity {
-    private final ArrayList<DeviceModel> scannedDeviceList = new ArrayList<>(), bondedDeviceList = new ArrayList<>();
+    private final ArrayList<DeviceModel> scannedDeviceList = new ArrayList<>(), bondedDeviceList = new ArrayList<>(), activeBondedList = new ArrayList<>();
     private BluetoothAdapter btAdapter;
     private DeviceAdapter deviceAdapter;
     private LinearLayout scanLayout;
+    private TextView noDevicesPaired;
+    private RecyclerView pairedView;
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN})
@@ -42,12 +44,13 @@ public class DeviceListActivity extends AppCompatActivity {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 DeviceModel deviceModel = new DeviceModel(device.getName(), device.getAddress());
                 Log.d("TAG", "onReceive: " + deviceModel.getName() + " " + deviceModel.getAddress());
-                if (!scannedDeviceList.contains(deviceModel)) scannedDeviceList.add(deviceModel);
-                if (scannedDeviceList.isEmpty()) scanLayout.setVisibility(View.GONE);
-                setDeviceAdapter(scannedDeviceList);
-                RecyclerView scannedView = findViewById(R.id.scanned_devices);
-                scannedView.setAdapter(deviceAdapter);
-                scannedView.setLayoutManager(new LinearLayoutManager(DeviceListActivity.this));
+                if (scannedDeviceList.contains(deviceModel)) return;
+                if (bondedDeviceList.contains(deviceModel) && !activeBondedList.contains(deviceModel)) activeBondedList.add(deviceModel);
+                if (!bondedDeviceList.contains(deviceModel)) scannedDeviceList.add(deviceModel);
+                setDeviceAdapter(activeBondedList);
+                pairedView.setLayoutManager(new LinearLayoutManager(DeviceListActivity.this));
+                pairedView.setAdapter(deviceAdapter);
+                deviceAdapter.notifyItemInserted(activeBondedList.size()-1);
             }
         }
     };
@@ -61,38 +64,49 @@ public class DeviceListActivity extends AppCompatActivity {
         finish();
     }
 
-    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT})
+    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN})
     @Override
     protected void onCreate(Bundle mSavedInstanceState) {
         super.onCreate(mSavedInstanceState);
         setContentView(R.layout.device_list);
 
-        RecyclerView pairedView = findViewById(R.id.paired_devices);
         TextView scanDevices = findViewById(R.id.scan_devices);
         scanLayout = findViewById(R.id.scanned_devices_layout);
+        noDevicesPaired = findViewById(R.id.no_devices_paired);
+        pairedView = findViewById(R.id.paired_devices);
+        RecyclerView scannedView = findViewById(R.id.scanned_devices);
+
+        setupBTScan();
+
         scanDevices.setOnClickListener(v -> {
-            Log.d("TAG", "Scan Clicked");
+            Log.d("TAG", "onCreate: Scanning");
+            if (btAdapter.isDiscovering()) {
+                btAdapter.cancelDiscovery();
+                btAdapter.startDiscovery();
+                registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+            }
+
+            if (scannedDeviceList.isEmpty()) return;
             scanLayout.setVisibility(View.VISIBLE);
-
-            if (btAdapter.isDiscovering()) btAdapter.cancelDiscovery();
-            btAdapter.startDiscovery();
-
-            scannedDeviceList.clear();
-            registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+            setDeviceAdapter(scannedDeviceList);
+            scannedView.setLayoutManager(new LinearLayoutManager(DeviceListActivity.this));
+            scannedView.setAdapter(deviceAdapter);
+            deviceAdapter.notifyItemInserted(scannedDeviceList.size()-1);
         });
+    }
 
+    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN})
+    private void setupBTScan() {
+        btAdapter = BluetoothAdapter.getDefaultAdapter();
+        btAdapter.startDiscovery();
+        registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
         setDeviceList();
-        setDeviceAdapter(bondedDeviceList);
-        pairedView.setAdapter(deviceAdapter);
-        pairedView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
     private void setDeviceAdapter(ArrayList<DeviceModel> arrayList) {
         deviceAdapter = new DeviceAdapter(this, arrayList, (item, position) -> {
             try {
-                btAdapter.cancelDiscovery();
-                if (item.getName().equals("No Devices Paired")) return;
                 String deviceName = item.getName();
                 String deviceAddress = item.getAddress();
 
@@ -114,16 +128,13 @@ public class DeviceListActivity extends AppCompatActivity {
         });
     }
 
-    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT})
+    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN})
     private void setDeviceList() {
-        btAdapter = BluetoothAdapter.getDefaultAdapter();
         Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
-        if (!pairedDevices.isEmpty()) {
-            for (BluetoothDevice device : pairedDevices) {
-                DeviceModel deviceModel = new DeviceModel(device.getName(), device.getAddress());
-                bondedDeviceList.add(deviceModel);
-            }
-        }
-        if (bondedDeviceList.isEmpty()) bondedDeviceList.add(new DeviceModel("No Devices Paired", ""));
+        if (!pairedDevices.isEmpty()) for (BluetoothDevice device : pairedDevices)
+            bondedDeviceList.add(new DeviceModel(device.getName(), device.getAddress()));
+
+        if (bondedDeviceList.isEmpty()) noDevicesPaired.setVisibility(View.VISIBLE);
+        else noDevicesPaired.setVisibility(View.GONE);
     }
 }

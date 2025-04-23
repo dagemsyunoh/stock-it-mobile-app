@@ -85,10 +85,11 @@
     <string name="grant_permissions">Grant Permissions</string>
     <string name="no">No</string>
     <string name="yes">Yes</string>
-    <string name="paired_devices">Paired Devices</string>
+    <string name="active_paired_devices">Active Paired Devices</string>
     <string name="pair_new_device">Pair new device</string>
     <string name="scanned_devices">Scanned Devices</string>
     <string name="save">Save</string>
     <string name="no_printer_saved_click_to_find_printer">No Printer Saved. Click to Find Printer.</string>
     <string name="check_out">Check Out</string>
+    <string name="no_devices_found">No Devices Found</string>
 </resources>

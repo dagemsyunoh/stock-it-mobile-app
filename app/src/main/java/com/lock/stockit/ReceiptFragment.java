@@ -164,7 +164,6 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
             sizesUnique.sort(new sizeComparator());
             addButton.setVisibility(View.VISIBLE);
         });
-
     }
 
     private void fetchTransNo() {
