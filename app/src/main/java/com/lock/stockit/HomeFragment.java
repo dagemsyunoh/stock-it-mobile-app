@@ -27,6 +27,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 
 import java.text.DecimalFormat;
@@ -46,7 +47,7 @@ public class HomeFragment extends Fragment {
     private final List<Double> salesList = new ArrayList<>();
     private TableLayout receiptTable, userTable;
     private LineChart lineChart;
-    private double max = 0;
+    private double max;
     private LinearLayout userLogLayout;
 
     @Override
@@ -55,16 +56,34 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         lineChart = view.findViewById(R.id.chart);
-
         receiptTable = view.findViewById(R.id.receipt_log);
-        initializeReceiptLog();
-
         userLogLayout = view.findViewById(R.id.user_log_layout);
         userTable = view.findViewById(R.id.user_log);
-        initializeUserLog();
         if (type) userLogLayout.setVisibility(View.VISIBLE);
 
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        startListening();
+    }
+
+    private void startListening() {
+        ListenerRegistration receiptListener = storeRef.collection("receipts")
+                .orderBy("invoice no", Query.Direction.DESCENDING)
+                .addSnapshotListener((snapshots, e) -> {
+                    if (e != null) return;
+                    initializeReceiptLog();
+                });
+
+        ListenerRegistration userLogListener = storeRef.collection("user log")
+                .orderBy("date-time", Query.Direction.DESCENDING)
+                .addSnapshotListener((snapshots, e) -> {
+                    if (e != null) return;
+                    initializeUserLog();
+                });
     }
 
     private void setChart() {
@@ -75,6 +94,7 @@ public class HomeFragment extends Fragment {
         float maxLimit = (float) Math.pow(10, digits);
         if (maxLimit / max > 2) maxLimit /= 2;
 
+        lineChart.clear();
         lineChart.setDescription(description);
         lineChart.getAxisRight().setDrawLabels(false);
 
@@ -106,6 +126,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void initializeUserLog() {
+        userTable.removeAllViews();
         storeRef.collection("user log").orderBy("date-time", Query.Direction.DESCENDING).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful() || task.getResult().isEmpty()) {
                 userLogLayout.setVisibility(View.GONE);
@@ -128,7 +149,7 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    private void getUserTableRow(String dateTime, String action, String target, String user,int typeface) {
+    private void getUserTableRow(String dateTime, String action, String target, String user, int typeface) {
         TableRow tableRow = new TableRow(getActivity());
         tableRow.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT));
 
@@ -166,6 +187,11 @@ public class HomeFragment extends Fragment {
     }
 
     private void initializeReceiptLog() {
+        receiptTable.removeAllViews();
+        dateList.clear();
+        salesList.clear();
+        max = 0;
+
         storeRef.collection("receipts").orderBy("invoice no", Query.Direction.DESCENDING).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful() || task.getResult().isEmpty()) {
                 LinearLayout receiptLogLayout = getActivity().findViewById(R.id.receipt_log_layout);

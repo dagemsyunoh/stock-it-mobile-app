@@ -59,7 +59,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private final CollectionReference customerRef = storeRef.collection("customers");
     public static final ArrayList<StockModel> stockList = new ArrayList<>();
     protected RecyclerView recyclerView;
-    protected FloatingActionButton addButton, printButton, saveButton, plusOne, minusOne;
+    protected FloatingActionButton addButton, checkoutButton, saveButton, plusOne, minusOne;
     private NumberPicker itemName, itemSize;
     private TextInputEditText itemQty;
     private TextView title, itemUnitPrice, itemTotalPrice, noItem, grandTotalPrice;
@@ -104,7 +104,7 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
         title = view.findViewById(R.id.receipt_title);
         recyclerView = view.findViewById(R.id.receipt_view);
         addButton = view.findViewById(R.id.add_button);
-        printButton = view.findViewById(R.id.print_button);
+        checkoutButton = view.findViewById(R.id.checkout_button);
         noItem = view.findViewById(R.id.no_item);
         grandTotalLayout = view.findViewById(R.id.grand_total_layout);
         grandTotalPrice = view.findViewById(R.id.grand_total_val);
@@ -121,7 +121,7 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
 
         addButton.setOnClickListener(v -> addItemPopUp());
 
-        printButton.setOnClickListener(v -> printPreview());
+        checkoutButton.setOnClickListener(v -> printPreview());
 
         return view;
     }
@@ -164,7 +164,6 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
             sizesUnique.sort(new sizeComparator());
             addButton.setVisibility(View.VISIBLE);
         });
-
     }
 
     private void fetchTransNo() {
@@ -280,8 +279,8 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
         }
 
         TextView header = inputDialog.findViewById(R.id.header);
-        header.setText(R.string.print_receipt);
-        header.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_print, 0, 0, 0);
+        header.setText(R.string.check_out);
+        header.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_checkout, 0, 0, 0);
 
         TextView dialogText = inputDialog.findViewById(R.id.dialog_text);
         dialogText.setText(R.string.please_enter_cash_amount);
@@ -324,20 +323,20 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
             noItem.setVisibility(View.INVISIBLE);
             recyclerView.setVisibility(View.VISIBLE);
             // print button layout
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) printButton.getLayoutParams();
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) checkoutButton.getLayoutParams();
             layoutParams.height = RelativeLayout.LayoutParams.WRAP_CONTENT;
             layoutParams.setMargins(mDp, mDp, mDp, mDp);
-            printButton.setLayoutParams(layoutParams);
+            checkoutButton.setLayoutParams(layoutParams);
 
         } else {
             grandTotalLayout.setVisibility(View.INVISIBLE);
             noItem.setVisibility(View.VISIBLE);
             recyclerView.setVisibility(View.INVISIBLE);
             // print button layout
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) printButton.getLayoutParams();
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) checkoutButton.getLayoutParams();
             layoutParams.height = 0;
             layoutParams.setMargins(mDp, 0, mDp, mDp);
-            printButton.setLayoutParams(layoutParams);
+            checkoutButton.setLayoutParams(layoutParams);
         }
     }
 
