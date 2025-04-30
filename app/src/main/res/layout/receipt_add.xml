@@ -74,6 +74,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="5dp"
                 android:layout_marginTop="5dp"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <TextView
@@ -81,7 +82,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="55dp"
                     android:gravity="center"
-                    android:text="@string/stocks"
+                    android:text="@string/quantity"
                     android:textSize="15sp" />
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -102,7 +103,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="55dp"
                         android:gravity="center"
-                        android:inputType="number"
+                        android:inputType="numberDecimal"
                         android:text="@string/zero"
                         android:textSize="15sp" />
 

@@ -5,15 +5,19 @@ import static android.app.Activity.RESULT_OK;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.TypedValue;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
@@ -41,9 +45,9 @@ import com.lock.stockit.Adapters.ReceiptAdapter;
 import com.lock.stockit.Helpers.CustomLinearLayoutManager;
 import com.lock.stockit.Helpers.QtyEditor;
 import com.lock.stockit.Helpers.ReceiptListeners;
+import com.lock.stockit.Helpers.SizeComparator;
+import com.lock.stockit.Helpers.StockComparator;
 import com.lock.stockit.Helpers.SwipeState;
-import com.lock.stockit.Helpers.sizeComparator;
-import com.lock.stockit.Helpers.stockComparator;
 import com.lock.stockit.Models.ReceiptModel;
 import com.lock.stockit.Models.StockModel;
 
@@ -70,7 +74,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private final ArrayList<String> sizesUnique = new ArrayList<>();
     private final ArrayList<Double> grandTotal = new ArrayList<>();
     private final static ArrayList<ReceiptModel> receiptList = new ArrayList<>();
-    private final String[] item = new String[5];
+    private final String[] item = new String[6];
     private int transactionNo, flag;
     private boolean cancelled, discountFlag, recyclerViewFlag = true;
     private String invoice;
@@ -151,7 +155,8 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
             for (DocumentSnapshot documentSnapshot : value.getDocuments()) {
                 stockList.add(new StockModel(documentSnapshot.getString("item name"),
                         documentSnapshot.getString("item size"),
-                        documentSnapshot.getDouble("qty").intValue(),
+                        documentSnapshot.getDouble("qty"),
+                        documentSnapshot.getString("qty type"),
                         documentSnapshot.getDouble("reg price"),
                         documentSnapshot.getDouble("dsc price")));
                 if (!namesUnique.contains(documentSnapshot.getString("item name")))
@@ -159,9 +164,9 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
                 if (!sizesUnique.contains(documentSnapshot.getString("item size")))
                     sizesUnique.add(documentSnapshot.getString("item size"));
             }
-            stockList.sort(new stockComparator());
+            stockList.sort(new StockComparator());
             namesUnique.sort(String::compareToIgnoreCase);
-            sizesUnique.sort(new sizeComparator());
+            sizesUnique.sort(new SizeComparator());
             addButton.setVisibility(View.VISIBLE);
         });
     }
@@ -219,9 +224,26 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
             setItemText();
         });
 
-        plusOne.setOnClickListener(view -> checkMinMax(1));
+        itemQty.setOnFocusChangeListener((v, hasFocus) -> {
+            if (Integer.parseInt(itemQty.getText().toString()) == 0) itemQty.setText("");
+        });
 
-        minusOne.setOnClickListener(view -> checkMinMax(-1));
+        itemQty.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE ||
+                    actionId == EditorInfo.IME_ACTION_GO ||
+                    actionId == EditorInfo.IME_ACTION_NEXT ||
+                    event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
+                checkMinMax(2);
+                InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                return true;
+            }
+            return false;
+        });
+
+        plusOne.setOnClickListener(v -> checkMinMax(1));
+
+        minusOne.setOnClickListener(v -> checkMinMax(-1));
 
         saveButton.setOnClickListener(v -> checkMinMax(0));
 
@@ -304,8 +326,7 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
             if (input.getText().toString().isEmpty()) {
                 Toast.makeText(getActivity(), "Please enter cash amount", Toast.LENGTH_SHORT).show();
                 return;
-            }
-            if (Double.parseDouble(input.getText().toString()) < sum) {
+            } if (Double.parseDouble(input.getText().toString()) < sum) {
                 Toast.makeText(getActivity(), "Cash amount cannot be less than total amount", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -354,19 +375,23 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
 
     private void checkMinMax(int val) {
         if (itemQty.getText() == null || itemQty.getText().toString().isEmpty()) itemQty.setText(String.valueOf(0));
-        if (Integer.parseInt(itemQty.getText().toString()) < 1 && val < 1) {
+        if (Double.parseDouble(itemQty.getText().toString()) < 1 && val < 1) {
             Toast.makeText(getActivity(), "Please enter quantity.", Toast.LENGTH_SHORT).show();
             return;
-        }
-        checkNameSize();
+        } checkNameSize();
+        if (stockList.get(flag).getItemQtyType().equals("pcs"))
+            if (stockList.get(flag).getItemQuantity() % 1 != 0) {
+                Toast.makeText(getActivity(), "This item cannot have decimal quantity", Toast.LENGTH_SHORT).show();
+                return;
+            }
         if (stockList.get(flag).getItemQuantity() == 0) {
             Toast.makeText(getActivity(), "This item is out of stock.", Toast.LENGTH_SHORT).show();
             return;
-        } if (Integer.parseInt(itemQty.getText().toString()) + val > stockList.get(flag).getItemQuantity()) {
+        } if (Double.parseDouble(itemQty.getText().toString()) + val > stockList.get(flag).getItemQuantity()) {
             Toast.makeText(getActivity(), "Not enough stock. Automatically set to maximum.", Toast.LENGTH_SHORT).show();
             itemQty.setText(String.valueOf(stockList.get(flag).getItemQuantity()));
             return;
-        } if (Integer.parseInt(itemQty.getText().toString()) + val < 1) {
+        } if (Double.parseDouble(itemQty.getText().toString()) + val < 1) {
             Toast.makeText(getActivity(), "You've reached the minimum quantity.", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -374,7 +399,7 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
     }
 
     private void editQty(int val) {
-        QtyEditor.qtyEditor(itemQty, val);
+        if (val < 2) QtyEditor.qtyEditor(itemQty, val);
         setItemText();
         if (val != 0) return;
         for (ReceiptModel receipt : receiptList)
@@ -382,7 +407,7 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
                 Toast.makeText(getActivity(), "Item already exists", Toast.LENGTH_SHORT).show();
                 return;
             }
-        receiptList.add(new ReceiptModel(item[0], item[1], Integer.parseInt(item[2]), Double.parseDouble(item[3]), Double.parseDouble(item[4])));
+        receiptList.add(new ReceiptModel(item[0], item[1], Double.parseDouble(item[2]), item[3], Double.parseDouble(item[4]), Double.parseDouble(item[5])));
         setLayout(true);
         getSum();
         for (int i = 0; i < 5; i++) item[i] = "";
@@ -427,11 +452,12 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
         item[0] = stockList.get(flag).getItemName();
         item[1] = stockList.get(flag).getItemSize();
         item[2] = itemQty.getText().toString();
-        if (discountFlag) item[3] = String.valueOf(stockList.get(flag).getItemDscPrice());
-        else item[3] = String.valueOf(stockList.get(flag).getItemRegPrice());
-        item[4] = String.valueOf(Double.parseDouble(item[2]) * Double.parseDouble(item[3]));
-        String unitPriceText = "₱" + String.format(Locale.getDefault(), "%.2f", Double.parseDouble(item[3]));
-        String totalPriceText = "₱" + String.format(Locale.getDefault(), "%.2f", Double.parseDouble(item[4]));
+        item[3] = stockList.get(flag).getItemQtyType();
+        if (discountFlag) item[4] = String.valueOf(stockList.get(flag).getItemDscPrice());
+        else item[4] = String.valueOf(stockList.get(flag).getItemRegPrice());
+        item[5] = String.valueOf(Double.parseDouble(item[2]) * Double.parseDouble(item[4]));
+        String unitPriceText = "₱" + String.format(Locale.getDefault(), "%.2f", Double.parseDouble(item[4]));
+        String totalPriceText = "₱" + String.format(Locale.getDefault(), "%.2f", Double.parseDouble(item[5]));
         itemUnitPrice.setText(unitPriceText);
         itemTotalPrice.setText(totalPriceText);
     }

@@ -402,7 +402,7 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
     private void saveReceipt() {
         ArrayList<String> items = new ArrayList<>();
         for (ReceiptModel val : receiptList)
-            items.add(val.getItemName() + " " + val.getItemSize() + ", " + val.getItemQuantity() + " pcs");
+            items.add(val.getItemName() + " " + val.getItemSize() + ", " + val.getItemQuantity() + " " + val.getItemQtyType());
         Map<String, Object> receiptMap = new HashMap<>();
         receiptMap.put("invoice no", invoice);
         receiptMap.put("date-time", dateTime);
@@ -543,8 +543,11 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
         total = 0;
         for (ReceiptModel receipt : receiptList) {
             total += receipt.getItemTotalPrice();
+            String qty;
+            if (receipt.getItemQuantity() % 1 == 0) qty = String.valueOf((int) receipt.getItemQuantity());
+            else qty = String.valueOf(receipt.getItemQuantity());
             text.append(formatType(receipt.getItemName(), receipt.getItemTotalPrice())).append("\n");
-            text.append(String.format(Locale.US, "  %-6s   %d @ %.2f", receipt.getItemSize(), receipt.getItemQuantity(), receipt.getItemUnitPrice())).append("\n");
+            text.append(String.format(Locale.US, "  %-6s   %s %s @ %.2f", receipt.getItemSize(), qty, receipt.getItemQtyType(), receipt.getItemUnitPrice())).append("\n");
         }
         double cashChange = cash - total;
         text.append("\n").append(formatType("TOTAL", total));

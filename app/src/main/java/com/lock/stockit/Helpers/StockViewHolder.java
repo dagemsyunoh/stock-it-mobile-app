@@ -55,10 +55,10 @@ public class StockViewHolder extends StockBaseViewHolder {
     @Override
     public void bindDataToViewHolder(StockModel item, int position, SwipeState swipeState) {
         //region Input Data
-        String unit;
-        if (item.getItemName().contains("Lumber")) unit = " pcs";
-        else unit = " kg";
-        String qtyText = item.getItemQuantity() + unit;
+        String unit = item.getItemQtyType();
+        String qtyText;
+        if (item.getItemQuantity() % 1 == 0) qtyText = ((int) item.getItemQuantity()) + " " + unit;
+        else qtyText = item.getItemQuantity() + " " + unit;
         String regPriceText = "₱" + String.format(Locale.getDefault(), "%.2f", item.getItemRegPrice());
         String dscPriceText = "₱" + String.format(Locale.getDefault(), "%.2f", item.getItemDscPrice());
         itemName.setText(item.getItemName());
