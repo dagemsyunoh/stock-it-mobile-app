@@ -172,7 +172,7 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
     }
 
     private void fetchTransNo() {
-        transactionNo = 1;
+        transactionNo = 0;
         receiptRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 if (!cancelled) receiptList.clear();
@@ -201,6 +201,7 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
         addPopUp.setContentView(R.layout.receipt_add);
         addPopUp.setCancelable(false);
         addPopUp.show();
+        addButton.setClickable(false);
 
         itemName = addPopUp.findViewById(R.id.add_name);
         itemSize = addPopUp.findViewById(R.id.add_size);
@@ -225,7 +226,7 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
         });
 
         itemQty.setOnFocusChangeListener((v, hasFocus) -> {
-            if (Integer.parseInt(itemQty.getText().toString()) == 0) itemQty.setText("");
+            if (Double.parseDouble(itemQty.getText().toString()) == 0) itemQty.setText("");
         });
 
         itemQty.setOnEditorActionListener((v, actionId, event) -> {
@@ -247,7 +248,10 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
 
         saveButton.setOnClickListener(v -> checkMinMax(0));
 
-        back.setOnClickListener(v -> addPopUp.cancel());
+        back.setOnClickListener(v -> {
+            addPopUp.cancel();
+            addButton.setClickable(true);
+        });
     }
 
     private void printPreview() {
@@ -375,12 +379,12 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
 
     private void checkMinMax(int val) {
         if (itemQty.getText() == null || itemQty.getText().toString().isEmpty()) itemQty.setText(String.valueOf(0));
-        if (Double.parseDouble(itemQty.getText().toString()) < 1 && val < 1) {
+        if (Double.parseDouble(itemQty.getText().toString()) <= 0 && val <= 0) {
             Toast.makeText(getActivity(), "Please enter quantity.", Toast.LENGTH_SHORT).show();
             return;
         } checkNameSize();
         if (stockList.get(flag).getItemQtyType().equals("pcs"))
-            if (stockList.get(flag).getItemQuantity() % 1 != 0) {
+            if (Double.parseDouble(itemQty.getText().toString()) % 1 != 0) {
                 Toast.makeText(getActivity(), "This item cannot have decimal quantity", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -391,7 +395,7 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
             Toast.makeText(getActivity(), "Not enough stock. Automatically set to maximum.", Toast.LENGTH_SHORT).show();
             itemQty.setText(String.valueOf(stockList.get(flag).getItemQuantity()));
             return;
-        } if (Double.parseDouble(itemQty.getText().toString()) + val < 1) {
+        } if (Double.parseDouble(itemQty.getText().toString()) + val <= 0) {
             Toast.makeText(getActivity(), "You've reached the minimum quantity.", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -414,6 +418,7 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
         adapter.setReceipts(receiptList);
         adapter.notifyItemInserted(receiptList.size());
         addPopUp.dismiss();
+        addButton.setClickable(true);
     }
 
     private void checkNameSize() {

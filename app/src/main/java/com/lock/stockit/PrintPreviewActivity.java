@@ -58,6 +58,7 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
 
     private static int cancelCount = 0;
     private final CollectionReference db = FirebaseFirestore.getInstance().collection("stores");
+    private final CollectionReference stockRef = db.document(LoaderActivity.sid).collection("stocks");
     private final CollectionReference receiptRef = db.document(LoaderActivity.sid).collection("receipts");
     private final DecimalFormat df = new DecimalFormat("0.00");
     private final UUID applicationUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -288,6 +289,7 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
 
     private void checkRecentConnection() {
         deviceAddress = sharedPreferences.getString("DeviceAddress", null);
+        if (!btAdapter.isEnabled()) return;
         Dialog connectDialog = new Dialog(this);
         connectDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         connectDialog.setContentView(R.layout.dialog_box);
@@ -303,7 +305,7 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
         buttonCancel.setText(R.string.no);
 
         String headerMessage, message;
-        if (deviceAddress == null) {
+        if (deviceAddress == null || deviceAddress.isEmpty()) {
             headerMessage = "No Device Saved";
             message = "No saved devices found. Would you like to find a device to connect to?";
             buttonCancel.setOnClickListener(v -> connectDialog.dismiss());
@@ -401,8 +403,13 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
 
     private void saveReceipt() {
         ArrayList<String> items = new ArrayList<>();
-        for (ReceiptModel val : receiptList)
+        for (ReceiptModel val : receiptList) {
             items.add(val.getItemName() + " " + val.getItemSize() + ", " + val.getItemQuantity() + " " + val.getItemQtyType());
+            stockRef.whereEqualTo("item name", val.getItemName()).whereEqualTo("item size", val.getItemSize()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                if (queryDocumentSnapshots.isEmpty()) return;
+                queryDocumentSnapshots.getDocuments().get(0).getReference().update("qty", queryDocumentSnapshots.getDocuments().get(0).getDouble("qty") - val.getItemQuantity());
+            });
+        }
         Map<String, Object> receiptMap = new HashMap<>();
         receiptMap.put("invoice no", invoice);
         receiptMap.put("date-time", dateTime);
@@ -415,8 +422,8 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
         }
         receiptRef.add(receiptMap);
         Log.d("TAG", "saveReceipt");
-            setResult(RESULT_OK);
-            finish();
+        setResult(RESULT_OK);
+        finish();
     }
 
     @SuppressLint("MissingPermission")

@@ -11,7 +11,6 @@
         android:layout_height="wrap_content"
         android:layout_marginVertical="20dp"
         android:gravity="top|center_horizontal"
-        android:text="@string/receipt"
         android:textSize="20sp"
         android:textStyle="bold" />
 
