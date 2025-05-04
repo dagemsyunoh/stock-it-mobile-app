@@ -10,24 +10,27 @@ import com.lock.stockit.Helpers.SwipeState;
 public class ReceiptModel implements Parcelable {
     private String itemName;
     private String itemSize;
-    private  int itemQty;
+    private double itemQty;
+    private String itemQtyType;
     private double itemUnitPrice;
     private double itemTotalPrice;
     private SwipeState state;
 
-    public ReceiptModel(String itemName, String itemSize, int itemQty, double itemUnitPrice, double itemTotalPrice) {
+    public ReceiptModel(String itemName, String itemSize, double itemQty, String itemQtyType, double itemUnitPrice, double itemTotalPrice) {
         this.setItemName(itemName);
         this.setItemSize(itemSize);
         this.setItemQuantity(itemQty);
+        this.setItemQtyType(itemQtyType);
         this.setItemUnitPrice(itemUnitPrice);
         this.setItemTotalPrice(itemTotalPrice);
         this.setState(SwipeState.NONE);
     }
 
-    public ReceiptModel(String itemName, String itemSize, int itemQty, double itemUnitPrice, double itemTotalPrice, SwipeState state) {
+    public ReceiptModel(String itemName, String itemSize, double itemQty, String itemQtyType, double itemUnitPrice, double itemTotalPrice, SwipeState state) {
         this.setItemName(itemName);
         this.setItemSize(itemSize);
         this.setItemQuantity(itemQty);
+        this.setItemQtyType(itemQtyType);
         this.setItemUnitPrice(itemUnitPrice);
         this.setItemTotalPrice(itemTotalPrice);
         this.setState(state);
@@ -48,7 +51,8 @@ public class ReceiptModel implements Parcelable {
     protected ReceiptModel(Parcel in) {
         itemName = in.readString();
         itemSize = in.readString();
-        itemQty = in.readInt();
+        itemQty = in.readDouble();
+        itemQtyType = in.readString();
         itemUnitPrice = in.readDouble();
         itemTotalPrice = in.readDouble();
     }
@@ -69,12 +73,21 @@ public class ReceiptModel implements Parcelable {
         this.itemSize = itemSize;
     }
 
-    public int getItemQuantity() {
+    public double getItemQuantity() {
         return itemQty;
     }
 
-    public void setItemQuantity(int itemQty) {
+    public void setItemQuantity(double itemQty) {
         this.itemQty = itemQty;
+    }
+
+
+    public String getItemQtyType() {
+        return itemQtyType;
+    }
+
+    public void setItemQtyType(String itemQtyType) {
+        this.itemQtyType = itemQtyType;
     }
 
     public double getItemUnitPrice() {
@@ -84,6 +97,7 @@ public class ReceiptModel implements Parcelable {
     public void setItemUnitPrice(double itemUnitPrice) {
         this.itemUnitPrice = itemUnitPrice;
     }
+
     public double getItemTotalPrice() {
         return itemTotalPrice;
     }
@@ -109,7 +123,8 @@ public class ReceiptModel implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(itemName);
         dest.writeString(itemSize);
-        dest.writeInt(itemQty);
+        dest.writeDouble(itemQty);
+        dest.writeString(itemQtyType);
         dest.writeDouble(itemUnitPrice);
         dest.writeDouble(itemTotalPrice);
     }

@@ -2,10 +2,7 @@ package com.lock.stockit.Helpers;
 
 import android.content.Context;
 import android.graphics.Insets;
-import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.Build;
-import android.view.Display;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -42,21 +39,14 @@ abstract public class ReceiptBaseViewHolder extends RecyclerView.ViewHolder {
     }
 
     private int getWidth() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            WindowMetrics windowMetrics = windowManager.getCurrentWindowMetrics();
-            WindowInsets windowInsets = windowMetrics.getWindowInsets();
-            Insets insets = windowInsets.getInsetsIgnoringVisibility(WindowInsets.Type.navigationBars() | WindowInsets.Type.displayCutout());
-            int insetsWidth = insets.right + insets.left;
-            //int insetsHeight = insets.top + insets.bottom;
-            Rect bounds = windowMetrics.getBounds();
-            //int height  = bounds.height() - insetsHeight;
-            return bounds.width() - insetsWidth; //Int width = bounds.width() - insetsWidth;
-        }
-        Point size = new Point();
-        Display display = windowManager.getDefaultDisplay(); //activity.getWindowManager().getDefaultDisplay(); // deprecated in API 30
-        display.getSize(size); // deprecated in API 30
-        //int height = size.y;
-        return size.x; //Int width = size.x;
+        WindowMetrics windowMetrics = windowManager.getCurrentWindowMetrics();
+        WindowInsets windowInsets = windowMetrics.getWindowInsets();
+        Insets insets = windowInsets.getInsetsIgnoringVisibility(WindowInsets.Type.navigationBars() | WindowInsets.Type.displayCutout());
+        int insetsWidth = insets.right + insets.left;
+        //int insetsHeight = insets.top + insets.bottom;
+        Rect bounds = windowMetrics.getBounds();
+        //int height  = bounds.height() - insetsHeight;
+        return bounds.width() - insetsWidth; //Int width = bounds.width() - insetsWidth;
     }
 
     protected void setSwipe(View view, SwipeState swipeState) {

@@ -5,24 +5,27 @@ import com.lock.stockit.Helpers.SwipeState;
 public class StockModel {
     private String itemName;
     private String itemSize;
-    private  int itemQty;
+    private  double itemQty;
+    private String itemQtyType;
     private double itemRegPrice;
     private double itemDscPrice;
     private SwipeState state;
 
-    public StockModel(String itemName, String itemSize, int itemQty, double itemRegPrice, double itemDscPrice) {
+    public StockModel(String itemName, String itemSize, double itemQty, String itemQtyType, double itemRegPrice, double itemDscPrice) {
         this.setItemName(itemName);
         this.setItemSize(itemSize);
         this.setItemQuantity(itemQty);
+        this.setItemQtyType(itemQtyType);
         this.setItemRegPrice(itemRegPrice);
         this.setItemDscPrice(itemDscPrice);
         this.setState(SwipeState.NONE);
     }
 
-    public StockModel(String itemName, String itemSize, int itemQty, double itemRegPrice, double itemDscPrice, SwipeState state) {
+    public StockModel(String itemName, String itemSize, double itemQty, String itemQtyType, double itemRegPrice, double itemDscPrice, SwipeState state) {
         this.setItemName(itemName);
         this.setItemSize(itemSize);
         this.setItemQuantity(itemQty);
+        this.setItemQtyType(itemQtyType);
         this.setItemRegPrice(itemRegPrice);
         this.setItemDscPrice(itemDscPrice);
         this.setState(state);
@@ -43,12 +46,20 @@ public class StockModel {
         this.itemSize = itemSize;
     }
 
-    public int getItemQuantity() {
+    public double getItemQuantity() {
         return itemQty;
     }
 
-    public void setItemQuantity(int itemQty) {
+    public void setItemQuantity(double itemQty) {
         this.itemQty = itemQty;
+    }
+
+    public String getItemQtyType() {
+        return itemQtyType;
+    }
+
+    public void setItemQtyType(String itemQtyType) {
+        this.itemQtyType = itemQtyType;
     }
 
     public double getItemRegPrice() {

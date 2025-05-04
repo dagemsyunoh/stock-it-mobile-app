@@ -5,10 +5,11 @@ import android.app.Dialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,9 +27,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.lock.stockit.Adapters.StockAdapter;
 import com.lock.stockit.Helpers.CustomLinearLayoutManager;
 import com.lock.stockit.Helpers.QtyEditor;
+import com.lock.stockit.Helpers.StockComparator;
 import com.lock.stockit.Helpers.StockListeners;
 import com.lock.stockit.Helpers.SwipeState;
-import com.lock.stockit.Helpers.stockComparator;
 import com.lock.stockit.Models.StockModel;
 
 import java.util.ArrayList;
@@ -40,7 +41,6 @@ public class InventoryFragment extends Fragment implements StockListeners {
     protected RecyclerView recyclerView;
     protected FloatingActionButton addButton, addItem, plusOne, minusOne;
     protected SearchView searchView;
-    private TextInputEditText itemName, itemSize, itemQty, itemRegPrice, itemDscPrice;
     private TextView noResult;
     private ArrayList<StockModel> stockList;
     private StockAdapter adapter;
@@ -100,15 +100,16 @@ public class InventoryFragment extends Fragment implements StockListeners {
             for (DocumentSnapshot documentSnapshot : querySnapshot.getDocuments()) {
                 String name = documentSnapshot.getString("item name");
                 String size = documentSnapshot.getString("item size");
-                int qty = documentSnapshot.getDouble("qty").intValue();
+                double qty = documentSnapshot.getDouble("qty");
+                String qtyType = documentSnapshot.getString("qty type");
                 double regPrice = documentSnapshot.getDouble("reg price");
                 double dscPrice = documentSnapshot.getDouble("dsc price");
                 names.add(name);
                 sizes.add(size);
-                stockList.add(new StockModel(name, size, qty, regPrice, dscPrice));
+                stockList.add(new StockModel(name, size, qty, qtyType, regPrice, dscPrice));
             }
             setRecyclerView();
-            stockList.sort(new stockComparator());
+            stockList.sort(new StockComparator());
             adapter.setStocks(stockList);
             adapter.notifyDataSetChanged();
         });
@@ -139,11 +140,12 @@ public class InventoryFragment extends Fragment implements StockListeners {
         addPopUp.setContentView(R.layout.stock_add);
         addPopUp.setTitle("Add Item to Inventory");
         addPopUp.show();
-        itemName = addPopUp.findViewById(R.id.add_name);
-        itemSize = addPopUp.findViewById(R.id.add_size);
-        itemQty = addPopUp.findViewById(R.id.add_qty);
-        itemRegPrice = addPopUp.findViewById(R.id.add_reg_price);
-        itemDscPrice = addPopUp.findViewById(R.id.add_dsc_price);
+        TextInputEditText itemName = addPopUp.findViewById(R.id.add_name);
+        TextInputEditText itemSize = addPopUp.findViewById(R.id.add_size);
+        TextInputEditText itemQty = addPopUp.findViewById(R.id.add_qty);
+        RadioGroup itemQtyType = addPopUp.findViewById(R.id.add_qty_type);
+        TextInputEditText itemRegPrice = addPopUp.findViewById(R.id.add_reg_price);
+        TextInputEditText itemDscPrice = addPopUp.findViewById(R.id.add_dsc_price);
 
         AppCompatImageView back = addPopUp.findViewById(R.id.back);
         plusOne = addPopUp.findViewById(R.id.add_plus_one);
@@ -178,10 +180,13 @@ public class InventoryFragment extends Fragment implements StockListeners {
         });
 
         addItem.setOnClickListener(view -> {
+            int selectedId = itemQtyType.getCheckedRadioButtonId();
+            RadioButton selectedQtyType = addPopUp.findViewById(selectedId);
             HashMap<String, Object> data = new HashMap<>();
             data.put("item name", itemName.getText().toString());
             data.put("item size", itemSize.getText().toString());
             data.put("qty", Double.parseDouble(itemQty.getText().toString()));
+            data.put("qty type", selectedQtyType.getText().toString());
             data.put("reg price", Double.parseDouble(itemRegPrice.getText().toString()));
             data.put("dsc price", Double.parseDouble(itemDscPrice.getText().toString()));
 
@@ -205,10 +210,14 @@ public class InventoryFragment extends Fragment implements StockListeners {
 
     private boolean isInvalid(HashMap<String, Object> data) {
         // check if name and size are not empty
-        if (data.get("item name").toString().isEmpty() || data.get("item size").toString().isEmpty())
+        if (data.get("item name").toString().isEmpty() ||
+                data.get("item size").toString().isEmpty() ||
+                data.get("qty type").toString().isEmpty())
             return true;
         // check if qty and price are greater than 0
-        return Double.parseDouble(data.get("qty").toString()) <= 0 && Double.parseDouble(data.get("reg price").toString()) <= 0 && Double.parseDouble(data.get("dsc price").toString()) <= 0;
+        return Double.parseDouble(data.get("qty").toString()) <= 0 &&
+                Double.parseDouble(data.get("reg price").toString()) <= 0 &&
+                Double.parseDouble(data.get("dsc price").toString()) <= 0;
     }
 
     private boolean exists(HashMap<String, Object> data) {
@@ -234,9 +243,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
     }
 
     @Override
-    public void onClickLeft(StockModel item, int position) {
-        Log.e("TAG", "Position: " + position);
-    }
+    public void onClickLeft(StockModel item, int position) { }
 
     @Override
     public void onClickRight(StockModel item, int position) {
