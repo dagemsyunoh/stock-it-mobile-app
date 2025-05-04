@@ -1,9 +1,15 @@
 package com.lock.stockit.Helpers;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
 import android.text.InputType;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +34,7 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
     private final FloatingActionButton plusOne, minusOne;
     private final ImageView rightImage;
     private final CardView cardView;
+    private boolean focus;
 
     public ReceiptViewHolder(View itemView, ReceiptListeners customListeners) {
         super(itemView, customListeners);
@@ -53,9 +60,27 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
         itemQty.setText(qtyText);
         itemUnitPrice.setText(unitPriceText);
         itemTotalPrice.setText(totalPriceText);
-        itemQty.setFocusable(false);
-        itemQty.setClickable(true);
-        itemQty.setInputType(InputType.TYPE_NULL);
+        if (item.getItemQtyType().equals("pcs")) itemQty.setInputType(InputType.TYPE_NULL);
+        else itemQty.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+
+        itemQty.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE ||
+                    actionId == EditorInfo.IME_ACTION_GO ||
+                    actionId == EditorInfo.IME_ACTION_NEXT ||
+                    event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
+                checkMinMax(item, position, 0);
+                InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                return true;
+            }
+            return false;
+        });
+        itemQty.setOnFocusChangeListener((v, hasFocus) -> focus = hasFocus);
+
+        KeyboardUtils.addKeyboardToggleListener((Activity) itemView.getContext(), isVisible -> {
+            Log.d("HOLDER", "keyboard visible: " + isVisible + " position: " + position);
+            if (!isVisible && focus) checkMinMax(item, position, 0);
+        });
         //endregion
         //region Swipe
         setSwipe(cardView, item.getState());
@@ -113,13 +138,18 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
         ArrayList<StockModel> stocks = ReceiptFragment.stockList;
         for (int i = 0; i < stocks.size(); i++)
             if (iName.equals(stocks.get(i).getItemName()) && iSize.equals(stocks.get(i).getItemSize())) flag = i;
+        if (item.getItemQtyType().equals("pcs"))
+            if (Double.parseDouble(itemQty.getText().toString()) % 1 != 0) {
+                Toast.makeText(cardView.getContext(), "This item cannot have decimal quantity", Toast.LENGTH_SHORT).show();
+                return;
+            }
         if (stocks.get(flag).getItemQuantity() == 0) {
             Toast.makeText(cardView.getContext(), "This item is out of stock.", Toast.LENGTH_SHORT).show();
             return;
-        } if (Integer.parseInt(itemQty.getText().toString()) + val > stocks.get(flag).getItemQuantity()) {
+        } if (Double.parseDouble(itemQty.getText().toString()) + val > stocks.get(flag).getItemQuantity()) {
             Toast.makeText(cardView.getContext(), "You've reached the maximum quantity.", Toast.LENGTH_SHORT).show();
             return;
-        } if (Integer.parseInt(itemQty.getText().toString()) + val < 1) {
+        } if (Double.parseDouble(itemQty.getText().toString()) + val <= 0) {
             Toast.makeText(cardView.getContext(), "You've reached the minimum quantity.", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -128,7 +158,7 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
     }
 
     private void changeValues (ReceiptModel item, int position) {
-        item.setItemQuantity(Integer.parseInt(itemQty.getText().toString()));
+        item.setItemQuantity(Double.parseDouble(itemQty.getText().toString()));
         item.setItemTotalPrice(item.getItemQuantity() * item.getItemUnitPrice());
         itemTotalPrice.setText(String.valueOf(item.getItemTotalPrice()));
         getListener().changeQty(item, position);

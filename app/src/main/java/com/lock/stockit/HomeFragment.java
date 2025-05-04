@@ -193,7 +193,7 @@ public class HomeFragment extends Fragment {
         max = 0;
 
         storeRef.collection("receipts").orderBy("invoice no", Query.Direction.DESCENDING).get().addOnCompleteListener(task -> {
-            if (!task.isSuccessful() || task.getResult().isEmpty()) {
+            if (!task.isSuccessful() || task.getResult().size() < 2) {
                 LinearLayout receiptLogLayout = getActivity().findViewById(R.id.receipt_log_layout);
                 receiptLogLayout.setVisibility(View.GONE);
                 return;
@@ -207,22 +207,24 @@ public class HomeFragment extends Fragment {
                     "Change",
                     Gravity.CENTER,
                     Typeface.BOLD);
+            if (!task.getResult().getDocuments().get(task.getResult().size()-1).getString("invoice no").equals("INVOICE #0")) {
+                String startDate = task.getResult().getDocuments().get(task.getResult().size() - 1).getString("date-time").split(" ")[0];
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                String endDate = LocalDate.now().toString();
 
-            String startDate = task.getResult().getDocuments().get(task.getResult().size()-1).getString("date-time").split(" ")[0];
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            String endDate = LocalDate.now().toString();
 
-            LocalDate localStartDate = LocalDate.parse(startDate);
-            LocalDate localEndDate = LocalDate.parse(endDate);
+                LocalDate localStartDate = LocalDate.parse(startDate);
+                LocalDate localEndDate = LocalDate.parse(endDate);
 
-            long days = ChronoUnit.DAYS.between(localStartDate, localEndDate);
+                long days = ChronoUnit.DAYS.between(localStartDate, localEndDate);
 
-            for (int i = 0; i <= days; i++) {
-                dateList.add(localStartDate.plusDays(i).toString());
-                salesList.add((double) 0);
+                for (int i = 0; i <= days; i++) {
+                    dateList.add(localStartDate.plusDays(i).toString());
+                    salesList.add((double) 0);
+                }
             }
-
             for (var document : task.getResult()) {
+                if (document.getString("invoicee no").equals("INVOICE #0")) continue;
                 String date = document.getString("date-time").split(" ")[0];
 
                 if (dateList.contains(date)) {
