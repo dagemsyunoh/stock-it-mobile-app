@@ -10,7 +10,7 @@
     <Space
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="10:6"
+        app:layout_constraintDimensionRatio="10:7"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -122,6 +122,15 @@
             android:layout_gravity="center_vertical"
             android:layout_margin="10dp"
             android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/name_text"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_margin="5dp"
+                android:gravity="center"
+                android:text="@string/display_name"
+                android:textSize="20sp" />
 
             <TextView
                 android:id="@+id/email_text"

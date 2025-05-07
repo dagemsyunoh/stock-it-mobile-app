@@ -25,7 +25,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
@@ -40,7 +40,8 @@ import java.util.Locale;
 
 public class HomeFragment extends Fragment {
 
-    private final DocumentReference storeRef = FirebaseFirestore.getInstance().collection("stores").document(LoaderActivity.sid);
+    private final CollectionReference userRef = FirebaseFirestore.getInstance().collection("user log");
+    private final CollectionReference receiptRef = FirebaseFirestore.getInstance().collection("stores").document(LoaderActivity.sid).collection("receipts");
     private final boolean type = LoaderActivity.admin;
     private final DecimalFormat df = new DecimalFormat("0.00");
     private final List<String> dateList = new ArrayList<>();
@@ -48,7 +49,7 @@ public class HomeFragment extends Fragment {
     private TableLayout receiptTable, userTable;
     private LineChart lineChart;
     private double max;
-    private LinearLayout userLogLayout;
+    private LinearLayout userLogLayout, receiptLogLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -58,8 +59,8 @@ public class HomeFragment extends Fragment {
         lineChart = view.findViewById(R.id.chart);
         receiptTable = view.findViewById(R.id.receipt_log);
         userLogLayout = view.findViewById(R.id.user_log_layout);
+        receiptLogLayout = view.findViewById(R.id.receipt_log_layout);
         userTable = view.findViewById(R.id.user_log);
-        if (type) userLogLayout.setVisibility(View.VISIBLE);
 
         return view;
     }
@@ -71,14 +72,14 @@ public class HomeFragment extends Fragment {
     }
 
     private void startListening() {
-        ListenerRegistration receiptListener = storeRef.collection("receipts")
+        ListenerRegistration receiptListener = userRef
                 .orderBy("invoice no", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshots, e) -> {
                     if (e != null) return;
                     initializeReceiptLog();
                 });
 
-        ListenerRegistration userLogListener = storeRef.collection("user log")
+        ListenerRegistration userLogListener = receiptRef
                 .orderBy("date-time", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshots, e) -> {
                     if (e != null) return;
@@ -127,11 +128,12 @@ public class HomeFragment extends Fragment {
 
     private void initializeUserLog() {
         userTable.removeAllViews();
-        storeRef.collection("user log").orderBy("date-time", Query.Direction.DESCENDING).get().addOnCompleteListener(task -> {
+        userRef.orderBy("date-time", Query.Direction.DESCENDING).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful() || task.getResult().isEmpty()) {
                 userLogLayout.setVisibility(View.GONE);
                 return;
             }
+            if (type) userLogLayout.setVisibility(View.VISIBLE);
 
             getUserTableRow("Date & Time",
                     "Action",
@@ -192,9 +194,8 @@ public class HomeFragment extends Fragment {
         salesList.clear();
         max = 0;
 
-        storeRef.collection("receipts").orderBy("invoice no", Query.Direction.DESCENDING).get().addOnCompleteListener(task -> {
+        receiptRef.orderBy("invoice no", Query.Direction.DESCENDING).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful() || task.getResult().size() < 2) {
-                LinearLayout receiptLogLayout = getActivity().findViewById(R.id.receipt_log_layout);
                 receiptLogLayout.setVisibility(View.GONE);
                 return;
             }
