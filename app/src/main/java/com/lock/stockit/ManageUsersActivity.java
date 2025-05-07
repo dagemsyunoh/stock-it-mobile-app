@@ -57,6 +57,7 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
     protected AuthCredential credential;
     private AlertDialog dialog;
     private final Logger logger = new Logger();
+    public static String sid = LoaderActivity.sid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,12 +102,12 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
             if (error != null || value == null) return;
             usersList.clear();
 
-            for (DocumentSnapshot documentSnapshot : value.getDocuments()) {
-                String email = documentSnapshot.getString("email");
-                boolean admin = Boolean.TRUE.equals(documentSnapshot.getBoolean("admin"));
-                boolean activated = Boolean.TRUE.equals(documentSnapshot.getBoolean("activated"));
-                usersList.add(new UserModel(email, admin, activated));
-            }
+            for (DocumentSnapshot doc : value.getDocuments()) if (doc.getString("store").equals(sid) || doc.getString("store").isEmpty())
+                    usersList.add(new UserModel(doc.getString("name"),
+                            doc.getString("email"),
+                            Boolean.TRUE.equals(doc.getBoolean("admin")),
+                            Boolean.TRUE.equals(doc.getBoolean("activated")),
+                            doc.getString("store")));
             setRecyclerView();
             adapter.setUsers(usersList);
             adapter.notifyDataSetChanged();

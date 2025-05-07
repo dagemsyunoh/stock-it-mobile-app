@@ -16,14 +16,16 @@ import androidx.cardview.widget.CardView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.lock.stockit.ManageUsersActivity;
 import com.lock.stockit.Models.UserModel;
 import com.lock.stockit.R;
 
 public class UserViewHolder extends UserBaseViewHolder {
 
     private final CollectionReference colRef = FirebaseFirestore.getInstance().collection("users");
-    private final TextView email;
+    private final TextView name, email;
     private final SwitchCompat admin, activated;
     private final ImageView rightImage;
     private final CardView cardView;
@@ -32,6 +34,7 @@ public class UserViewHolder extends UserBaseViewHolder {
 
     public UserViewHolder(View itemView, UserListeners customListeners) {
         super(itemView, customListeners);
+        name = itemView.findViewById(R.id.name_text);
         email = itemView.findViewById(R.id.email_text);
         admin = itemView.findViewById(R.id.admin_switch);
         activated = itemView.findViewById(R.id.activated_switch);
@@ -41,6 +44,7 @@ public class UserViewHolder extends UserBaseViewHolder {
     @Override
     public void bindDataToViewHolder(UserModel item, int position, SwipeState swipeState) {
         //region Input Data
+        name.setText(item.getName());
         email.setText(item.getEmail());
         admin.setChecked(item.isAdmin());
         activated.setChecked(item.isActivated());
@@ -63,7 +67,7 @@ public class UserViewHolder extends UserBaseViewHolder {
         });
 
         activated.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (!cancelFlag) confirmChange("activated", admin);
+            if (!cancelFlag) confirmChange("activated", activated);
             cancelFlag = false;
         });
 
@@ -99,8 +103,15 @@ public class UserViewHolder extends UserBaseViewHolder {
 
     private void updateData(String field, SwitchCompat switchClicked) {
         colRef.whereEqualTo("email", email.getText().toString()).get().addOnCompleteListener(task -> {
+            DocumentReference docRef = colRef.document(task.getResult().getDocuments().get(0).getId());
             if (!task.isSuccessful()) return;
-            colRef.document(task.getResult().getDocuments().get(0).getId()).update(field, switchClicked.isChecked());
+            Log.d("TAG", field);
+            docRef.update(field, switchClicked.isChecked());
+            if (field.equals("activated")) {
+                String store = "";
+                if (switchClicked.isChecked()) store = ManageUsersActivity.sid;
+                docRef.update("store", store);
+            }
         });
     }
 
