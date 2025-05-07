@@ -1,9 +1,6 @@
 # stock-it-mobile-app
 
 TO-DO: <br>
-- printer connection (partially done)
-- print format (partially done)
-- different store functions
 - settings
 - design
 - testing & bug checking
@@ -30,3 +27,6 @@ DONE: <br>
 - cashier name
 - daily sales
 - customer discounts
+- different store functions
+- printer connection
+- print format
