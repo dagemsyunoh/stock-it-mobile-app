@@ -3,7 +3,6 @@ package com.lock.stockit;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -95,7 +94,6 @@ public class SignInActivity extends AppCompatActivity implements FirebaseAuth.Au
             Exception exception = task.getException();
             if (exception instanceof FirebaseAuthException) {
                 String errorCode = ((FirebaseAuthException) exception).getErrorCode();
-                Log.d("TAG", errorCode);
                 switch (errorCode) {
                     case "ERROR_INVALID_CREDENTIAL":
                         Toast.makeText(this, "Incorrect email or password. Please try again.", Toast.LENGTH_SHORT).show();
