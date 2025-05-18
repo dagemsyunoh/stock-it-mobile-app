@@ -101,4 +101,6 @@
     <string name="manage_customers">Manage Customers</string>
     <string name="previous_transactions">Previous Transactions</string>
     <string name="add_customer">Add Customer</string>
+    <string name="account">Account</string>
+    <string name="admin_tools">Admin Tools</string>
 </resources>

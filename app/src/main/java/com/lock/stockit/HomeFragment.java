@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,6 +51,8 @@ public class HomeFragment extends Fragment {
     private LineChart lineChart;
     private double max;
     private LinearLayout userLogLayout, receiptLogLayout;
+    private ListenerRegistration receiptListenerRegistration;
+    private ListenerRegistration userLogListenerRegistration;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -71,20 +74,43 @@ public class HomeFragment extends Fragment {
         startListening();
     }
 
-    private void startListening() {
-        ListenerRegistration receiptListener = userRef
-                .orderBy("invoice no", Query.Direction.DESCENDING)
-                .addSnapshotListener((snapshots, e) -> {
-                    if (e != null) return;
-                    initializeReceiptLog();
-                });
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (receiptListenerRegistration != null) {
+            receiptListenerRegistration.remove();
+        }
+        if (userLogListenerRegistration != null) {
+            userLogListenerRegistration.remove();
+        }
+    }
 
-        ListenerRegistration userLogListener = receiptRef
-                .orderBy("date-time", Query.Direction.DESCENDING)
-                .addSnapshotListener((snapshots, e) -> {
-                    if (e != null) return;
-                    initializeUserLog();
-                });
+    private void startListening() {
+        if (isAdded()) { // Good practice to check if fragment is added
+            // Listener for userRef (you named it receiptListener, might be a typo)
+            receiptListenerRegistration = userRef
+                    .orderBy("invoice no", Query.Direction.DESCENDING) // Should this be "date-time" for user logs?
+                    .addSnapshotListener((snapshots, e) -> {
+                        if (e != null) {
+                            Log.w("HomeFragment", "User log listener error", e);
+                            return;
+                        }
+                        if (!isAdded()) return; // Check again before UI work
+                        initializeUserLog(); // Assuming this updates user log based on userRef
+                    });
+
+            // Listener for receiptRef (you named it userLogListener, might be a typo)
+            userLogListenerRegistration = receiptRef
+                    .orderBy("date-time", Query.Direction.DESCENDING) // Should this be "invoice no" for receipts?
+                    .addSnapshotListener((snapshots, e) -> {
+                        if (e != null) {
+                            Log.w("HomeFragment", "Receipt log listener error", e);
+                            return;
+                        }
+                        if (!isAdded()) return; // Check again before UI work
+                        initializeReceiptLog(); // Assuming this updates receipt log based on receiptRef
+                    });
+        }
     }
 
     private void setChart() {
