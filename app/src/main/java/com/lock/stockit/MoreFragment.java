@@ -16,21 +16,27 @@ import com.google.firebase.auth.FirebaseUser;
 public class MoreFragment extends Fragment {
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
     private final FirebaseUser user = auth.getCurrentUser();
-    protected Button buttonManage, buttonChangeEmail, buttonChangePassword, buttonSignOUt;
+    protected Button buttonUsers, buttonCustomers, buttonChangeEmail, buttonChangePassword, buttonSignOUt;
     private TextView emailUser;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_more, container, false);
-        buttonManage = view.findViewById(R.id.manage_users);
+        buttonUsers = view.findViewById(R.id.manage_users);
+        buttonCustomers = view.findViewById(R.id.manage_customers);
         buttonChangeEmail = view.findViewById(R.id.change_email);
         buttonChangePassword = view.findViewById(R.id.change_password);
         buttonSignOUt = view.findViewById(R.id.sign_out_button);
         emailUser = view.findViewById(R.id.email_user);
 
-        buttonManage.setOnClickListener(v -> {
+        buttonUsers.setOnClickListener(v -> {
             Intent i = new Intent(getActivity(), ManageUsersActivity.class);
+            startActivity(i);
+        });
+
+        buttonCustomers.setOnClickListener(v -> {
+            Intent i = new Intent(getActivity(), ManageCustomersActivity.class);
             startActivity(i);
         });
 
@@ -53,9 +59,14 @@ public class MoreFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        String welcome = "Welcome, " + user.getEmail();
+        String welcome = "Welcome, " + user.getDisplayName() + "\n" + user.getEmail();
         emailUser.setText(welcome);
-        if (LoaderActivity.admin) buttonManage.setVisibility(View.VISIBLE);
-        else buttonManage.setVisibility(View.GONE);
+        if (LoaderActivity.admin) {
+            buttonUsers.setVisibility(View.VISIBLE);
+            buttonCustomers.setVisibility(View.VISIBLE);
+        } else {
+            buttonUsers.setVisibility(View.GONE);
+            buttonCustomers.setVisibility(View.GONE);
+        }
     }
 }

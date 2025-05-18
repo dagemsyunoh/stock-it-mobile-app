@@ -19,4 +19,15 @@ public class Logger {
         log.put("date-time", dateTime);
         FirebaseFirestore.getInstance().collection("user log").document().set(log);
     }
+
+    public void setCustomerLog(String action, String target, String user) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        String dateTime = formatter.format(new Date());
+        Map<String, Object> log = new HashMap<>();
+        log.put("action", action);
+        log.put("target", target);
+        log.put("user", user);
+        log.put("date-time", dateTime);
+        FirebaseFirestore.getInstance().collection("customer log").document().set(log);
+    }
 }

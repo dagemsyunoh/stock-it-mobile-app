@@ -141,11 +141,11 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
         dialogText.setText(R.string.enter_your_name);
 
         TextInputLayout inputLayout = nameDialog.findViewById(R.id.input_layout);
+        inputLayout.setHint(getString(R.string.display_name));
         inputLayout.setEndIconMode(TextInputLayout.END_ICON_NONE);
 
         TextInputEditText inputName = nameDialog.findViewById(R.id.input);
         inputName.setInputType(InputType.TYPE_CLASS_TEXT);
-        inputName.setHint(R.string.display_name);
 
         Button buttonCancel = nameDialog.findViewById(R.id.cancel_button);
         Button buttonEnter = nameDialog.findViewById(R.id.ok_button);

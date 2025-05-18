@@ -152,7 +152,6 @@ public class InventoryFragment extends Fragment implements StockListeners {
         minusOne = addPopUp.findViewById(R.id.add_minus_one);
         addItem = addPopUp.findViewById(R.id.add_item);
 
-        // Auto-capitalize first letter of each word of item name
         itemName.setOnFocusChangeListener((view, b) -> {
             String input = String.valueOf(itemName.getText());
             if (input.isEmpty()) return;
@@ -164,7 +163,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
                         .append(" ");
             itemName.setText(output.toString().trim());
         });
-        // auto-change item size to lowercase without spaces
+
         itemSize.setOnFocusChangeListener((view, b) -> {
             String input = String.valueOf(itemSize.getText());
             String output = input.replaceAll("\\s+", "").toLowerCase();
