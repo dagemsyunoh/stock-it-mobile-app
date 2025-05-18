@@ -1,49 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:gravity="center"
-    android:orientation="vertical"
+    android:padding="16dp"
     tools:context=".MoreFragment">
 
-    <TextView
-        android:id="@+id/email_user"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center" />
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/manage_users"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/manage_users"
-        android:visibility="gone"/>
+        <!-- Profile Section -->
+        <TextView
+            android:id="@+id/email_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="@string/user"
+            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+            android:textColor="?android:textColorPrimary" />
 
-    <Button
-        android:id="@+id/manage_customers"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/manage_customers"
-        android:visibility="gone" />
+        <!-- Account Section Header -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
+            android:text="@string/account"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="?android:textColorPrimary"
+            android:textStyle="bold" />
 
-    <Button
-        android:id="@+id/change_email"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/change_email" />
+        <!-- Account Buttons -->
+        <Button
+            android:id="@+id/change_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="@string/change_email" />
 
-    <Button
-        android:id="@+id/change_password"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/change_password" />
+        <Button
+            android:id="@+id/change_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="@string/change_password" />
 
-    <Button
-        android:id="@+id/sign_out_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/sign_out" />
+        <!-- Admin Tools Group -->
+        <LinearLayout
+            android:id="@+id/admin_tools_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
 
-</LinearLayout>
+            <!-- Admin Tools Section Header -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="8dp"
+                android:text="@string/admin_tools"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?android:textColorPrimary"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/manage_users"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:text="@string/manage_users" />
+
+            <Button
+                android:id="@+id/manage_customers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:text="@string/manage_customers" />
+        </LinearLayout>
+
+        <!-- Sign Out Button -->
+        <Button
+            android:id="@+id/sign_out_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="?attr/colorError"
+            android:text="@string/sign_out"
+            android:textColor="?attr/colorOnError" />
+
+    </LinearLayout>
+</ScrollView>

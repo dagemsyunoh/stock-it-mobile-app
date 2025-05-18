@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
@@ -61,12 +62,8 @@ public class MoreFragment extends Fragment {
 
         String welcome = "Welcome, " + user.getDisplayName() + "\n" + user.getEmail();
         emailUser.setText(welcome);
-        if (LoaderActivity.admin) {
-            buttonUsers.setVisibility(View.VISIBLE);
-            buttonCustomers.setVisibility(View.VISIBLE);
-        } else {
-            buttonUsers.setVisibility(View.GONE);
-            buttonCustomers.setVisibility(View.GONE);
-        }
+        LinearLayout adminTools = getView().findViewById(R.id.admin_tools_group);
+        if (LoaderActivity.admin) adminTools.setVisibility(View.VISIBLE);
+        else adminTools.setVisibility(View.GONE);
     }
 }
