@@ -1,6 +1,10 @@
 package com.lock.stockit.Helpers;
 
+import static com.lock.stockit.InventoryFragment.LOW_STOCK_THRESHOLD;
+
 import android.annotation.SuppressLint;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -72,6 +76,16 @@ public class StockViewHolder extends StockBaseViewHolder {
         editQty.setVisibility(View.GONE);
         editRegPrice.setVisibility(View.GONE);
         editDscPrice.setVisibility(View.GONE);
+
+        int originalCardColor = cardView.getCardBackgroundColor().getDefaultColor();
+
+        if (item.getItemQuantity() == 0) {
+            cardView.setForeground(new ColorDrawable(Color.parseColor("#80F44336")));
+        } else if (item.getItemQuantity() <= LOW_STOCK_THRESHOLD) {
+            cardView.setForeground(new ColorDrawable(Color.parseColor("#80FFC107")));
+        } else {
+            cardView.setForeground(null); // remove tint
+        }
         //endregion
         //region Swipe
         setSwipe(cardView, item.getState());

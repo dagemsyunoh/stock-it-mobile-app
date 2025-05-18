@@ -167,7 +167,9 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-    }    private final ActivityResultLauncher<String[]> permissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+    }
+
+    private final ActivityResultLauncher<String[]> permissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
         boolean connectGranted, scanGranted;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             connectGranted = result.getOrDefault(Manifest.permission.BLUETOOTH_CONNECT, false);
@@ -405,6 +407,7 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
 
     private void saveReceipt() {
         ArrayList<String> items = new ArrayList<>();
+//        update stocks and add to receipt
         for (ReceiptModel val : receiptList) {
             items.add(val.getItemName() + " " + val.getItemSize() + ", " + val.getItemQuantity() + " " + val.getItemQtyType());
             stockRef.whereEqualTo("item name", val.getItemName()).whereEqualTo("item size", val.getItemSize()).get().addOnSuccessListener(queryDocumentSnapshots -> {
@@ -423,7 +426,6 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
             addCustomerReceipt();
         }
         receiptRef.add(receiptMap);
-        Log.d("TAG", "saveReceipt");
         setResult(RESULT_OK);
         finish();
     }

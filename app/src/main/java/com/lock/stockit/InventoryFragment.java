@@ -2,9 +2,16 @@ package com.lock.stockit;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +22,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.app.NotificationCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -34,6 +42,7 @@ import com.lock.stockit.Models.StockModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class InventoryFragment extends Fragment implements StockListeners {
 
@@ -46,7 +55,14 @@ public class InventoryFragment extends Fragment implements StockListeners {
     private StockAdapter adapter;
     private final ArrayList<String> names = new ArrayList<>();
     private final ArrayList<String> sizes = new ArrayList<>();
-
+    private static final long SEARCH_DELAY = 300; // milliseconds debounce time
+    private final Handler searchHandler = new Handler(Looper.getMainLooper());
+    private Runnable searchRunnable;
+    public static final double LOW_STOCK_THRESHOLD = 5.0;  // for example, less or equal to 5 triggers alert
+    private static final long NOTIFY_COOLDOWN = 30 * 60 * 1000; // 30 minutes in milliseconds
+    private static final String PREFS_NAME = "low_stock_notifications";
+    private static final String PREFS_KEY_PREFIX = "last_notified_";
+    private final Map<String, Long> notifiedTimestamps = new HashMap<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -67,7 +83,9 @@ public class InventoryFragment extends Fragment implements StockListeners {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                filterStocks(newText);
+                if (searchRunnable != null) searchHandler.removeCallbacks(searchRunnable);
+                searchRunnable = () -> filterStocks(newText);
+                searchHandler.postDelayed(searchRunnable, SEARCH_DELAY);
                 return false;
             }
         });
@@ -92,6 +110,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
         super.onStart();
         fetchData();
     }
+
     @SuppressLint("NotifyDataSetChanged")
     private void fetchData() {
         stockRef.addSnapshotListener((querySnapshot, error) -> {
@@ -112,7 +131,66 @@ public class InventoryFragment extends Fragment implements StockListeners {
             stockList.sort(new StockComparator());
             adapter.setStocks(stockList);
             adapter.notifyDataSetChanged();
+            checkLowStockItems();
         });
+    }
+
+    private void saveNotificationTimestamp(String key, long timestamp) {
+        getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().putLong(PREFS_KEY_PREFIX + key, timestamp).apply();
+    }
+
+    private long getNotificationTimestamp(String key) {
+        return getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getLong(PREFS_KEY_PREFIX + key, 0);
+    }
+
+    private void checkLowStockItems() {
+        long now = System.currentTimeMillis();
+        for (StockModel item : stockList) {
+            String key = item.getItemName() + "_" + item.getItemSize();
+            if (item.getItemQuantity() <= LOW_STOCK_THRESHOLD) {
+                long lastNotified = getNotificationTimestamp(key);
+                if (lastNotified == 0 || now - lastNotified >= NOTIFY_COOLDOWN) {
+                    notifyLowStock(item);
+                    saveNotificationTimestamp(key, now);
+                }
+            } else {
+                // Stock replenished, remove timestamp to allow future notifications
+                getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().remove(PREFS_KEY_PREFIX + key).apply();
+            }
+        }
+    }
+
+    private void notifyLowStock(StockModel item) {
+        NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+        String channelId = "stock_alert_channel";
+
+        // Create notification channel for Android 8.0+
+        NotificationChannel channel = new NotificationChannel(
+                channelId,
+                "Stock Alerts",
+                NotificationManager.IMPORTANCE_HIGH
+        );
+        notificationManager.createNotificationChannel(channel);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity(), channelId);
+        builder.setSmallIcon(R.drawable.ic_launcher);
+        builder.setContentTitle("Low Stock Alert");
+        String quantityStr = (item.getItemQuantity() % 1 == 0) ? String.valueOf((int) item.getItemQuantity()) : String.valueOf(item.getItemQuantity());
+        builder.setContentText("Item \"" + item.getItemName() + " " + item.getItemSize() + "\" is low: " + quantityStr + " " + item.getItemQtyType() + " left.");
+        builder.setPriority(NotificationCompat.PRIORITY_HIGH);
+        builder.setAutoCancel(true);
+
+        // Use item hashcode as notification ID to prevent duplication
+        int notificationId = item.hashCode();
+        Intent intent = new Intent(getActivity(), MainActivity.class);
+// Key to identify inventory tab
+        intent.putExtra("open_tab", "inventory");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        builder.setContentIntent(pendingIntent);
+        notificationManager.notify(notificationId, builder.build());
     }
 
     private void setRecyclerView() {
