@@ -124,7 +124,58 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        String tabToOpen = getIntent().getStringExtra("open_tab");
+        if (tabToOpen != null) {
+            openTab(tabToOpen);
+        }
     }
+
+    private void openTab(String tabName) {
+        int tabIndex; // default to home
+
+        // Non-admin tab indexes
+        if (LoaderActivity.admin) switch (tabName) {
+            case "receipt":
+                tabIndex = 1;
+                break;
+            case "inventory":
+                tabIndex = 2;
+                break;
+            case "more":
+                tabIndex = 3;
+                break;
+            case "home":
+            default:
+                tabIndex = 0;
+                break;
+        }
+        else switch (tabName) {
+            case "receipt":
+                tabIndex = 1;
+                break;
+            case "more":
+                tabIndex = 2;
+                break;
+            case "home":
+            default:
+                tabIndex = 0;
+                break;
+        }
+
+        viewPager2.setCurrentItem(tabIndex);
+    }
+
+    @Override
+    protected void onNewIntent(@NonNull Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);  // update the intent
+        String tabToOpen = intent.getStringExtra("open_tab");
+        if (tabToOpen != null) {
+            openTab(tabToOpen);
+        }
+    }
+
     private void checkName() {
         if (auth.getCurrentUser().getDisplayName() != null) return;
         Dialog nameDialog = new Dialog(MainActivity.this);

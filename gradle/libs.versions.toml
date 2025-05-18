@@ -25,6 +25,8 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
 preference = { module = "androidx.preference:preference", version.ref = "preference" }
+core-ktx = { group = "androidx.core", name = "core-ktx", version = "1.16.0" }
+activity-ktx = { group = "androidx.activity", name = "activity-ktx", version = "1.10.1" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

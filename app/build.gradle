@@ -45,4 +45,6 @@ dependencies {
     androidTestImplementation libs.espresso.core
     implementation libs.preference
     implementation libs.mpandroidchart
+    implementation libs.core.ktx
+    implementation libs.activity.ktx
 }

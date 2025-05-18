@@ -167,7 +167,9 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-    }    private final ActivityResultLauncher<String[]> permissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+    }
+
+    private final ActivityResultLauncher<String[]> permissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
         boolean connectGranted, scanGranted;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             connectGranted = result.getOrDefault(Manifest.permission.BLUETOOTH_CONNECT, false);
