@@ -405,6 +405,7 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
 
     private void saveReceipt() {
         ArrayList<String> items = new ArrayList<>();
+//        update stocks and add to receipt
         for (ReceiptModel val : receiptList) {
             items.add(val.getItemName() + " " + val.getItemSize() + ", " + val.getItemQuantity() + " " + val.getItemQtyType());
             stockRef.whereEqualTo("item name", val.getItemName()).whereEqualTo("item size", val.getItemSize()).get().addOnSuccessListener(queryDocumentSnapshots -> {

@@ -5,6 +5,8 @@ import android.app.Dialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,7 +48,9 @@ public class InventoryFragment extends Fragment implements StockListeners {
     private StockAdapter adapter;
     private final ArrayList<String> names = new ArrayList<>();
     private final ArrayList<String> sizes = new ArrayList<>();
-
+    private static final long SEARCH_DELAY = 300; // milliseconds debounce time
+    private final Handler searchHandler = new Handler(Looper.getMainLooper());
+    private Runnable searchRunnable;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -67,7 +71,9 @@ public class InventoryFragment extends Fragment implements StockListeners {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                filterStocks(newText);
+                if (searchRunnable != null) searchHandler.removeCallbacks(searchRunnable);
+                searchRunnable = () -> filterStocks(newText);
+                searchHandler.postDelayed(searchRunnable, SEARCH_DELAY);
                 return false;
             }
         });
