@@ -153,10 +153,10 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
         dialogText.setText(message);
 
         TextInputLayout inputLayout = passDialog.findViewById(R.id.input_layout);
+        inputLayout.setHint(getString(R.string.password));
         inputLayout.setEndIconMode(TextInputLayout.END_ICON_PASSWORD_TOGGLE);
 
         TextInputEditText inputPassword = passDialog.findViewById(R.id.input);
-        inputPassword.setHint(R.string.password);
         inputPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
         Button buttonCancel = passDialog.findViewById(R.id.cancel_button);

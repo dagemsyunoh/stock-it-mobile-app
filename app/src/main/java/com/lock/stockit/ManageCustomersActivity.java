@@ -116,6 +116,7 @@ public class ManageCustomersActivity extends AppCompatActivity implements Custom
         addCustomer.setOnClickListener(view -> {
             HashMap<String, Object> data = new HashMap<>();
             data.put("name", customerName.getText().toString());
+            data.put("transactions", 0);
 
             if (data.get("name").toString().isEmpty()) {
                 Toast.makeText(this, "Invalid input", Toast.LENGTH_SHORT).show();
@@ -160,12 +161,10 @@ public class ManageCustomersActivity extends AppCompatActivity implements Custom
             if (error != null || value == null) return;
             customersList.clear();
 
-            for (DocumentSnapshot doc : value.getDocuments())
-                if (doc.getString("store").equals(sid) || doc.getString("store").isEmpty()) {
-                    names.add(doc.getString("name"));
-                    customersList.add(new CustomerModel(doc.getString("name"),
-                            doc.getDouble("transactions").intValue()));
-                }
+            for (DocumentSnapshot doc : value.getDocuments()) {
+                names.add(doc.getString("name"));
+                customersList.add(new CustomerModel(doc.getString("name"), doc.getDouble("transactions").intValue()));
+            }
             setRecyclerView();
             adapter.setCustomers(customersList);
             adapter.notifyDataSetChanged();
@@ -220,10 +219,10 @@ public class ManageCustomersActivity extends AppCompatActivity implements Custom
         dialogText.setText(message);
 
         TextInputLayout inputLayout = passDialog.findViewById(R.id.input_layout);
+        inputLayout.setHint(getString(R.string.password));
         inputLayout.setEndIconMode(TextInputLayout.END_ICON_PASSWORD_TOGGLE);
 
         TextInputEditText inputPassword = passDialog.findViewById(R.id.input);
-        inputPassword.setHint(R.string.password);
         inputPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
         Button buttonCancel = passDialog.findViewById(R.id.cancel_button);

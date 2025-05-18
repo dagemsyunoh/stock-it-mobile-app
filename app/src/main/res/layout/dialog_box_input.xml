@@ -39,6 +39,7 @@
                 android:id="@+id/input_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:hint="@string/input_field"
                 android:layout_margin="5dp">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -46,7 +47,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="15dp"
-                    android:hint="@string/input_field"
                     tools:ignore="VisualLintTextFieldSize" />
 
             </com.google.android.material.textfield.TextInputLayout>

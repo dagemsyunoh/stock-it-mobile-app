@@ -22,8 +22,8 @@ public class CustomerViewHolder extends CustomerBaseViewHolder {
     private final CardView cardView;
     private final Logger logger = new Logger();
 
-    public CustomerViewHolder(View itemView, CustomerListeners customListeners) {
-        super(itemView, customListeners);
+    public CustomerViewHolder(View itemView, CustomerListeners customerListeners) {
+        super(itemView, customerListeners);
         name = itemView.findViewById(R.id.name_text);
         transactions = itemView.findViewById(R.id.transactions_text);
         cardView = itemView.findViewById(R.id.card_view);
@@ -32,9 +32,10 @@ public class CustomerViewHolder extends CustomerBaseViewHolder {
 
     @Override
     public void bindDataToViewHolder(CustomerModel item, int position, SwipeState swipeState) {
+        String transactText = item.getTransactions() + " transactions";
         //region Input Data
         name.setText(item.getName());
-        transactions.setText(String.valueOf(item.getTransactions()));
+        transactions.setText(transactText);
         //endregion
         //region Swipe
         setSwipe(cardView, item.getState());
