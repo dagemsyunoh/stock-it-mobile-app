@@ -60,11 +60,11 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
     private final CollectionReference db = FirebaseFirestore.getInstance().collection("stores");
     private final CollectionReference stockRef = db.document(LoaderActivity.sid).collection("stocks");
     private final CollectionReference receiptRef = db.document(LoaderActivity.sid).collection("receipts");
+    private final CollectionReference customerRef = db.document(LoaderActivity.sid).collection("customers");
     private final DecimalFormat df = new DecimalFormat("0.00");
     private final UUID applicationUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private SharedPreferences sharedPreferences;
     private SecurePreferences preferences;
-    private final CollectionReference customerRef = db.document(LoaderActivity.sid).collection("customers");
     private final int CONNECTION_TIMEOUT = 5000;
     private final String sSeparator = "-".repeat(32), dSeparator = "=".repeat(32);
     private final ArrayList<String> headerList = new ArrayList<>();
@@ -90,7 +90,9 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
             printButton.setText(R.string.print);
             printButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_print, 0);
         }
-    };    private final ActivityResultLauncher<Intent> enableLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+    };
+
+    private final ActivityResultLauncher<Intent> enableLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
         if (result.getResultCode() == RESULT_CANCELED) {
             Toast.makeText(this, "Bluetooth disabled. Turn on bluetooth to print.", Toast.LENGTH_SHORT).show();
             return;

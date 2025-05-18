@@ -82,13 +82,6 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
         super.onStart();
         fetchData();
     }
-    private final Handler mHandler = new Handler(Looper.getMainLooper()) {
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            dialog.dismiss();
-            Toast.makeText(ManageUsersActivity.this, "User deleted.", Toast.LENGTH_SHORT).show();
-        }
-    };
 
     private void setRecyclerView() {
         adapter = new UserAdapter(this, SwipeState.LEFT);
@@ -185,9 +178,16 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
         });
     }
 
+    private final Handler mHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            dialog.dismiss();
+            Toast.makeText(ManageUsersActivity.this, "User deleted.", Toast.LENGTH_SHORT).show();
+        }
+    };
+
     public void run() {
         try {
-
             mHandler.sendEmptyMessage(0);
         } catch (Exception e) {
             Log.e("TAG", e.getMessage());

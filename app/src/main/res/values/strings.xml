@@ -51,6 +51,8 @@
     <string name="bluetooth_devices">Bluetooth Devices</string>
     <string name="delete_user">Delete User</string>
     <string name="warning_user_deletion">Warning! User Deletion</string>
+    <string name="delete_customer">Delete Customer</string>
+    <string name="warning_customer_deletion">Warning! Customer Deletion</string>
     <string name="warning_user_status_change">Warning! User Status Change</string>
     <string name="ok">OK</string>
     <string name="email_verification_required">Email Verification Required</string>
@@ -96,4 +98,7 @@
     <string name="pcs">pcs</string>
     <string name="kg">kg</string>
     <string name="quantity">Quantity</string>
+    <string name="manage_customers">Manage Customers</string>
+    <string name="previous_transactions">Previous Transactions</string>
+    <string name="add_customer">Add Customer</string>
 </resources>

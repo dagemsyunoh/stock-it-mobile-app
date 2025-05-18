@@ -35,6 +35,9 @@
             android:name=".ManageUsersActivity"
             android:exported="false" />
         <activity
+            android:name=".ManageCustomersActivity"
+            android:exported="false" />
+        <activity
             android:name=".LoaderActivity"
             android:exported="true">
             <intent-filter>
