@@ -423,7 +423,6 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
             addCustomerReceipt();
         }
         receiptRef.add(receiptMap);
-        Log.d("TAG", "saveReceipt");
         setResult(RESULT_OK);
         finish();
     }
