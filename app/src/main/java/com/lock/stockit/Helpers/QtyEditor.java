@@ -7,7 +7,7 @@ public class QtyEditor {
         double qty = Double.parseDouble(inputQty.getText().toString());
         if (val == 0) return;
         if (qty + val <= 0) return;
-        if (qty % 1 == 0) inputQty.setText(String.valueOf((int) qty + val));
-        else inputQty.setText(String.valueOf(qty + val));
+        if (qty % 1 != 0) inputQty.setText(String.valueOf(qty + val));
+        else inputQty.setText(String.valueOf((int) qty + val));
     }
 }

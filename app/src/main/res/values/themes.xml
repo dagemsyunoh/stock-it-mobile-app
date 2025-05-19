@@ -4,6 +4,8 @@
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">@color/purple</item>
         <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSurfaceVariant">@color/light_surface_variant</item>
+
     </style>
 
     <style name="Theme.StockIt" parent="Base.Theme.StockIt" />

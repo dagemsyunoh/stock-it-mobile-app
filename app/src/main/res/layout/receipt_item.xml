@@ -131,7 +131,7 @@
                 android:layout_marginHorizontal="5dp"
                 android:layout_marginTop="5dp"
                 android:gravity="center"
-                android:text=""
+                android:text="@string/item_name"
                 android:textSize="20sp" />
 
             <TextView
@@ -141,7 +141,7 @@
                 android:layout_below="@+id/item_text"
                 android:layout_marginHorizontal="5dp"
                 android:gravity="center"
-                android:text=""
+                android:text="@string/item_size"
                 android:textSize="15sp" />
 
             <LinearLayout

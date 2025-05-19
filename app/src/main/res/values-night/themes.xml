@@ -4,6 +4,7 @@
         <!-- Customize your dark theme here. -->
         <item name="colorPrimary">@color/purple</item>
         <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSurfaceVariant">@color/dark_surface_variant</item>
     </style>
 
     <style name="Theme.StockIt" parent="Base.Theme.StockIt" />

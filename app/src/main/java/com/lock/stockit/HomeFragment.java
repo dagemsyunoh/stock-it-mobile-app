@@ -77,17 +77,11 @@ public class HomeFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        if (receiptListenerRegistration != null) {
-            receiptListenerRegistration.remove();
-        }
-        if (userLogListenerRegistration != null) {
-            userLogListenerRegistration.remove();
-        }
+        if (receiptListenerRegistration != null) receiptListenerRegistration.remove();
+        if (userLogListenerRegistration != null) userLogListenerRegistration.remove();
     }
 
     private void startListening() {
-        if (isAdded()) { // Good practice to check if fragment is added
-            // Listener for userRef (you named it receiptListener, might be a typo)
             receiptListenerRegistration = userRef
                     .orderBy("invoice no", Query.Direction.DESCENDING) // Should this be "date-time" for user logs?
                     .addSnapshotListener((snapshots, e) -> {
@@ -95,8 +89,7 @@ public class HomeFragment extends Fragment {
                             Log.w("HomeFragment", "User log listener error", e);
                             return;
                         }
-                        if (!isAdded()) return; // Check again before UI work
-                        initializeUserLog(); // Assuming this updates user log based on userRef
+                        initializeUserLog();
                     });
 
             // Listener for receiptRef (you named it userLogListener, might be a typo)
@@ -107,10 +100,8 @@ public class HomeFragment extends Fragment {
                             Log.w("HomeFragment", "Receipt log listener error", e);
                             return;
                         }
-                        if (!isAdded()) return; // Check again before UI work
-                        initializeReceiptLog(); // Assuming this updates receipt log based on receiptRef
+                        initializeReceiptLog();
                     });
-        }
     }
 
     private void setChart() {
@@ -225,7 +216,7 @@ public class HomeFragment extends Fragment {
                 receiptLogLayout.setVisibility(View.GONE);
                 return;
             }
-
+            receiptLogLayout.setVisibility(View.VISIBLE);
             getReceiptTableRow("Invoice #",
                     "Date & Time",
                     "Items Purchased",
@@ -234,11 +225,10 @@ public class HomeFragment extends Fragment {
                     "Change",
                     Gravity.CENTER,
                     Typeface.BOLD);
-            if (!task.getResult().getDocuments().get(task.getResult().size()-1).getString("invoice no").equals("INVOICE #0")) {
+            if (task.getResult().size() > 1) {
                 String startDate = task.getResult().getDocuments().get(task.getResult().size() - 1).getString("date-time").split(" ")[0];
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                 String endDate = LocalDate.now().toString();
-
 
                 LocalDate localStartDate = LocalDate.parse(startDate);
                 LocalDate localEndDate = LocalDate.parse(endDate);
@@ -251,7 +241,7 @@ public class HomeFragment extends Fragment {
                 }
             }
             for (var document : task.getResult()) {
-                if (document.getString("invoicee no").equals("INVOICE #0")) continue;
+                if (document.getString("invoice no").equals("INVOICE #0")) continue;
                 String date = document.getString("date-time").split(" ")[0];
 
                 if (dateList.contains(date)) {
@@ -272,10 +262,8 @@ public class HomeFragment extends Fragment {
                         "PHP " + df.format(document.getDouble("amount rendered cash") - document.getDouble("total")),
                         Gravity.START, Typeface.NORMAL);
             }
-
             setChart();
         });
-
     }
 
     private void getReceiptTableRow(String invoiceNo, String dateTime, String items, String amountRendered, String total, String change, int gravity, int typeface) {

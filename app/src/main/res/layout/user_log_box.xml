@@ -2,85 +2,133 @@
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/card_view"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardCornerRadius="@dimen/card_radius"
-    app:cardElevation="@dimen/card_elevation"
-    app:cardMaxElevation="@dimen/card_elevation_maximum"
-    app:cardUseCompatPadding="false">
+    android:layout_margin="16dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="8dp"
+    app:cardUseCompatPadding="true">
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/back"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:layout_margin="10dp"
-        android:src="@drawable/ic_close" />
+        android:padding="16dp">
 
-    <RelativeLayout
-        android:id="@+id/content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_gravity="center_vertical"
-        android:layout_margin="10dp"
-        android:gravity="center_vertical">
+        <!-- Close Button -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/back"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:contentDescription="@string/back"
+            android:padding="8dp"
+            android:src="@drawable/ic_close"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.None" />
 
+        <!-- Header -->
         <TextView
             android:id="@+id/header"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
+            android:layout_marginEnd="8dp"
             android:gravity="center"
             android:text="@string/user_action_details"
+            android:textColor="?attr/colorOnSurface"
             android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <!-- Date Time -->
+        <TextView
+            android:id="@+id/date_time_text"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/header"
-            android:gravity="center_vertical"
-            android:orientation="vertical">
+            android:layout_marginTop="16dp"
+            android:text="@string/date_time"
+            android:textSize="15sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/header" />
 
-            <TextView
-                android:id="@+id/date_time_text"
-                android:layout_width="wrap_content"
-                android:layout_height="55dp"
-                android:layout_marginHorizontal="5dp"
-                android:gravity="center"
-                android:text="@string/date_time"
-                android:textSize="15sp" />
+        <TextView
+            android:id="@+id/date_time_val"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textSize="15sp"
+            app:layout_constraintBaseline_toBaselineOf="@id/date_time_text"
+            app:layout_constraintStart_toStartOf="@id/label_barrier" />
 
-            <TextView
-                android:id="@+id/action_text"
-                android:layout_width="wrap_content"
-                android:layout_height="55dp"
-                android:layout_marginHorizontal="5dp"
-                android:gravity="center"
-                android:text="@string/action"
-                android:textSize="15sp" />
+        <!-- Action -->
+        <TextView
+            android:id="@+id/action_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/action"
+            android:textSize="15sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/date_time_text" />
 
-            <TextView
-                android:id="@+id/target_text"
-                android:layout_width="wrap_content"
-                android:layout_height="55dp"
-                android:layout_marginHorizontal="5dp"
-                android:gravity="center"
-                android:text="@string/target"
-                android:textSize="15sp" />
+        <TextView
+            android:id="@+id/action_val"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textSize="15sp"
+            app:layout_constraintBaseline_toBaselineOf="@id/action_text"
+            app:layout_constraintStart_toStartOf="@id/label_barrier" />
 
-            <TextView
-                    android:id="@+id/user_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="55dp"
-                    android:layout_marginHorizontal="5dp"
-                    android:gravity="center"
-                    android:text="@string/user"
-                    android:textSize="15sp" />
-        </LinearLayout>
-    </RelativeLayout>
+        <!-- Target -->
+        <TextView
+            android:id="@+id/target_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/target"
+            android:textSize="15sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/action_text" />
 
+        <TextView
+            android:id="@+id/target_val"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textSize="15sp"
+            app:layout_constraintBaseline_toBaselineOf="@id/target_text"
+            app:layout_constraintStart_toStartOf="@id/label_barrier" />
+
+        <!-- User -->
+        <TextView
+            android:id="@+id/user_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/user"
+            android:textSize="15sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/target_text" />
+
+        <TextView
+            android:id="@+id/user_val"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textSize="15sp"
+            app:layout_constraintBaseline_toBaselineOf="@id/user_text"
+            app:layout_constraintStart_toStartOf="@id/label_barrier" />
+
+        <!-- Barrier to align value texts -->
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/label_barrier"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:barrierDirection="end"
+            app:constraint_referenced_ids="date_time_text,action_text,target_text,user_text" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

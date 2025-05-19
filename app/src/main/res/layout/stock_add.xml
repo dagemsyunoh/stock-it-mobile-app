@@ -1,262 +1,270 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/card_view"
-    android:layout_width="wrap_content"
+    android:layout_width="320dp"
     android:layout_height="wrap_content"
-    app:cardCornerRadius="@dimen/card_radius"
-    app:cardElevation="@dimen/card_elevation"
-    app:cardMaxElevation="@dimen/card_elevation_maximum"
-    app:cardUseCompatPadding="false">
+    android:layout_margin="16dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="8dp"
+    app:cardUseCompatPadding="true">
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/back"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:padding="10dp"
-        android:src="@drawable/ic_close" />
-
-    <RelativeLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_gravity="center_vertical"
-        android:layout_margin="10dp"
-        android:gravity="center_vertical">
+        android:padding="16dp">
 
+        <!-- Close button -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/back"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:contentDescription="@string/back"
+            android:padding="8dp"
+            android:src="@drawable/ic_close"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.None" />
+
+        <!-- Header -->
         <TextView
             android:id="@+id/header"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
+            android:layout_marginEnd="8dp"
             android:gravity="center"
             android:text="@string/add_item_to_inventory"
+            android:textAllCaps="true"
+            android:textColor="?attr/colorOnSurface"
             android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/back"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <LinearLayout
-            android:id="@+id/content"
-            android:layout_width="match_parent"
+        <!-- Item Name Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/item_name_input_layout"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:layout_below="@+id/header"
-            android:orientation="vertical">
+            android:layout_marginTop="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/header">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/add_name"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="start|center_vertical"
+                android:hint="@string/item_name"
+                android:inputType="textCapSentences"
+                android:textSize="16sp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Item Size Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/item_size_input_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/item_name_input_layout">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/add_size"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="start|center_vertical"
+                android:hint="@string/item_size"
+                android:textSize="16sp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Quantity Label -->
+        <TextView
+            android:id="@+id/qty_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/stocks"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/item_size_input_layout" />
+
+        <!-- Quantity Row -->
+        <LinearLayout
+            android:id="@+id/qty_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/qty_label">
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/add_plus_one"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:contentDescription="@string/plus_one"
+                android:elevation="0dp"
+                android:src="@drawable/ic_add"
+                app:fabCustomSize="40dp" />
 
             <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="wrap_content"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="5dp"
-                android:layout_marginTop="5dp">
+                android:layout_marginHorizontal="8dp">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/add_name"
-                    android:layout_width="200dp"
-                    android:layout_height="55dp"
+                    android:id="@+id/add_qty"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:hint="@string/item_name"
-                    android:inputType="textCapSentences"
-                    android:textSize="15sp" />
+                    android:inputType="number"
+                    android:text="@string/zero"
+                    android:textSize="16sp" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="5dp"
-                android:layout_marginTop="5dp">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/add_size"
-                    android:layout_width="150dp"
-                    android:layout_height="55dp"
-                    android:gravity="center"
-                    android:hint="@string/item_size"
-                    android:textSize="15sp" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <LinearLayout
-                android:id="@+id/qty_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="5dp"
-                android:layout_marginTop="5dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/qty_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="55dp"
-                    android:layout_marginHorizontal="5dp"
-                    android:gravity="center"
-                    android:text="@string/stocks"
-                    android:textSize="15sp" />
-
-                <com.google.android.material.floatingactionbutton.FloatingActionButton
-                    android:id="@+id/add_plus_one"
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-                    android:layout_gravity="center"
-                    android:contentDescription="@string/plus_one"
-                    android:src="@drawable/ic_add"
-                    app:fabCustomSize="45dp" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content">
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/add_qty"
-                        android:layout_width="match_parent"
-                        android:layout_height="55dp"
-                        android:gravity="center"
-                        android:inputType="number"
-                        android:text="@string/zero"
-                        android:textSize="15sp" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.floatingactionbutton.FloatingActionButton
-                    android:id="@+id/add_minus_one"
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-                    android:layout_gravity="center"
-                    android:contentDescription="@string/minus_one"
-                    android:src="@drawable/ic_subtract"
-                    app:fabCustomSize="45dp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="5dp"
-                android:layout_marginTop="5dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="55dp"
-                    android:layout_marginHorizontal="5dp"
-                    android:gravity="center"
-                    android:text="@string/quantity_type"
-                    android:textSize="15sp" />
-
-                <RadioGroup
-                    android:id="@+id/add_qty_type"
-                    android:layout_width="wrap_content"
-                    android:layout_height="55dp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/pc"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="@string/pcs"
-                        android:textSize="15sp" />
-
-                    <RadioButton
-                        android:id="@+id/kg"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text="@string/kg"
-                        android:textSize="15sp" />
-
-                </RadioGroup>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/reg_price_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="5dp"
-                android:layout_marginTop="5dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/reg_price_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="55dp"
-                    android:layout_marginHorizontal="5dp"
-                    android:gravity="center"
-                    android:text="@string/reg_price"
-                    android:textSize="15sp" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="7dp"
-                    android:layout_marginBottom="10dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/add_reg_price"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:inputType="numberDecimal"
-                        android:text="@string/price_default"
-                        android:textSize="15sp"
-                        tools:ignore="DuplicateSpeakableTextCheck" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/dsc_price_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="5dp"
-                android:layout_marginTop="5dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/dsc_price_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="55dp"
-                    android:layout_marginHorizontal="5dp"
-                    android:gravity="center"
-                    android:text="@string/dsc_price"
-                    android:textSize="15sp" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/dsc_price_edit"
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="7dp"
-                    android:layout_marginBottom="10dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/add_dsc_price"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:inputType="numberDecimal"
-                        android:text="@string/price_default"
-                        android:textSize="15sp" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-            </LinearLayout>
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/add_minus_one"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:contentDescription="@string/minus_one"
+                android:elevation="0dp"
+                android:src="@drawable/ic_subtract"
+                app:fabCustomSize="40dp" />
 
         </LinearLayout>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/add_item"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_alignEnd="@id/content"
-            android:layout_below="@id/content"
-            android:layout_margin="10dp"
-            android:contentDescription="@string/add_item"
-            android:src="@drawable/ic_save"
-            app:fabCustomSize="48dp" />
+        <!-- Quantity Type Label -->
+        <TextView
+            android:id="@+id/qty_type_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/quantity_type"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/qty_layout" />
 
-    </RelativeLayout>
+        <!-- Quantity Type RadioGroup -->
+        <RadioGroup
+            android:id="@+id/add_qty_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/qty_type_label">
+
+            <RadioButton
+                android:id="@+id/pc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pcs"
+                android:textSize="14sp" />
+
+            <RadioButton
+                android:id="@+id/kg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/kg"
+                android:textSize="14sp" />
+
+        </RadioGroup>
+
+        <!-- Regular Price Label -->
+        <TextView
+            android:id="@+id/reg_price_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/reg_price"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@+id/dsc_price_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/add_qty_type" />
+
+        <!-- Regular Price Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/reg_price_input_layout"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/dsc_price_input_layout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/reg_price_label">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/add_reg_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:inputType="numberDecimal"
+                android:text="@string/price_default"
+                android:textSize="16sp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Discount Price Label -->
+        <TextView
+            android:id="@+id/dsc_price_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/dsc_price"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/reg_price_label"
+            app:layout_constraintTop_toBottomOf="@id/add_qty_type" />
+
+        <!-- Discount Price Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/dsc_price_input_layout"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/reg_price_input_layout"
+            app:layout_constraintTop_toBottomOf="@id/dsc_price_label">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/add_dsc_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:inputType="numberDecimal"
+                android:text="@string/price_default"
+                android:textSize="16sp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Add Button -->
+        <Button
+            android:id="@+id/add_item"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/add_item"
+            android:textAllCaps="true"
+            app:icon="@drawable/ic_save"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/dsc_price_input_layout" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>

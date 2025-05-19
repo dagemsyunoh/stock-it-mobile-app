@@ -6,18 +6,24 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
+    android:padding="24dp"
     tools:context=".LoaderActivity">
 
     <ProgressBar
         android:id="@+id/progress_bar"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:indeterminateTint="?attr/colorPrimary" />
+
     <TextView
         android:id="@+id/load"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="20dp"
+        android:layout_marginTop="24dp"
         android:text="@string/loading"
-        android:textSize="40sp" />
+        android:textAlignment="center"
+        android:textAppearance="?attr/textAppearanceHeadlineSmall"
+        android:textColor="?android:textColorPrimary"
+        android:textSize="28sp" />
 
 </LinearLayout>

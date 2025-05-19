@@ -147,16 +147,15 @@ public class InventoryFragment extends Fragment implements StockListeners {
         long now = System.currentTimeMillis();
         for (StockModel item : stockList) {
             String key = item.getItemName() + "_" + item.getItemSize();
+            // Stock replenished, remove timestamp to allow future notifications
             if (item.getItemQuantity() <= LOW_STOCK_THRESHOLD) {
                 long lastNotified = getNotificationTimestamp(key);
                 if (lastNotified == 0 || now - lastNotified >= NOTIFY_COOLDOWN) {
                     notifyLowStock(item);
                     saveNotificationTimestamp(key, now);
                 }
-            } else {
-                // Stock replenished, remove timestamp to allow future notifications
+            } else
                 getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().remove(PREFS_KEY_PREFIX + key).apply();
-            }
         }
     }
 

@@ -54,8 +54,9 @@ public class ManageCustomersActivity extends AppCompatActivity implements Custom
     private final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     private final Logger logger = new Logger();
     private final ArrayList<String> names = new ArrayList<>();
-    protected FloatingActionButton buttonAdd, addCustomer;
+    protected FloatingActionButton buttonAdd;
     protected ExtendedFloatingActionButton buttonBack;
+    protected Button addCustomer;
     protected AuthCredential credential;
     private RecyclerView recyclerView;
     private ArrayList<CustomerModel> customersList;

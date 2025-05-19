@@ -79,13 +79,11 @@ public class StockViewHolder extends StockBaseViewHolder {
 
         int originalCardColor = cardView.getCardBackgroundColor().getDefaultColor();
 
-        if (item.getItemQuantity() == 0) {
-            cardView.setForeground(new ColorDrawable(Color.parseColor("#80F44336")));
-        } else if (item.getItemQuantity() <= LOW_STOCK_THRESHOLD) {
-            cardView.setForeground(new ColorDrawable(Color.parseColor("#80FFC107")));
-        } else {
-            cardView.setForeground(null); // remove tint
-        }
+        if (item.getItemQuantity() == 0)
+            cardView.setForeground(new ColorDrawable(Color.parseColor("#33F44336")));
+        else if (item.getItemQuantity() <= LOW_STOCK_THRESHOLD)
+            cardView.setForeground(new ColorDrawable(Color.parseColor("#33FFC107")));
+        else cardView.setForeground(null);
         //endregion
         //region Swipe
         setSwipe(cardView, item.getState());

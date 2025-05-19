@@ -138,19 +138,33 @@ public class ReceiptViewHolder extends ReceiptBaseViewHolder {
         ArrayList<StockModel> stocks = ReceiptFragment.stockList;
         for (int i = 0; i < stocks.size(); i++)
             if (iName.equals(stocks.get(i).getItemName()) && iSize.equals(stocks.get(i).getItemSize())) flag = i;
-        if (item.getItemQtyType().equals("pcs"))
+        if (stocks.get(flag).getItemQuantity() == 0) {
+            Toast.makeText(cardView.getContext(), "This item is out of stock.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (item.getItemQtyType().equals("pcs")) {
             if (Double.parseDouble(itemQty.getText().toString()) % 1 != 0) {
                 Toast.makeText(cardView.getContext(), "This item cannot have decimal quantity", Toast.LENGTH_SHORT).show();
                 return;
             }
-        if (stocks.get(flag).getItemQuantity() == 0) {
-            Toast.makeText(cardView.getContext(), "This item is out of stock.", Toast.LENGTH_SHORT).show();
-            return;
-        } if (Double.parseDouble(itemQty.getText().toString()) + val > stocks.get(flag).getItemQuantity()) {
-            Toast.makeText(cardView.getContext(), "You've reached the maximum quantity.", Toast.LENGTH_SHORT).show();
-            return;
-        } if (Double.parseDouble(itemQty.getText().toString()) + val <= 0) {
+            if (Double.parseDouble(itemQty.getText().toString()) + val <= 0) {
+                Toast.makeText(cardView.getContext(), "You've reached the minimum quantity.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+        if (Double.parseDouble(itemQty.getText().toString()) + val <= 0) {
             Toast.makeText(cardView.getContext(), "You've reached the minimum quantity.", Toast.LENGTH_SHORT).show();
+            double min = 0.01;
+            itemQty.setText(String.valueOf(min));
+            changeValues(item, position);
+            return;
+        }
+        if (Double.parseDouble(itemQty.getText().toString()) + val > stocks.get(flag).getItemQuantity()) {
+            Toast.makeText(cardView.getContext(), "Not enough stock. Automatically set to maximum.", Toast.LENGTH_SHORT).show();
+            double iQty = stocks.get(flag).getItemQuantity();
+            if (iQty % 1 == 0) itemQty.setText(String.valueOf((int) iQty));
+            else itemQty.setText(String.valueOf(iQty));
+            changeValues(item, position);
             return;
         }
         QtyEditor.qtyEditor(itemQty, val);

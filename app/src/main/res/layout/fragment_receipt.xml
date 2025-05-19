@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ReceiptFragment">
@@ -14,23 +15,42 @@
         android:textSize="20sp"
         android:textStyle="bold" />
 
-    <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/discount_switch"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/discount"
         android:layout_width="wrap_content"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/receipt_title"
         android:layout_centerHorizontal="true"
-        android:layout_margin="5dp"
-        android:gravity="center"
-        android:text="@string/use_discounted_price"
-        android:textSize="20sp" />
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="?attr/colorSurface"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:strokeColor="?attr/colorOutline"
+        app:strokeWidth="1dp">
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/discount_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="@string/use_discounted_price"
+            android:textColor="?android:textColorPrimary"
+            android:textSize="16sp"
+            android:thumbTint="?attr/colorPrimary"
+            android:trackTint="?attr/colorPrimaryContainer" />
+
+    </com.google.android.material.card.MaterialCardView>
+
 
     <TextView
         android:id="@+id/no_item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/checkout_button"
-        android:layout_below="@+id/discount_switch"
+        android:layout_below="@+id/discount"
         android:gravity="center"
         android:text="@string/click_to_add"
         android:textSize="20sp" />
@@ -40,7 +60,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/checkout_button"
-        android:layout_below="@+id/discount_switch"
+        android:layout_below="@+id/discount"
         android:scrollbars="vertical"
         android:visibility="invisible"
         tools:listitem="@layout/receipt_item" />

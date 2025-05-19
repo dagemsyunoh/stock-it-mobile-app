@@ -4,4 +4,6 @@
     <color name="purple">#5D3FD3</color>
     <color name="red">#DC143C</color>
     <color name="white">#FFFFFF</color>
+    <color name="light_surface_variant">#F0F0F0</color>
+    <color name="dark_surface_variant">#1E1E1E</color>
 </resources>

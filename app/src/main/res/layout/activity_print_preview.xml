@@ -1,37 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:padding="16dp"
     tools:context=".PrintPreviewActivity">
 
     <TextView
         android:id="@+id/header"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="15dp"
         android:gravity="center"
         android:text="@string/receipt"
         android:textSize="20sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/printer_name"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/header"
-        android:layout_margin="15dp"
+        android:layout_marginTop="8dp"
         android:gravity="center"
         android:text="@string/no_printer_saved_click_to_find_printer"
-        android:textSize="15sp" />
+        android:textSize="15sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header" />
+
     <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/printer_name"
-        android:layout_margin="15dp"
-        android:backgroundTint="@color/design_default_color_background">
+        android:id="@+id/scroll_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:background="?attr/colorSurface"
+        android:padding="12dp"
+        app:layout_constraintBottom_toTopOf="@id/button_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/printer_name">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -42,6 +54,7 @@
                 android:id="@+id/print_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingBottom="8dp"
                 android:textAlignment="center"
                 android:textSize="15sp" />
 
@@ -49,6 +62,7 @@
                 android:id="@+id/print_body"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingBottom="8dp"
                 android:textSize="15sp" />
 
             <TextView
@@ -57,36 +71,44 @@
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
                 android:textSize="15sp" />
+
         </LinearLayout>
+
     </ScrollView>
+
     <LinearLayout
-        style="?android:attr/buttonBarStyle"
-        android:layout_width="match_parent"
+        android:id="@+id/button_bar"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/cancel_button"
-            style="?android:attr/radius"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:drawableEnd="@drawable/ic_close"
-            android:drawableTint="@color/design_default_color_background"
-            android:text="@string/cancel" />
+            android:layout_marginEnd="16dp"
+            android:text="@string/cancel"
+            app:icon="@drawable/ic_close"
+            app:iconGravity="textEnd"
+            app:iconPadding="8dp" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/print_button"
-            style="?android:attr/radius"
+            style="@style/Widget.MaterialComponents.Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:drawableEnd="@drawable/ic_save"
-            android:drawableTint="@color/design_default_color_background"
-            android:text="@string/save" />
+            android:text="@string/save"
+            app:icon="@drawable/ic_save"
+            app:iconGravity="textEnd"
+            app:iconPadding="8dp" />
 
     </LinearLayout>
 
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

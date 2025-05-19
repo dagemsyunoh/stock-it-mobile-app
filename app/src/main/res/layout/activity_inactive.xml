@@ -1,36 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical"
+    android:padding="24dp"
     tools:context=".InactiveActivity">
-    <TextView
-        android:id="@+id/inactive_text"
-        android:layout_width="wrap_content"
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/account_verify"
-        android:textAlignment="center"
-        android:textSize="20sp" />
-    <Button
-        android:id="@+id/resend_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:enabled="false"
-        android:text="@string/resend" />
-    <TextView
-        android:id="@+id/reload"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:text="@string/reloadV"
-        android:textAlignment="center" />
-    <Button
-        android:id="@+id/sign_out_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/sign_out" />
-</LinearLayout>
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <!-- Status Message -->
+        <TextView
+            android:id="@+id/inactive_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="24dp"
+            android:text="@string/account_verify"
+            android:textAlignment="center"
+            android:textAppearance="?attr/textAppearanceHeadlineSmall" />
+
+        <!-- Resend Verification -->
+        <Button
+            android:id="@+id/resend_button"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:enabled="false"
+            android:text="@string/resend" />
+
+        <!-- Reload Prompt -->
+        <TextView
+            android:id="@+id/reload"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="@string/reloadV"
+            android:textAlignment="center"
+            android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+        <!-- Sign Out Button -->
+        <Button
+            android:id="@+id/sign_out_button"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="?attr/colorError"
+            android:text="@string/sign_out"
+            android:textColor="?attr/colorOnError" />
+
+    </LinearLayout>
+
+</ScrollView>

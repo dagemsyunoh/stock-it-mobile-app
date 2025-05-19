@@ -63,7 +63,8 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private final CollectionReference customerRef = storeRef.collection("customers");
     public static final ArrayList<StockModel> stockList = new ArrayList<>();
     protected RecyclerView recyclerView;
-    protected FloatingActionButton addButton, checkoutButton, saveButton, plusOne, minusOne;
+    protected FloatingActionButton addButton, checkoutButton, plusOne, minusOne;
+    Button saveButton;
     private NumberPicker itemName, itemSize;
     private TextInputEditText itemQty;
     private TextView title, itemUnitPrice, itemTotalPrice, noItem, grandTotalPrice;
@@ -206,8 +207,8 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
         itemName = addPopUp.findViewById(R.id.add_name);
         itemSize = addPopUp.findViewById(R.id.add_size);
         itemQty = addPopUp.findViewById(R.id.add_qty);
-        itemUnitPrice = addPopUp.findViewById(R.id.unit_price_val_text);
-        itemTotalPrice = addPopUp.findViewById(R.id.total_price_val_text);
+        itemUnitPrice = addPopUp.findViewById(R.id.unit_price_value);
+        itemTotalPrice = addPopUp.findViewById(R.id.total_price_value);
         AppCompatImageView back = addPopUp.findViewById(R.id.back);
         plusOne = addPopUp.findViewById(R.id.add_plus_one);
         minusOne = addPopUp.findViewById(R.id.add_minus_one);
@@ -383,20 +384,32 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
             Toast.makeText(getActivity(), "Please enter quantity.", Toast.LENGTH_SHORT).show();
             return;
         } checkNameSize();
-        if (stockList.get(flag).getItemQtyType().equals("pcs"))
+        if (stockList.get(flag).getItemQuantity() == 0) {
+            Toast.makeText(getActivity(), "This item is out of stock.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (stockList.get(flag).getItemQtyType().equals("pcs")) {
             if (Double.parseDouble(itemQty.getText().toString()) % 1 != 0) {
                 Toast.makeText(getActivity(), "This item cannot have decimal quantity", Toast.LENGTH_SHORT).show();
                 return;
             }
-        if (stockList.get(flag).getItemQuantity() == 0) {
-            Toast.makeText(getActivity(), "This item is out of stock.", Toast.LENGTH_SHORT).show();
+            if (Double.parseDouble(itemQty.getText().toString()) + val <= 0) {
+                Toast.makeText(getActivity(), "You've reached the minimum quantity.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+        if (Double.parseDouble(itemQty.getText().toString()) + val <= 0) {
+            Toast.makeText(getActivity(), "You've reached the minimum quantity.", Toast.LENGTH_SHORT).show();
+            double min = 0.01;
+            itemQty.setText(String.valueOf(min));
+            setItemText();
             return;
         } if (Double.parseDouble(itemQty.getText().toString()) + val > stockList.get(flag).getItemQuantity()) {
             Toast.makeText(getActivity(), "Not enough stock. Automatically set to maximum.", Toast.LENGTH_SHORT).show();
-            itemQty.setText(String.valueOf(stockList.get(flag).getItemQuantity()));
-            return;
-        } if (Double.parseDouble(itemQty.getText().toString()) + val <= 0) {
-            Toast.makeText(getActivity(), "You've reached the minimum quantity.", Toast.LENGTH_SHORT).show();
+            double iQty = stockList.get(flag).getItemQuantity();
+            if (iQty % 1 == 0) itemQty.setText(String.valueOf((int) iQty));
+            else itemQty.setText(String.valueOf(iQty));
+            setItemText();
             return;
         }
         editQty(val);

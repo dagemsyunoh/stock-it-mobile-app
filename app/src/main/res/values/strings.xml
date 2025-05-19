@@ -103,4 +103,8 @@
     <string name="add_customer">Add Customer</string>
     <string name="account">Account</string>
     <string name="admin_tools">Admin Tools</string>
+    <string name="customer_name">Customer Name</string>
+    <string name="device_name">Device Name</string>
+    <string name="_00_11_22_33_44_55">00:11:22:33:44:55</string>
+    <string name="warning">Warning</string>
 </resources>
