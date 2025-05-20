@@ -18,9 +18,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
+            android:paddingVertical="16dp"
             android:text="@string/user"
+            android:textAlignment="center"
             android:textAppearance="?attr/textAppearanceHeadlineSmall"
-            android:textColor="?android:textColorPrimary" />
+            android:textColor="?android:textColorPrimary"
+            android:textStyle="bold" />
 
         <!-- Account Section Header -->
         <TextView

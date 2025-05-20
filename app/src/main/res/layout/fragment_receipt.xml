@@ -12,7 +12,9 @@
         android:layout_height="wrap_content"
         android:layout_marginVertical="20dp"
         android:gravity="top|center_horizontal"
-        android:textSize="20sp"
+        android:paddingVertical="16dp"
+        android:textAlignment="center"
+        android:textAppearance="?attr/textAppearanceHeadlineMedium"
         android:textStyle="bold" />
 
     <com.google.android.material.card.MaterialCardView
