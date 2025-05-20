@@ -194,15 +194,25 @@ public class HomeFragment extends Fragment {
         TextView targetText = dialog.findViewById(R.id.target_text);
         TextView userText = dialog.findViewById(R.id.user_text);
 
-        String newDateTime = dateTimeText.getText() + ":\t\t" + dateTime;
-        String newAction = actionText.getText() + ":\t\t" + action;
-        String newTarget = targetText.getText() + ":\t\t" + target;
-        String newUser = userText.getText() + ":\t\t" + user;
+        String newDateTime = dateTimeText.getText() + ":";
+        String newAction = actionText.getText() + ":";
+        String newTarget = targetText.getText() + ":";
+        String newUser = userText.getText() + ":";
 
         dateTimeText.setText(newDateTime);
         actionText.setText(newAction);
         targetText.setText(newTarget);
         userText.setText(newUser);
+
+        TextView dateTimeVal = dialog.findViewById(R.id.date_time_val);
+        TextView actionVal = dialog.findViewById(R.id.action_val);
+        TextView targetVal = dialog.findViewById(R.id.target_val);
+        TextView userVal = dialog.findViewById(R.id.user_val);
+
+        dateTimeVal.setText(dateTime);
+        actionVal.setText(action);
+        targetVal.setText(target);
+        userVal.setText(user);
     }
 
     private void initializeReceiptLog() {
@@ -310,19 +320,19 @@ public class HomeFragment extends Fragment {
         changeText.setText(newChange);
         itemsText.setText(newItems);
 
-        TextView dateTimeValText = dialog.findViewById(R.id.date_time_val_text);
-        TextView amountRenderedValText = dialog.findViewById(R.id.amount_rendered_val_text);
-        TextView totalValText = dialog.findViewById(R.id.total_val_text);
-        TextView changeValText = dialog.findViewById(R.id.change_val_text);
-        TextView itemsValText = dialog.findViewById(R.id.items_val_text);
+        TextView dateTimeVal = dialog.findViewById(R.id.date_time_val);
+        TextView amountRenderedVal = dialog.findViewById(R.id.amount_rendered_val);
+        TextView totalVal = dialog.findViewById(R.id.total_val);
+        TextView changeVal = dialog.findViewById(R.id.change_val);
+        TextView itemsVal = dialog.findViewById(R.id.items_val);
 
         String newItemsText = items.replaceAll("\t@", "\n@");
 
-        dateTimeValText.setText(dateTime);
-        amountRenderedValText.setText(amountRendered);
-        totalValText.setText(total);
-        changeValText.setText(change);
-        itemsValText.setText(newItemsText);
+        dateTimeVal.setText(dateTime);
+        amountRenderedVal.setText(amountRendered);
+        totalVal.setText(total);
+        changeVal.setText(change);
+        itemsVal.setText(newItemsText);
     }
 
     private void addTextViewToRow(TableRow tableRow, String text,int gravity, int typeface) {
