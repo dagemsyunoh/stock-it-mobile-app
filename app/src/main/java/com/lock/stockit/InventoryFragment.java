@@ -15,6 +15,7 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -48,7 +49,8 @@ public class InventoryFragment extends Fragment implements StockListeners {
 
     protected final CollectionReference stockRef = FirebaseFirestore.getInstance().collection("stores").document(LoaderActivity.sid).collection("stocks");
     protected RecyclerView recyclerView;
-    protected FloatingActionButton addButton, addItem, plusOne, minusOne;
+    protected FloatingActionButton addButton, plusOne, minusOne;
+    protected Button addItem;
     protected SearchView searchView;
     private TextView noResult;
     private ArrayList<StockModel> stockList;

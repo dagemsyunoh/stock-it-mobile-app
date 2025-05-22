@@ -121,7 +121,8 @@ public class SignUpActivity extends AppCompatActivity implements FirebaseAuth.Au
         data.put("activated", false);
         data.put("admin", false);
         data.put("email", email);
-        data.put("store", null);
+        data.put("name", "");
+        data.put("store", "");
         docRef.set(data);
         logger.setUserLog("create", email, email);
     }

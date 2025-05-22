@@ -33,7 +33,7 @@ import com.lock.stockit.Adapters.ViewPagerAdapter;
 public class MainActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener {
 
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
-    private final DocumentReference docRef = FirebaseFirestore.getInstance().collection("users").document(auth.getUid());
+    private final DocumentReference userRef = FirebaseFirestore.getInstance().collection("users").document(auth.getUid());
     protected ViewPager2 viewPager2;
     protected ViewPagerAdapter viewPagerAdapter;
     protected BottomNavigationView bottomNavigationView;
@@ -207,6 +207,7 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
         buttonEnter.setOnClickListener(v -> {
             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder().setDisplayName(inputName.getText().toString()).build();
             auth.getCurrentUser().updateProfile(profileUpdates);
+            userRef.update("name", inputName.getText().toString());
             nameDialog.dismiss();
         });
     }
@@ -215,7 +216,7 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
     protected void onStart() {
         super.onStart();
         checkName();
-        docRef.get().addOnSuccessListener(doc -> LoaderActivity.admin = Boolean.TRUE.equals(doc.getBoolean("admin")))
+        userRef.get().addOnSuccessListener(doc -> LoaderActivity.admin = Boolean.TRUE.equals(doc.getBoolean("admin")))
                 .addOnFailureListener(e -> LoaderActivity.admin = false)
                 .addOnCompleteListener(task -> bottomNavigationView.getMenu().findItem(R.id.inventory).setVisible(LoaderActivity.admin));
         auth.addAuthStateListener(this);

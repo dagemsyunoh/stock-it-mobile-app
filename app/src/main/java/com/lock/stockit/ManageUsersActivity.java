@@ -95,7 +95,8 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
             if (error != null || value == null) return;
             usersList.clear();
 
-            for (DocumentSnapshot doc : value.getDocuments()) if (doc.getString("store").equals(sid) || doc.getString("store").isEmpty())
+            for (DocumentSnapshot doc : value.getDocuments())
+                if (doc.getString("store").equals(sid) || doc.getString("store").isEmpty())
                     usersList.add(new UserModel(doc.getString("name"),
                             doc.getString("email"),
                             Boolean.TRUE.equals(doc.getBoolean("admin")),
