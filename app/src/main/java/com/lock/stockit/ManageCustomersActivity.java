@@ -120,26 +120,26 @@ public class ManageCustomersActivity extends AppCompatActivity implements Custom
             data.put("transactions", 0);
 
             if (data.get("name").toString().isEmpty()) {
-                Toast.makeText(this, "Invalid input", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Invalid input.", Toast.LENGTH_SHORT).show();
                 return;
             }
             if (exists(data)) {
-                Toast.makeText(this, "Customer already exists. Please edit the existing item instead", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Customer already exists.", Toast.LENGTH_SHORT).show();
                 addPopUp.dismiss();
                 return;
             }
 
             customerRef.add(data).addOnSuccessListener(documentReference -> {
-                Toast.makeText(this, "Item added", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Customer added.", Toast.LENGTH_SHORT).show();
                 addPopUp.dismiss();
-            }).addOnFailureListener(e -> Toast.makeText(this, "Error adding item", Toast.LENGTH_SHORT).show());
+            }).addOnFailureListener(e -> Toast.makeText(this, "Error adding customer.", Toast.LENGTH_SHORT).show());
         });
 
         back.setOnClickListener(v -> addPopUp.cancel());
     }
 
     private boolean exists(HashMap<String, Object> data) {
-        for (String n : names) if (n.equals(data.get("item name").toString())) return true;
+        for (String n : names) if (n.equals(data.get("name").toString())) return true;
         return false;
     }
 

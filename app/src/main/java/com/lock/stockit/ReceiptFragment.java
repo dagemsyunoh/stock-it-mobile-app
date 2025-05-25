@@ -143,7 +143,7 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
         customerRef.addSnapshotListener((value, error) -> {
             if (error != null || value == null) return;
             for (DocumentSnapshot documentSnapshot : value.getDocuments())
-                customerList.add(documentSnapshot.getId());
+                customerList.add(documentSnapshot.getString("name"));
         });
     }
 
