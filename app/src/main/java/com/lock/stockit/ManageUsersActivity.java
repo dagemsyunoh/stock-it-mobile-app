@@ -94,7 +94,6 @@ public class ManageUsersActivity extends AppCompatActivity implements UserListen
         userRef.addSnapshotListener((value, error) -> {
             if (error != null || value == null) return;
             usersList.clear();
-
             for (DocumentSnapshot doc : value.getDocuments())
                 if (doc.getString("store").equals(sid) || doc.getString("store").isEmpty())
                     usersList.add(new UserModel(doc.getString("name"),
