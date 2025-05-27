@@ -231,23 +231,9 @@ public class InventoryFragment extends Fragment implements StockListeners {
         minusOne = addPopUp.findViewById(R.id.add_minus_one);
         addItem = addPopUp.findViewById(R.id.add_item);
 
-        itemName.setOnFocusChangeListener((view, b) -> {
-            String input = String.valueOf(itemName.getText());
-            if (input.isEmpty()) return;
-            String[] words = input.split("\\s");
-            StringBuilder output = new StringBuilder();
-            for (String word : words)
-                output.append(Character.toUpperCase(word.charAt(0)))
-                        .append(word.substring(1).toLowerCase())
-                        .append(" ");
-            itemName.setText(output.toString().trim());
-        });
+        itemName.setOnFocusChangeListener((view, b) -> setItemName(itemName));
 
-        itemSize.setOnFocusChangeListener((view, b) -> {
-            String input = String.valueOf(itemSize.getText());
-            String output = input.replaceAll("\\s+", "").toLowerCase();
-            itemSize.setText(output);
-        });
+        itemSize.setOnFocusChangeListener((view, b) -> setItemSize(itemSize));
 
         plusOne.setOnClickListener(view -> QtyEditor.qtyEditor(itemQty, 1));
 
@@ -258,6 +244,8 @@ public class InventoryFragment extends Fragment implements StockListeners {
         });
 
         addItem.setOnClickListener(view -> {
+            setItemName(itemName);
+            setItemSize(itemSize);
             int selectedId = itemQtyType.getCheckedRadioButtonId();
             RadioButton selectedQtyType = addPopUp.findViewById(selectedId);
             HashMap<String, Object> data = new HashMap<>();
@@ -284,6 +272,24 @@ public class InventoryFragment extends Fragment implements StockListeners {
         });
 
         back.setOnClickListener(v -> addPopUp.cancel());
+    }
+
+    private void setItemName(TextInputEditText itemName) {
+        String input = String.valueOf(itemName.getText());
+        if (input.isEmpty()) return;
+        String[] words = input.split("\\s");
+        StringBuilder output = new StringBuilder();
+        for (String word : words)
+            output.append(Character.toUpperCase(word.charAt(0)))
+                    .append(word.substring(1).toLowerCase())
+                    .append(" ");
+        itemName.setText(output.toString().trim());
+    }
+
+    private void setItemSize(TextInputEditText itemSize) {
+        String input = String.valueOf(itemSize.getText());
+        String output = input.replaceAll("\\s+", "").toLowerCase();
+        itemSize.setText(output);
     }
 
     private boolean isInvalid(HashMap<String, Object> data) {
