@@ -162,7 +162,7 @@ public class StockViewHolder extends StockBaseViewHolder {
             colRef.document(task.getResult().getDocuments().get(0).getId()).update(
                     "qty",
                     Double.parseDouble(qty.getText().toString()),
-                    "price",
+                    "reg price",
                     Double.parseDouble(regPrice.getText().toString()),
                     "dsc price",
                     Double.parseDouble(dscPrice.getText().toString()));
