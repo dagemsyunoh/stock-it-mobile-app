@@ -121,8 +121,7 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
         receiptList = getIntent().getExtras().getParcelableArrayList("receiptList");
         invoice = getIntent().getExtras().getString("invoice");
         cash = getIntent().getExtras().getDouble("cash");
-        if (getIntent().getExtras().containsKey("customer"))
-            customer = getIntent().getExtras().getString("customer");
+        customer = getIntent().getExtras().getString("customer");
 
         getHeaderBodyFooter();
         setHeaderBodyFooter();
@@ -444,18 +443,16 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
     }
 
     private void addCustomerReceipt() {
-        customerRef.document(customer).get().addOnSuccessListener(documentSnapshot -> {
+        customerRef.whereEqualTo("name", customer).get().addOnSuccessListener(queryDocumentSnapshots -> {
             int transactions = 1;
-            if (documentSnapshot.getDouble("transactions") != null)
-                transactions = documentSnapshot.getDouble("transactions").intValue() + 1;
+            if (queryDocumentSnapshots.getDocuments().get(0).getDouble("transactions") != null)
+                transactions = queryDocumentSnapshots.getDocuments().get(0).getDouble("transactions").intValue() + 1;
             Map<String, Object> customerMap = new HashMap<>();
             customerMap.put("transactions", transactions);
             customerMap.put("transaction #" + transactions, invoice);
             customerRef.document(customer).update(customerMap);
         });
     }
-
-
 
     @Override
     protected void onDestroy() {
@@ -471,10 +468,6 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
             Log.e("TAG", "checkSocket ", e);
         }
     }
-
-
-
-
 
     private void closeSocket(BluetoothSocket nOpenSocket) {
         try {
