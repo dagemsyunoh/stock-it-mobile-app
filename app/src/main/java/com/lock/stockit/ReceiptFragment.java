@@ -70,7 +70,7 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     private TextView title, itemUnitPrice, itemTotalPrice, noItem, grandTotalPrice;
     private LinearLayout grandTotalLayout;
     private ReceiptAdapter adapter;
-    private final ArrayList<String> customerList = new ArrayList<>();
+    private static final ArrayList<String> customerList = new ArrayList<>();
     private final ArrayList<String> namesUnique = new ArrayList<>();
     private final ArrayList<String> sizesUnique = new ArrayList<>();
     private final ArrayList<Double> grandTotal = new ArrayList<>();
@@ -142,6 +142,7 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
     private void fetchCustomerData() {
         customerRef.addSnapshotListener((value, error) -> {
             if (error != null || value == null) return;
+            customerList.clear();
             for (DocumentSnapshot documentSnapshot : value.getDocuments())
                 customerList.add(documentSnapshot.getString("name"));
         });
@@ -290,12 +291,11 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
             picker.setMaxValue(customerList.size() - 1);
             picker.setDisplayedValues(customerList.toArray(new String[0]));
 
-            String value = customerList.get(picker.getValue());
-
             Button buttonCancel = discountDialog.findViewById(R.id.cancel_button);
             Button buttonOk = discountDialog.findViewById(R.id.ok_button);
             buttonCancel.setOnClickListener(v -> discountDialog.dismiss());
             buttonOk.setOnClickListener(v -> {
+                String value = customerList.get(picker.getValue());
                 i.putExtra("customer", value);
                 discountDialog.dismiss();
                 inputDialog.show();
