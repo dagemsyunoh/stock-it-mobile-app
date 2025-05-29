@@ -444,13 +444,15 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
 
     private void addCustomerReceipt() {
         customerRef.whereEqualTo("name", customer).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            if (queryDocumentSnapshots.isEmpty()) return;
+            String cid = queryDocumentSnapshots.getDocuments().get(0).getId();
             int transactions = 1;
-            if (queryDocumentSnapshots.getDocuments().get(0).getDouble("transactions") != null)
+            if (queryDocumentSnapshots.getDocuments().get(0).getDouble("transactions") != 0)
                 transactions = queryDocumentSnapshots.getDocuments().get(0).getDouble("transactions").intValue() + 1;
             Map<String, Object> customerMap = new HashMap<>();
             customerMap.put("transactions", transactions);
             customerMap.put("transaction #" + transactions, invoice);
-            customerRef.document(customer).update(customerMap);
+            customerRef.document(cid).update(customerMap);
         });
     }
 

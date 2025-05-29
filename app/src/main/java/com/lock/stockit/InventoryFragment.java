@@ -157,7 +157,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
                     saveNotificationTimestamp(key, now);
                 }
             } else
-                getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().remove(PREFS_KEY_PREFIX + key).apply();
+                requireActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().remove(PREFS_KEY_PREFIX + key).apply();
         }
     }
 

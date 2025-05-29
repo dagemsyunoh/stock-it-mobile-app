@@ -116,7 +116,7 @@ public class ManageCustomersActivity extends AppCompatActivity implements Custom
 
         addCustomer.setOnClickListener(view -> {
             HashMap<String, Object> data = new HashMap<>();
-            data.put("name", customerName.getText().toString());
+            data.put("name", customerName.getText().toString().toUpperCase());
             data.put("transactions", 0);
 
             if (data.get("name").toString().isEmpty()) {
