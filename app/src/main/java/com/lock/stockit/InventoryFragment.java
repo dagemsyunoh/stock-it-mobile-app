@@ -184,7 +184,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
         // Use item hashcode as notification ID to prevent duplication
         int notificationId = item.hashCode();
         Intent intent = new Intent(getActivity(), MainActivity.class);
-// Key to identify inventory tab
+        // Key to identify inventory tab
         intent.putExtra("open_tab", "inventory");
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
