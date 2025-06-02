@@ -15,6 +15,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.fragment.app.Fragment;
 
@@ -26,10 +27,13 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -215,17 +219,35 @@ public class HomeFragment extends Fragment {
         userVal.setText(user);
     }
 
+    @NonNull
+    private static List<DocumentSnapshot> getDocuments(Task<QuerySnapshot> task) {
+        List<DocumentSnapshot> documents = task.getResult().getDocuments();
+        documents.sort((doc1, doc2) -> {
+            String dateTime1 = doc1.getString("date-time");
+            String dateTime2 = doc2.getString("date-time");
+            // Compare date-time descending (newest first)
+            int dateCompare = dateTime2.compareTo(dateTime1);
+            if (dateCompare != 0) return dateCompare;
+            // If same date, compare invoice no ascending
+            String invoice1 = doc1.getString("invoice no");
+            String invoice2 = doc2.getString("invoice no");
+            return invoice2.compareTo(invoice1);
+        });
+        return documents;
+    }
+
     private void initializeReceiptLog() {
         receiptTable.removeAllViews();
         dateList.clear();
         salesList.clear();
         max = 0;
 
-        receiptRef.orderBy("invoice no", Query.Direction.DESCENDING).get().addOnCompleteListener(task -> {
+        receiptRef.get().addOnCompleteListener(task -> {
             if (!task.isSuccessful() || task.getResult().size() < 2) {
                 receiptLogLayout.setVisibility(View.GONE);
                 return;
             }
+            List<DocumentSnapshot> documents = getDocuments(task);
             receiptLogLayout.setVisibility(View.VISIBLE);
             getReceiptTableRow("Invoice #",
                     "Date & Time",
@@ -235,7 +257,7 @@ public class HomeFragment extends Fragment {
                     "Change",
                     Gravity.CENTER,
                     Typeface.BOLD);
-            if (task.getResult().size() > 1) {
+            if (documents.size() > 1) {
                 String startDate = task.getResult().getDocuments().get(task.getResult().size() - 1).getString("date-time").split(" ")[0];
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                 String endDate = LocalDate.now().toString();
@@ -250,7 +272,7 @@ public class HomeFragment extends Fragment {
                     salesList.add((double) 0);
                 }
             }
-            for (var document : task.getResult()) {
+            for (var document : documents) {
                 if (document.getString("invoice no").equals("INVOICE #0")) continue;
                 String date = document.getString("date-time").split(" ")[0];
 
