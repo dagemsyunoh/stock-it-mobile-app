@@ -1,6 +1,10 @@
 package com.lock.stockit;
 
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
+
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
@@ -10,11 +14,15 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.fragment.app.Fragment;
 
@@ -27,6 +35,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
@@ -53,6 +62,13 @@ public class HomeFragment extends Fragment {
     private LinearLayout userLogLayout, receiptLogLayout;
     private ListenerRegistration receiptListenerRegistration;
     private ListenerRegistration userLogListenerRegistration;
+
+    ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if (result.getResultCode() == RESULT_OK)
+            Toast.makeText(getActivity(), "Print successful", Toast.LENGTH_SHORT).show();
+        else if (result.getResultCode() == RESULT_CANCELED)
+            Toast.makeText(getActivity(), "Print cancelled", Toast.LENGTH_SHORT).show();
+    });
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -82,8 +98,8 @@ public class HomeFragment extends Fragment {
     }
 
     private void startListening() {
-            receiptListenerRegistration = userRef
-                    .orderBy("invoice no", Query.Direction.DESCENDING) // Should this be "date-time" for user logs?
+        receiptListenerRegistration = receiptRef
+                .orderBy("invoice no", Query.Direction.DESCENDING)
                     .addSnapshotListener((snapshots, e) -> {
                         if (e != null) {
                             Log.w("HomeFragment", "User log listener error", e);
@@ -92,9 +108,8 @@ public class HomeFragment extends Fragment {
                         initializeUserLog();
                     });
 
-            // Listener for receiptRef (you named it userLogListener, might be a typo)
-            userLogListenerRegistration = receiptRef
-                    .orderBy("date-time", Query.Direction.DESCENDING) // Should this be "invoice no" for receipts?
+        userLogListenerRegistration = userRef
+                .orderBy("date-time", Query.Direction.DESCENDING)
                     .addSnapshotListener((snapshots, e) -> {
                         if (e != null) {
                             Log.w("HomeFragment", "Receipt log listener error", e);
@@ -226,6 +241,8 @@ public class HomeFragment extends Fragment {
                 receiptLogLayout.setVisibility(View.GONE);
                 return;
             }
+            List<DocumentSnapshot> documents = task.getResult().getDocuments();
+            documents.sort((a, b) -> b.getString("date-time").compareTo(a.getString("date-time")));
             receiptLogLayout.setVisibility(View.VISIBLE);
             getReceiptTableRow("Invoice #",
                     "Date & Time",
@@ -233,6 +250,7 @@ public class HomeFragment extends Fragment {
                     "Amount Rendered\nCash",
                     "Total Price",
                     "Change",
+                    "Customer",
                     Gravity.CENTER,
                     Typeface.BOLD);
             if (task.getResult().size() > 1) {
@@ -250,9 +268,12 @@ public class HomeFragment extends Fragment {
                     salesList.add((double) 0);
                 }
             }
-            for (var document : task.getResult()) {
+            for (var document : documents) {
                 if (document.getString("invoice no").equals("INVOICE #0")) continue;
                 String date = document.getString("date-time").split(" ")[0];
+                String customer = "";
+                if (document.getString("customer") != null)
+                    customer = document.getString("customer");
 
                 if (dateList.contains(date)) {
                     double dailyTotal = salesList.get(dateList.indexOf(date)) + document.getDouble("total");
@@ -270,13 +291,14 @@ public class HomeFragment extends Fragment {
                         "PHP " + df.format(document.getDouble("amount rendered cash")),
                         "PHP " + df.format(document.getDouble("total")),
                         "PHP " + df.format(document.getDouble("amount rendered cash") - document.getDouble("total")),
+                        customer,
                         Gravity.START, Typeface.NORMAL);
             }
             setChart();
         });
     }
 
-    private void getReceiptTableRow(String invoiceNo, String dateTime, String items, String amountRendered, String total, String change, int gravity, int typeface) {
+    private void getReceiptTableRow(String invoiceNo, String dateTime, String items, String amountRendered, String total, String change, String customer, int gravity, int typeface) {
         TableRow tableRow = new TableRow(getActivity());
         tableRow.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT));
 
@@ -286,41 +308,47 @@ public class HomeFragment extends Fragment {
         addTextViewToRow(tableRow, amountRendered, Gravity.CENTER, typeface);
         addTextViewToRow(tableRow, total, Gravity.CENTER, typeface);
         addTextViewToRow(tableRow, change, Gravity.CENTER, typeface);
+        addTextViewToRow(tableRow, customer, Gravity.CENTER, typeface);
 
-        if (typeface == Typeface.NORMAL) tableRow.setOnClickListener(v -> showReceiptDialog(invoiceNo, dateTime, items, amountRendered, total, change));
+        if (typeface == Typeface.NORMAL)
+            tableRow.setOnClickListener(v -> showReceiptDialog(invoiceNo, dateTime, items, amountRendered, total, change, customer));
         receiptTable.addView(tableRow, new  TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT));
     }
 
-    private void showReceiptDialog(String invoiceNo, String dateTime, String items, String amountRendered, String total, String change) {
+    private void showReceiptDialog(String invoiceNo, String dateTime, String items, String amountRendered, String total, String change, String customer) {
         Dialog dialog = new Dialog(getActivity());
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.setContentView(R.layout.receipt_log_box);
         dialog.show();
         AppCompatImageView back = dialog.findViewById(R.id.back);
-        back.setOnClickListener(v1 -> dialog.dismiss());
+        Button reprint = dialog.findViewById(R.id.reprint_button);
 
         TextView header = dialog.findViewById(R.id.header);
         header.setText(invoiceNo);
 
         TextView dateTimeText = dialog.findViewById(R.id.date_time_text);
+        TextView customerText = dialog.findViewById(R.id.customer_text);
         TextView amountRenderedText = dialog.findViewById(R.id.amount_rendered_text);
         TextView totalText = dialog.findViewById(R.id.total_text);
         TextView changeText = dialog.findViewById(R.id.change_text);
         TextView itemsText = dialog.findViewById(R.id.items_text);
 
         String newDateTime = dateTimeText.getText() + ":";
+        String newCustomer = customerText.getText() + ":";
         String newAmountRendered = amountRenderedText.getText() + ":";
         String newTotal = totalText.getText() + ":";
         String newChange = changeText.getText() + ":";
         String newItems = itemsText.getText() + ":";
 
         dateTimeText.setText(newDateTime);
+        customerText.setText(newCustomer);
         amountRenderedText.setText(newAmountRendered);
         totalText.setText(newTotal);
         changeText.setText(newChange);
         itemsText.setText(newItems);
 
         TextView dateTimeVal = dialog.findViewById(R.id.date_time_val);
+        TextView customerVal = dialog.findViewById(R.id.customer_val);
         TextView amountRenderedVal = dialog.findViewById(R.id.amount_rendered_val);
         TextView totalVal = dialog.findViewById(R.id.total_val);
         TextView changeVal = dialog.findViewById(R.id.change_val);
@@ -329,10 +357,24 @@ public class HomeFragment extends Fragment {
         String newItemsText = items.replaceAll("\t@", "\n@");
 
         dateTimeVal.setText(dateTime);
+        customerVal.setText(customer);
         amountRenderedVal.setText(amountRendered);
         totalVal.setText(total);
         changeVal.setText(change);
         itemsVal.setText(newItemsText);
+
+        back.setOnClickListener(v1 -> dialog.dismiss());
+        reprint.setOnClickListener(v1 -> printPreview(invoiceNo, dateTime, amountRendered, items, customer));
+    }
+
+    private void printPreview(String invoiceNo, String dateTime, String amountRendered, String items, String customer) {
+        Intent i = new Intent(getActivity(), PrintPreviewActivity.class);
+        i.putExtra("invoice", invoiceNo);
+        i.putExtra("date-time", dateTime);
+        i.putExtra("cash", Double.valueOf(amountRendered.replace("PHP ", "")));
+        i.putExtra("items", items);
+        i.putExtra("customer", customer);
+        printLauncher.launch(i);
     }
 
     private void addTextViewToRow(TableRow tableRow, String text,int gravity, int typeface) {

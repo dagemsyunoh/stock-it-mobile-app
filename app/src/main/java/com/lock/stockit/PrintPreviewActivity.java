@@ -48,6 +48,7 @@ import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -73,7 +74,7 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
     private TextView printerName, printHeader, printBody, printFooter;
     private AlertDialog dialog;
     private OutputStream os;
-    private double cash, total;
+    private double cash, total, unitPrice;
     private Button printButton;
     private BluetoothAdapter btAdapter;
     private BluetoothSocket btSocket;
@@ -118,10 +119,52 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
         printFooter = findViewById(R.id.print_footer);
         Button cancelButton = findViewById(R.id.cancel_button);
         printButton = findViewById(R.id.print_button);
-        receiptList = getIntent().getExtras().getParcelableArrayList("receiptList");
+        receiptList = new ArrayList<>();
+
         invoice = getIntent().getExtras().getString("invoice");
         cash = getIntent().getExtras().getDouble("cash");
         customer = getIntent().getExtras().getString("customer");
+
+        if (getIntent().getExtras().containsKey("items")) {
+            String items = getIntent().getExtras().getString("items");
+            String[] lines = items.split("\\n");
+            String price;
+            if (customer != null && !customer.isEmpty()) price = "dsc price";
+            else price = "reg price";
+
+            for (String line : lines) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
+
+                String[] parts = line.split("@");
+                if (parts.length != 2) continue;
+
+                // Parse left part: itemName + itemSize
+                String leftPart = parts[0].trim();
+                String[] leftWords = leftPart.split("\\s+");
+                if (leftWords.length < 2) continue;
+
+                String iSize = leftWords[leftWords.length - 1]; // last word = item size
+                String iName = String.join(" ", Arrays.copyOfRange(leftWords, 0, leftWords.length - 1)); // rest = name
+
+                // Parse right part: quantity and qtyType
+                String[] qtyParts = parts[1].trim().split("\\s+");
+                if (qtyParts.length < 2) continue;
+
+                double iQty = Double.parseDouble(qtyParts[0]);
+                String iQtyType = qtyParts[1];
+                stockRef.whereEqualTo("item name", iName).whereEqualTo("item size", iSize).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (queryDocumentSnapshots.isEmpty()) return;
+                    double unitPrice = queryDocumentSnapshots.getDocuments().get(0).getDouble(price);
+                    double itemTotal = iQty * unitPrice;
+                    total += itemTotal;
+                    receiptList.add(new ReceiptModel(iName, iSize, iQty, iQtyType, unitPrice, itemTotal));
+                    dateTime = getIntent().getExtras().getString("date-time");
+                    getHeaderBodyFooter();
+                    setHeaderBodyFooter();
+                });
+            }
+        } else receiptList = getIntent().getExtras().getParcelableArrayList("receiptList");
 
         getHeaderBodyFooter();
         setHeaderBodyFooter();
@@ -538,7 +581,7 @@ public class PrintPreviewActivity extends AppCompatActivity implements Runnable 
     private String getBody() {
         StringBuilder text = new StringBuilder();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-        dateTime = formatter.format(new Date());
+        if (dateTime == null) dateTime = formatter.format(new Date());
         String cashierName = preferences.getString("cashier name").toUpperCase();
         text.append("DATE & TIME: ").append(dateTime).append("\n");
         text.append(invoice).append("\n");
