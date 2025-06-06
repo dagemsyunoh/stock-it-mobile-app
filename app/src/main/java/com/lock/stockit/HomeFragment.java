@@ -253,8 +253,8 @@ public class HomeFragment extends Fragment {
                     "Customer",
                     Gravity.CENTER,
                     Typeface.BOLD);
-            if (task.getResult().size() > 1) {
-                String startDate = task.getResult().getDocuments().get(task.getResult().size() - 1).getString("date-time").split(" ")[0];
+            if (documents.size() > 1) {
+                String startDate = documents.get(documents.size() - 1).getString("date-time").split(" ")[0];
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                 String endDate = LocalDate.now().toString();
 
