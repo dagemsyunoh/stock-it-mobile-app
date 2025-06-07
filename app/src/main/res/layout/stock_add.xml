@@ -55,7 +55,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/add_name"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="wrap_content"
                 android:gravity="start|center_vertical"
                 android:hint="@string/item_name"
                 android:inputType="textCapSentences"
@@ -76,7 +76,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/add_size"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="wrap_content"
                 android:gravity="start|center_vertical"
                 android:hint="@string/item_size"
                 android:textSize="16sp" />
