@@ -54,6 +54,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
     protected SearchView searchView;
     private TextView noResult;
     private ArrayList<StockModel> stockList;
+    private ArrayList<StockModel> displayList;
     private StockAdapter adapter;
     private final ArrayList<String> names = new ArrayList<>();
     private final ArrayList<String> sizes = new ArrayList<>();
@@ -75,6 +76,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
         searchView = view.findViewById(R.id.stock_search);
         noResult = view.findViewById(R.id.no_result);
         stockList = new ArrayList<>();
+        displayList = new ArrayList<>();
 
         searchView.clearFocus();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -100,12 +102,18 @@ public class InventoryFragment extends Fragment implements StockListeners {
     private void filterStocks(String newText) {
         ArrayList<StockModel> filteredList = new ArrayList<>();
         for (StockModel item : stockList)
-            if (item.getItemName().toLowerCase().contains(newText.toLowerCase()) || item.getItemSize().toLowerCase().contains(newText.toLowerCase()))
+            if (item.getItemName().toLowerCase().contains(newText.toLowerCase()) ||
+                    item.getItemSize().toLowerCase().contains(newText.toLowerCase()))
                 filteredList.add(item);
+
+        displayList = filteredList;
+
         if (filteredList.isEmpty()) noResult.setVisibility(View.VISIBLE);
         else noResult.setVisibility(View.GONE);
-        adapter.setStocks(filteredList);
+
+        adapter.setStocks(displayList);
     }
+
 
     @Override
     public void onStart() {
@@ -131,7 +139,8 @@ public class InventoryFragment extends Fragment implements StockListeners {
             }
             setRecyclerView();
             stockList.sort(new StockComparator());
-            adapter.setStocks(stockList);
+            displayList = stockList;
+            adapter.setStocks(displayList);
             adapter.notifyDataSetChanged();
             checkLowStockItems();
         });
@@ -201,12 +210,13 @@ public class InventoryFragment extends Fragment implements StockListeners {
     }
 
     private void deleteItem(int pos) {
-        String name = stockList.get(pos).getItemName();
-        String size = stockList.get(pos).getItemSize();
+        String name = displayList.get(pos).getItemName();
+        String size = displayList.get(pos).getItemSize();
         stockRef.addSnapshotListener((value, error) -> {
             if (error != null || value == null) return;
             for (DocumentSnapshot documentSnapshot : value.getDocuments())
-                if (documentSnapshot.getString("item name").equals(name) && documentSnapshot.getString("item size").equals(size)) {
+                if (documentSnapshot.getString("item name").equals(name) &&
+                        documentSnapshot.getString("item size").equals(size)) {
                     documentSnapshot.getReference().delete();
                     Toast.makeText(getActivity(), "Item Deleted", Toast.LENGTH_SHORT).show();
                 }
@@ -243,11 +253,31 @@ public class InventoryFragment extends Fragment implements StockListeners {
                 Toast.makeText(getActivity(), "Quantity cannot be less than 1", Toast.LENGTH_SHORT).show();
         });
 
+        itemRegPrice.setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus) {
+                if (Double.parseDouble(itemRegPrice.getText().toString()) == 0)
+                    itemRegPrice.setText("");
+            } else if (itemRegPrice.getText().toString().trim().isEmpty())
+                itemRegPrice.setText(R.string.price_default);
+        });
+
+        itemDscPrice.setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus) {
+                if (Double.parseDouble(itemDscPrice.getText().toString()) == 0)
+                    itemDscPrice.setText("");
+            } else if (itemDscPrice.getText().toString().trim().isEmpty())
+                itemDscPrice.setText(R.string.price_default);
+        });
+
         addItem.setOnClickListener(view -> {
             setItemName(itemName);
             setItemSize(itemSize);
             int selectedId = itemQtyType.getCheckedRadioButtonId();
             RadioButton selectedQtyType = addPopUp.findViewById(selectedId);
+            if (selectedQtyType == null) {
+                Toast.makeText(getActivity(), "Please select a quantity type", Toast.LENGTH_SHORT).show();
+                return;
+            }
             HashMap<String, Object> data = new HashMap<>();
             data.put("item name", itemName.getText().toString());
             data.put("item size", itemSize.getText().toString());
