@@ -100,23 +100,23 @@ public class HomeFragment extends Fragment {
     private void startListening() {
         receiptListenerRegistration = receiptRef
                 .orderBy("invoice no", Query.Direction.DESCENDING)
-                    .addSnapshotListener((snapshots, e) -> {
-                        if (e != null) {
-                            Log.w("HomeFragment", "User log listener error", e);
-                            return;
-                        }
-                        initializeUserLog();
-                    });
+                .addSnapshotListener((snapshots, e) -> {
+                    if (e != null) {
+                        Log.w("HomeFragment", "Receipt log listener error", e);
+                        return;
+                    }
+                    initializeReceiptLog();
+                });
 
         userLogListenerRegistration = userRef
                 .orderBy("date-time", Query.Direction.DESCENDING)
-                    .addSnapshotListener((snapshots, e) -> {
-                        if (e != null) {
-                            Log.w("HomeFragment", "Receipt log listener error", e);
-                            return;
-                        }
-                        initializeReceiptLog();
-                    });
+                .addSnapshotListener((snapshots, e) -> {
+                    if (e != null) {
+                        Log.w("HomeFragment", "User log listener error", e);
+                        return;
+                    }
+                    initializeUserLog();
+                });
     }
 
     private void setChart() {

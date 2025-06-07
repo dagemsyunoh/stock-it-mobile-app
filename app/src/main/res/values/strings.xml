@@ -69,7 +69,7 @@
     <string name="invoice_no">Invoice #</string>
     <string name="date_time">Date-Time</string>
     <string name="total">Total</string>
-    <string name="amount_rendered_cash">Amount Rendered Cash</string>
+    <string name="amount_tendered">Amount Tendered</string>
     <string name="items_purchased">Items Purchased</string>
     <string name="change">Change</string>
     <string name="input_field">Input Field</string>
