@@ -42,48 +42,87 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Item Picker Label -->
-        <TextView
-            android:id="@+id/item_picker_label"
-            android:layout_width="wrap_content"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/add_name_input_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/item_name"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="14sp"
+            android:layout_width="match_parent"
+            android:layout_margin="16dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/header" />
+            android:hint="@string/item_name"
+            app:layout_constraintTop_toBottomOf="@id/header">
 
-        <!-- Size Picker Label -->
-        <TextView
-            android:id="@+id/size_picker_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/item_size"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="14sp"
-            app:layout_constraintStart_toStartOf="@id/add_size"
-            app:layout_constraintTop_toTopOf="@id/item_picker_label" />
+            <AutoCompleteTextView
+                android:id="@+id/add_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/item_name"
+                android:inputType="none" />
 
-        <!-- Item Picker -->
-        <NumberPicker
-            android:id="@+id/add_name"
-            android:layout_width="0dp"
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/add_size_input_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintEnd_toStartOf="@id/add_size"
+            android:layout_width="match_parent"
+            android:layout_margin="16dp"
+            android:hint="@string/item_size"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/item_picker_label" />
+            app:layout_constraintTop_toBottomOf="@id/add_name_input_layout">
 
-        <!-- Size Picker -->
-        <NumberPicker
-            android:id="@+id/add_size"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/add_name"
-            app:layout_constraintTop_toBottomOf="@id/size_picker_label" />
+            <AutoCompleteTextView
+                android:id="@+id/add_size"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/item_size"
+                android:inputType="none" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <!--        &lt;!&ndash; Item Picker Label &ndash;&gt;-->
+        <!--        <TextView-->
+        <!--            android:id="@+id/item_picker_label"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginTop="16dp"-->
+        <!--            android:text="@string/item_name"-->
+        <!--            android:textColor="?attr/colorOnSurface"-->
+        <!--            android:textSize="14sp"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@id/header" />-->
+
+        <!--        &lt;!&ndash; Size Picker Label &ndash;&gt;-->
+        <!--        <TextView-->
+        <!--            android:id="@+id/size_picker_label"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:text="@string/item_size"-->
+        <!--            android:textColor="?attr/colorOnSurface"-->
+        <!--            android:textSize="14sp"-->
+        <!--            app:layout_constraintStart_toStartOf="@id/add_size"-->
+        <!--            app:layout_constraintTop_toTopOf="@id/item_picker_label" />-->
+
+        <!--        &lt;!&ndash; Item Picker &ndash;&gt;-->
+        <!--        <NumberPicker-->
+        <!--            android:id="@+id/add_name"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginEnd="8dp"-->
+        <!--            app:layout_constraintEnd_toStartOf="@id/add_size"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@id/item_picker_label" />-->
+
+        <!--        &lt;!&ndash; Size Picker &ndash;&gt;-->
+        <!--        <NumberPicker-->
+        <!--            android:id="@+id/add_size"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginStart="8dp"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintStart_toEndOf="@id/add_name"-->
+        <!--            app:layout_constraintTop_toBottomOf="@id/size_picker_label" />-->
 
         <!-- Quantity Row -->
         <LinearLayout
@@ -95,7 +134,7 @@
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/add_name">
+            app:layout_constraintTop_toBottomOf="@id/add_size_input_layout">
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/add_plus_one"

@@ -18,6 +18,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
@@ -54,6 +56,7 @@ import com.lock.stockit.Models.StockModel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Objects;
 
 public class ReceiptFragment extends Fragment implements ReceiptListeners {
 
@@ -65,8 +68,9 @@ public class ReceiptFragment extends Fragment implements ReceiptListeners {
     protected RecyclerView recyclerView;
     protected FloatingActionButton addButton, checkoutButton, plusOne, minusOne;
     Button saveButton;
-    private NumberPicker itemName, itemSize;
+    private AutoCompleteTextView itemSize;
     private TextInputEditText itemQty;
+    private String selectedName, selectedSize;
     private TextView title, itemUnitPrice, itemTotalPrice, noItem, grandTotalPrice;
     private LinearLayout grandTotalLayout;
     private ReceiptAdapter adapter;
@@ -119,10 +123,7 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
         cancelled = false;
         addButton.setClickable(false);
 
-        discountSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            discountFlag = isChecked;
-            resetPrice();
-        });
+        discountSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> changeDiscount(isChecked));
 
         addButton.setOnClickListener(v -> addItemPopUp());
 
@@ -205,30 +206,37 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
         addPopUp.show();
         addButton.setClickable(false);
 
-        itemName = addPopUp.findViewById(R.id.add_name);
+        AutoCompleteTextView itemName = addPopUp.findViewById(R.id.add_name);
         itemSize = addPopUp.findViewById(R.id.add_size);
         itemQty = addPopUp.findViewById(R.id.add_qty);
         itemUnitPrice = addPopUp.findViewById(R.id.unit_price_value);
         itemTotalPrice = addPopUp.findViewById(R.id.total_price_value);
+
         AppCompatImageView back = addPopUp.findViewById(R.id.back);
         plusOne = addPopUp.findViewById(R.id.add_plus_one);
         minusOne = addPopUp.findViewById(R.id.add_minus_one);
         saveButton = addPopUp.findViewById(R.id.add_item);
 
         fetchData();
-        String[] nameDisplay = namesUnique.toArray(new String[0]);
-        setNumberPicker(itemName, nameDisplay, namesUnique);
-        changeSizeValues(itemName.getValue());
+        reset();
 
-        itemName.setOnValueChangedListener((np, oldPos, newPos) -> changeSizeValues(newPos));
+        ArrayAdapter<String> adapterName = new ArrayAdapter<>(getActivity(), R.layout.receipt_list_item, namesUnique);
+        itemName.setAdapter(adapterName);
 
-        itemSize.setOnValueChangedListener((np, oldPos, newPos) -> {
-            itemQty.setText(String.valueOf(0));
-            setItemText();
+        itemName.setOnItemClickListener((parent, view, position, id) -> {
+            if (!Objects.equals(selectedName, parent.getItemAtPosition(position).toString())) {
+                itemSize.setText(null);
+                selectedName = parent.getItemAtPosition(position).toString();
+                reset();
+                changeSizeValues(position);
+            }
         });
 
         itemQty.setOnFocusChangeListener((v, hasFocus) -> {
-            if (Double.parseDouble(itemQty.getText().toString()) == 0) itemQty.setText("");
+            if (hasFocus)
+                if (Double.parseDouble(itemQty.getText().toString()) == 0) itemQty.setText("");
+            if (!hasFocus)
+                if (itemQty.getText().toString().isEmpty()) itemQty.setText(String.valueOf(0));
         });
 
         itemQty.setOnEditorActionListener((v, actionId, event) -> {
@@ -256,6 +264,141 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
         });
     }
 
+    private void reset() {
+        String defPrice = "₱" + getString(R.string.price_default);
+        itemQty.setText(String.valueOf(0));
+        itemUnitPrice.setText(defPrice);
+        itemTotalPrice.setText(defPrice);
+    }
+
+    private void changeSizeValues(int pos) {
+        sizesUnique.clear();
+        selectedSize = null;
+        if (stockList.isEmpty()) return;
+        for (int i = 0; i < stockList.size(); i++)
+            if (stockList.get(i).getItemName().equals(selectedName))
+                sizesUnique.add(stockList.get(i).getItemSize());
+
+        ArrayAdapter<String> adapterSize = new ArrayAdapter<>(getActivity(), R.layout.receipt_list_item, sizesUnique);
+        itemSize.setAdapter(adapterSize);
+
+        itemSize.setOnItemClickListener((parent, view, position, id) -> {
+            if (!Objects.equals(selectedSize, parent.getItemAtPosition(position).toString())) {
+                selectedSize = parent.getItemAtPosition(position).toString();
+                reset();
+                setItemText();
+            }
+        });
+    }
+
+    private void checkMinMax(int val) {
+        if (selectedName == null || selectedSize == null) {
+            Toast.makeText(getActivity(), "Please select item.", Toast.LENGTH_SHORT).show();
+            itemQty.setText(String.valueOf(0));
+            return;
+        }
+        if (itemQty.getText() == null || itemQty.getText().toString().isEmpty()) itemQty.setText(String.valueOf(0));
+        if (Double.parseDouble(itemQty.getText().toString()) <= 0 && val <= 0) {
+            Toast.makeText(getActivity(), "Please enter quantity.", Toast.LENGTH_SHORT).show();
+            return;
+        } checkNameSize();
+        if (stockList.get(flag).getItemQuantity() == 0) {
+            Toast.makeText(getActivity(), "This item is out of stock.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (stockList.get(flag).getItemQtyType().equals("pcs")) {
+            if (Double.parseDouble(itemQty.getText().toString()) % 1 != 0) {
+                Toast.makeText(getActivity(), "This item cannot have decimal quantity", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (Double.parseDouble(itemQty.getText().toString()) + val <= 0) {
+                Toast.makeText(getActivity(), "You've reached the minimum quantity.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+        if (Double.parseDouble(itemQty.getText().toString()) + val <= 0) {
+            Toast.makeText(getActivity(), "You've reached the minimum quantity.", Toast.LENGTH_SHORT).show();
+            double min = 0.01;
+            itemQty.setText(String.valueOf(min));
+            setItemText();
+            return;
+        } if (Double.parseDouble(itemQty.getText().toString()) + val > stockList.get(flag).getItemQuantity()) {
+            Toast.makeText(getActivity(), "Not enough stock. Automatically set to maximum.", Toast.LENGTH_SHORT).show();
+            double iQty = stockList.get(flag).getItemQuantity();
+            if (iQty % 1 == 0) itemQty.setText(String.valueOf((int) iQty));
+            else itemQty.setText(String.valueOf(iQty));
+            setItemText();
+            return;
+        }
+        editQty(val);
+    }
+
+    private void editQty(int val) {
+        if (val < 2) QtyEditor.qtyEditor(itemQty, val);
+        setItemText();
+        if (val != 0) return;
+        for (ReceiptModel receipt : receiptList)
+            if (receipt.getItemName().equals(item[0]) && receipt.getItemSize().equals(item[1])) {
+                Toast.makeText(getActivity(), "Item already exists", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        receiptList.add(new ReceiptModel(item[0], item[1], Double.parseDouble(item[2]), item[3], Double.parseDouble(item[4]), Double.parseDouble(item[5])));
+        setLayout(true);
+        getSum();
+        for (int i = 0; i < 5; i++) item[i] = "";
+        adapter.setReceipts(receiptList);
+        adapter.notifyItemInserted(receiptList.size());
+        addPopUp.dismiss();
+        addButton.setClickable(true);
+    }
+
+    private void checkNameSize() {
+        if (selectedName.isEmpty() || selectedSize.isEmpty()) return;
+        for (int i = 0; i < stockList.size(); i++)
+            if (selectedName.equals(stockList.get(i).getItemName()) && selectedSize.equals(stockList.get(i).getItemSize()))
+                flag = i;
+    }
+
+    private void changeDiscount(boolean isChecked) {
+        discountFlag = isChecked;
+        HashMap<String, StockModel> stockMap = new HashMap<>();
+
+        for (StockModel stock : stockList) {
+            String key = stock.getItemName() + "|" + stock.getItemSize();
+            stockMap.put(key, stock);
+        }
+
+        for (ReceiptModel receipt : receiptList) {
+            String key = receipt.getItemName() + "|" + receipt.getItemSize();
+            if (stockMap.containsKey(key)) {
+                StockModel stock = stockMap.get(key);
+                double unitPrice = discountFlag ? stock.getItemDscPrice() : stock.getItemRegPrice();
+
+                receipt.setItemUnitPrice(unitPrice);
+                receipt.setItemTotalPrice(receipt.getItemQuantity() * unitPrice);
+                adapter.notifyItemChanged(receiptList.indexOf(receipt)); // Update UI
+            }
+        }
+
+        adapter.setReceipts(receiptList);
+        getSum();
+    }
+
+    private void setItemText() {
+        checkNameSize();
+        item[0] = stockList.get(flag).getItemName();
+        item[1] = stockList.get(flag).getItemSize();
+        item[2] = itemQty.getText().toString();
+        item[3] = stockList.get(flag).getItemQtyType();
+        if (discountFlag) item[4] = String.valueOf(stockList.get(flag).getItemDscPrice());
+        else item[4] = String.valueOf(stockList.get(flag).getItemRegPrice());
+        item[5] = String.valueOf(Double.parseDouble(item[2]) * Double.parseDouble(item[4]));
+        String unitPriceText = "₱" + String.format(Locale.getDefault(), "%.2f", Double.parseDouble(item[4]));
+        String totalPriceText = "₱" + String.format(Locale.getDefault(), "%.2f", Double.parseDouble(item[5]));
+        itemUnitPrice.setText(unitPriceText);
+        itemTotalPrice.setText(totalPriceText);
+    }
+
     private void printPreview() {
         Intent i = new Intent(getActivity(), PrintPreviewActivity.class);
         i.putExtra("receiptList", receiptList);
@@ -266,7 +409,6 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
         inputDialog.setContentView(R.layout.dialog_box_input);
         inputDialog.setCancelable(false);
         inputDialog.create();
-
 
         if (discountFlag) {
             Dialog discountDialog = new Dialog(getActivity());
@@ -331,7 +473,8 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
             if (input.getText().toString().isEmpty()) {
                 Toast.makeText(getActivity(), "Please enter cash amount", Toast.LENGTH_SHORT).show();
                 return;
-            } if (Double.parseDouble(input.getText().toString()) < sum) {
+            }
+            if (Double.parseDouble(input.getText().toString()) < sum) {
                 Toast.makeText(getActivity(), "Cash amount cannot be less than total amount", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -364,128 +507,6 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
             layoutParams.setMargins(mDp, 0, mDp, mDp);
             checkoutButton.setLayoutParams(layoutParams);
         }
-    }
-
-    private void changeSizeValues(int pos) {
-        String nameVal = namesUnique.get(pos);
-        sizesUnique.clear();
-        if (stockList.isEmpty()) return;
-        for (int i = 0; i < stockList.size(); i++)
-            if (stockList.get(i).getItemName().equals(nameVal)) sizesUnique.add(stockList.get(i).getItemSize());
-        String[] sizeDisplay = sizesUnique.toArray(new String[0]);
-        setNumberPicker(itemSize, sizeDisplay, sizesUnique);
-        itemQty.setText(String.valueOf(0));
-        setItemText();
-    }
-
-    private void checkMinMax(int val) {
-        if (itemQty.getText() == null || itemQty.getText().toString().isEmpty()) itemQty.setText(String.valueOf(0));
-        if (Double.parseDouble(itemQty.getText().toString()) <= 0 && val <= 0) {
-            Toast.makeText(getActivity(), "Please enter quantity.", Toast.LENGTH_SHORT).show();
-            return;
-        } checkNameSize();
-        if (stockList.get(flag).getItemQuantity() == 0) {
-            Toast.makeText(getActivity(), "This item is out of stock.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (stockList.get(flag).getItemQtyType().equals("pcs")) {
-            if (Double.parseDouble(itemQty.getText().toString()) % 1 != 0) {
-                Toast.makeText(getActivity(), "This item cannot have decimal quantity", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (Double.parseDouble(itemQty.getText().toString()) + val <= 0) {
-                Toast.makeText(getActivity(), "You've reached the minimum quantity.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-        }
-        if (Double.parseDouble(itemQty.getText().toString()) + val <= 0) {
-            Toast.makeText(getActivity(), "You've reached the minimum quantity.", Toast.LENGTH_SHORT).show();
-            double min = 0.01;
-            itemQty.setText(String.valueOf(min));
-            setItemText();
-            return;
-        } if (Double.parseDouble(itemQty.getText().toString()) + val > stockList.get(flag).getItemQuantity()) {
-            Toast.makeText(getActivity(), "Not enough stock. Automatically set to maximum.", Toast.LENGTH_SHORT).show();
-            double iQty = stockList.get(flag).getItemQuantity();
-            if (iQty % 1 == 0) itemQty.setText(String.valueOf((int) iQty));
-            else itemQty.setText(String.valueOf(iQty));
-            setItemText();
-            return;
-        }
-        editQty(val);
-    }
-
-    private void editQty(int val) {
-        if (val < 2) QtyEditor.qtyEditor(itemQty, val);
-        setItemText();
-        if (val != 0) return;
-        for (ReceiptModel receipt : receiptList)
-            if (receipt.getItemName().equals(item[0]) && receipt.getItemSize().equals(item[1])) {
-                Toast.makeText(getActivity(), "Item already exists", Toast.LENGTH_SHORT).show();
-                return;
-            }
-        receiptList.add(new ReceiptModel(item[0], item[1], Double.parseDouble(item[2]), item[3], Double.parseDouble(item[4]), Double.parseDouble(item[5])));
-        setLayout(true);
-        getSum();
-        for (int i = 0; i < 5; i++) item[i] = "";
-        adapter.setReceipts(receiptList);
-        adapter.notifyItemInserted(receiptList.size());
-        addPopUp.dismiss();
-        addButton.setClickable(true);
-    }
-
-    private void checkNameSize() {
-        String iName = namesUnique.get(itemName.getValue());
-        String iSize = sizesUnique.get(itemSize.getValue());
-        for (int i = 0; i < stockList.size(); i++)
-            if (iName.equals(stockList.get(i).getItemName()) && iSize.equals(stockList.get(i).getItemSize())) flag = i;
-    }
-
-    private void resetPrice() {
-        HashMap<String, StockModel> stockMap = new HashMap<>();
-
-        for (StockModel stock : stockList) {
-            String key = stock.getItemName() + "|" + stock.getItemSize();
-            stockMap.put(key, stock);
-        }
-
-        for (ReceiptModel receipt : receiptList) {
-            String key = receipt.getItemName() + "|" + receipt.getItemSize();
-            if (stockMap.containsKey(key)) {
-                StockModel stock = stockMap.get(key);
-                double unitPrice = discountFlag ? stock.getItemDscPrice() : stock.getItemRegPrice();
-
-                receipt.setItemUnitPrice(unitPrice);
-                receipt.setItemTotalPrice(receipt.getItemQuantity() * unitPrice);
-                adapter.notifyItemChanged(receiptList.indexOf(receipt)); // Update UI
-            }
-        }
-
-        adapter.setReceipts(receiptList);
-        getSum();
-    }
-
-    private void setItemText() {
-        checkNameSize();
-        item[0] = stockList.get(flag).getItemName();
-        item[1] = stockList.get(flag).getItemSize();
-        item[2] = itemQty.getText().toString();
-        item[3] = stockList.get(flag).getItemQtyType();
-        if (discountFlag) item[4] = String.valueOf(stockList.get(flag).getItemDscPrice());
-        else item[4] = String.valueOf(stockList.get(flag).getItemRegPrice());
-        item[5] = String.valueOf(Double.parseDouble(item[2]) * Double.parseDouble(item[4]));
-        String unitPriceText = "₱" + String.format(Locale.getDefault(), "%.2f", Double.parseDouble(item[4]));
-        String totalPriceText = "₱" + String.format(Locale.getDefault(), "%.2f", Double.parseDouble(item[5]));
-        itemUnitPrice.setText(unitPriceText);
-        itemTotalPrice.setText(totalPriceText);
-    }
-
-    private void setNumberPicker(NumberPicker numberPicker, String[] array, ArrayList<String> arrayList) {
-        if (arrayList == null || arrayList.isEmpty()) return;
-        numberPicker.setDisplayedValues(null);
-        numberPicker.setMinValue(0);
-        numberPicker.setMaxValue(arrayList.size() - 1);
-        numberPicker.setDisplayedValues(array);
     }
 
     private void getSum() {
