@@ -219,6 +219,8 @@ ActivityResultLauncher<Intent> printLauncher = registerForActivityResult(new Act
 
         fetchData();
         reset();
+        selectedName = null;
+        selectedSize = null;
 
         ArrayAdapter<String> adapterName = new ArrayAdapter<>(getActivity(), R.layout.receipt_list_item, namesUnique);
         itemName.setAdapter(adapterName);
