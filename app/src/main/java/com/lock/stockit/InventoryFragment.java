@@ -61,7 +61,7 @@ public class InventoryFragment extends Fragment implements StockListeners {
     private static final long SEARCH_DELAY = 300; // milliseconds debounce time
     private final Handler searchHandler = new Handler(Looper.getMainLooper());
     private Runnable searchRunnable;
-    public static final double LOW_STOCK_THRESHOLD = 5.0;  // for example, less or equal to 5 triggers alert
+    public static final double LOW_STOCK_THRESHOLD = 10.0;  // for example, less or equal to 5 triggers alert
     private static final long NOTIFY_COOLDOWN = 30 * 60 * 1000; // 30 minutes in milliseconds
     private static final String PREFS_NAME = "low_stock_notifications";
     private static final String PREFS_KEY_PREFIX = "last_notified_";
